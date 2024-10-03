@@ -1,0 +1,29 @@
+{
+  "name": "be-campuspoly",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www",
+    "dev": "nodemon ./bin/www"
+  },
+  "dependencies": {
+    "body-parser": "^1.20.3",
+    "bootstrap": "^5.3.3",
+    "bootstrap-icons": "^1.11.3",
+    "cookie-parser": "~1.4.4",
+    "debug": "~2.6.9",
+    "dotenv": "^16.4.5",
+    "express": "~4.16.1",
+    "express-handlebars": "^8.0.1",
+    "express-session": "^1.18.0",
+    "fs": "^0.0.1-security",
+    "hbs": "~4.0.4",
+    "http-errors": "~1.6.3",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.7.0",
+    "morgan": "~1.9.1",
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.9.15",
+    "nodemon": "^3.1.7"
+  }
+}
