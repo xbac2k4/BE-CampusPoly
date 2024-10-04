@@ -59,7 +59,7 @@ const loginProcessing = async () => {
                     buttonLogin.disabled = false; 
                     return;
                 }
-                window.location.href = '/home';
+                window.location.href = '/post';
                 form.reset();
             } else {
                 errorMessage.innerText = `*${result.message}`;
