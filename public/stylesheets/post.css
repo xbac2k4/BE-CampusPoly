@@ -1,0 +1,49 @@
+main {
+    flex: 1;
+    /* Để article chiếm phần còn lại */
+    max-height: 100vh;
+    /* Giới hạn chiều cao tối đa */
+    overflow: auto;
+    /* Để có khoảng cách với nội dung */
+    background-color: #f8f9fa;
+    /* Màu nền cho article (có thể thay đổi) */
+    background-color: white;
+    padding: 5vh 15vh 10vh 10vh;
+}
+
+.load-more {
+    cursor: pointer;
+    text-align: center;
+    background-color: #e4ebf6;
+    padding: 1vh;
+    border-radius: 2vh;
+    display: none;
+}
+
+.load-more:hover {
+    background-color: #f2f5fa;
+}
+
+#spinner {
+    display: none;
+    margin-top: 2vh;
+    width: 3vh;
+    height: 3vh;
+}
+
+.input-search:focus {
+    box-shadow: none;
+    outline: none;
+}
+
+.header > .dropdown {
+    background-color: #e4ebf6;
+    border-radius: 2vh;
+    transition: 0.3s ease;
+}
+
+.header > .dropdown:hover {
+    background-color: #f2f5fa;
+}
+
+

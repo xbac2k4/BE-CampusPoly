@@ -47,27 +47,33 @@ const loginProcessing = async () => {
 
         errorMessage.style.display = "none";
 
-        setTimeout(function() {
-            buttonText.style.display = "inline"; 
+        setTimeout(function () {
+            buttonText.style.display = "inline";
             if (result.status === 200) {
                 // console.log(result.data);
-                
+
                 spinner.style.display = "none";
                 if (result.data.role !== 0) {
                     errorMessage.innerText = `*You are not an administrator`;
                     errorMessage.style.display = "inline-block";
-                    buttonLogin.disabled = false; 
+                    buttonLogin.disabled = false;
                     return;
                 }
-                window.location.href = '/post';
+                history.pushState(null, null, window.location.href = '/post');
+                window.addEventListener('load', () => {
+                    // Lắng nghe sự kiện "popstate" xảy ra khi người dùng nhấn nút "Back"
+                    window.onpopstate = function () {
+                        history.go(0);
+                    };
+                });
                 form.reset();
             } else {
                 errorMessage.innerText = `*${result.message}`;
                 spinner.style.display = "none";
                 errorMessage.style.display = "inline-block";
-                buttonLogin.disabled = false; 
+                buttonLogin.disabled = false;
             }
-        }, 1000); 
+        }, 1000);
     } catch (error) {
         console.error('Error:', error);
     }
