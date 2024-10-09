@@ -6,7 +6,7 @@ class HttpResponse {
         loginSuccess: 'Login success',
         loginFail: 'Incorrect email or password',
         dataNotFound: 'Data not found',
-        3: 'Too large',
+        getDataSucces: 'Get data succes',
         4: 'Not found',
         5: 'Unauthorized',
     }

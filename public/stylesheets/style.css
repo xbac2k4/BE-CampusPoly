@@ -1,5 +1,89 @@
+html, body {
+  overflow-y: hidden;
+}
+
 * {
   padding: 0;
   margin: 0;
-  box-sizing: border-box
+  box-sizing: border-box;
+}
+
+a {
+  color: #5b5e62;
+}
+
+header .container-fluid img{
+  height: 4vh;
+}
+
+header .navbar {
+  padding-left: 15vh;
+  padding-right: 15vh;
+}
+.main {
+  padding-left: 15vh;
+}
+
+
+header .navbar .container-fluid {
+  padding: 0 7vh 0 7vh;
+}
+
+aside {
+  flex: 1;
+}
+article {
+  flex: 4;
+  overflow: auto; /* Thêm thanh cuộn nếu cần thiết */
+}
+
+.nav-item {
+  color: #667a99;
+}
+
+.circle {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.2);
+}
+
+
+aside .nav-item {
+  background-color: #ffffff;
+  transition: 0.3s ease;
+}
+
+aside .nav-item:hover {
+  background-color: #e4ebf6;
+  transition: 0.3s ease;
+  color: black;
+  cursor: pointer;
+}
+
+aside .nav-item:hover .nav-link i,
+aside .nav-item:hover .nav-link span {
+  color: black;
+}
+
+.nav-link i,
+.nav-link span {
+  color: #667a99;
+  transition: 0.5s ease;
+}
+
+button:focus {
+  outline: none;
+}
+
+aside > div > div > button {
+  background-color: #e75b2a;
+  transition: 0.5s ease;
+}
+
+aside > div > div > button:hover {
+  background-color: #ef791f;
 }
