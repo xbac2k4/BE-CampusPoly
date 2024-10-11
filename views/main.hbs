@@ -11,43 +11,81 @@
 </head>
 
 <body>
-    <header class="d-flex flex-row">
-        <div class="row">
-            <div class="logo">
-                <h2>CINEMA MANA</h2>
+    <header class="mb-0">
+        <nav class="navbar" style="background-color: #e75b2a;">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">
+                    <img src="/images/Logo.png" alt="" srcset="">
+                </a>
+                <ul class="navbar-nav">
+                    <!-- Avatar -->
+                    <li class="nav-item dropdown">
+                        <a data-mdb-dropdown-init class="nav-link dropdown-toggle d-flex align-items-center" href="#"
+                            id="navbarDropdownMenuLink" role="button" data-mdb-toggle="dropdown" aria-expanded="false">
+                            <img src="/images/profile-user.png" class="rounded-circle mx-1" alt="Avatar"
+                                loading="lazy" />
+                        </a>
+                        <ul class="dropdown-menu .bg-primary" aria-labelledby="navbarDropdownMenuLink">
+                            <li>
+                                <a class="dropdown-item" href="#">My profile</a>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider"> <!-- Sử dụng lớp dropdown-divider của Bootstrap -->
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="#" id="buttonLogout">Logout</a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
             </div>
-        </div>
-        <div class="avatar-admin d-flex flex-row">
-            <div class="avatar">
-                <img src="https://tse2.mm.bing.net/th?id=OIP.r5c3LIjTtHGBidy9KheKNgHaFn&pid=Api&P=0&h=220">
-            </div>
-            <div class="name">
-                <h5>ADMIN</h5>
-            </div>
-        </div>
+        </nav>
     </header>
-    <div class="container-fluid d-flex flex-row">
+    <div class="main container-fluid d-flex flex-row pr-0">
         <aside>
-            <div class="list-group">
-                <button onclick="window.location.href = '/category'" type="button"
-                    class="list-group-item list-group-item-action"><i class="bi bi-stack"></i>Category</button>
-                <button onclick="window.location.href = '/movie'" type="button"
-                    class="list-group-item list-group-item-action"><i class="bi bi-film"></i>Movie</button>
-                <button onclick="window.location.href = '/showtimes'" type="button"
-                    class="list-group-item list-group-item-action"><i class="bi bi-clock"></i>Showtimes</button>
-                <button onclick="window.location.href = '/user'" type="button"
-                    class="list-group-item list-group-item-action"><i class="bi bi-person"></i>User</button>
-                <button onclick="window.location.href = '/ticket'" type="button"
-                    class="list-group-item list-group-item-action"><i class="bi bi-ticket-detailed"></i>Ticket</button>
+            <div class="col-auto px-0 my-4">
+                <div class="d-flex flex-column align-items-center align-items-sm-center px-3 pt-2 text-white min-vh-100">
+                    <button class="w-75 d-flex align-items-center justify-content-center px-3 py-2 me-md-auto text-white border-0 rounded-pill">
+                        <span style="font-weight: bold;" class="fs-6 my-1">Tạo bài viết mới</span>
+                    </button>
+                    <ul class="nav nav-pills flex-column mb-sm-auto mb-0 mt-3 align-items-center align-items-sm-start w-75"
+                        id="menu">
+                        <li class="nav-item w-100 d-flex align-items-center justify-content-start rounded-pill my-1 px-2" data-path="/post">
+                            <a href="/post" class="nav-link align-middle px-0 d-flex align-items-center">
+                                <div class="circle rounded-circle mr-2"><i class="bi bi-chat-fill"></i></div>
+                                <span class="ms-1 d-none d-sm-inline">Các bài viết</span>
+                            </a>
+                        </li>
+                        <li class="nav-item w-100 d-flex align-items-center justify-content-start rounded-pill my-1 px-2" data-path="/user">
+                            <a href="/user" class="nav-link align-middle px-0 d-flex align-items-center">
+                                <div class="circle rounded-circle mr-2"><i class="bi bi-chat-fill"></i></div>
+                                <span class="ms-1 d-none d-sm-inline">Người dùng</span>
+                            </a>
+                        </li>
+                        <li class="nav-item w-100 d-flex align-items-center justify-content-start rounded-pill my-1 px-2" data-path="/group">
+                            <a href="/group" class="nav-link align-middle px-0 d-flex align-items-center">
+                                <div class="circle rounded-circle mr-2"><i class="bi bi-chat-fill"></i></div>
+                                <span class="ms-1 d-none d-sm-inline">Nhóm</span>
+                            </a>
+                        </li>
+                        <li class="nav-item w-100 d-flex align-items-center justify-content-start rounded-pill my-1 px-2" data-path="/report">
+                            <a href="/report" class="nav-link align-middle px-0 d-flex align-items-center">
+                                <div class="circle rounded-circle mr-2"><i class="bi bi-chat-fill"></i></div>
+                                <span class="ms-1 d-none d-sm-inline">Báo cáo</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </aside>
         <article>
             {{{body}}}
         </article>
     </div>
+    {{!-- script --}}
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.2.0/mdb.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="/javascripts/main.js"></script>
 </body>
 
 </html>
-                {{!-- <button onclick="window.location.href = '/statistical'" type="button"
-                    class="list-group-item list-group-item-action"><i class="bi bi-bar-chart"></i>Statistical</button> --}}
