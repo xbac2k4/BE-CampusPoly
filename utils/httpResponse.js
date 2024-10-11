@@ -7,7 +7,9 @@ class HttpResponse {
         loginFail: 'Incorrect email or password',
         dataNotFound: 'Data not found',
         getDataSucces: 'Get data succes',
-        4: 'Not found',
+        registerEmailExists: 'email already exists',
+        registerSuccess: 'Register success',
+        registerFail: 'Register fail',
         5: 'Unauthorized',
     }
 

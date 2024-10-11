@@ -19,19 +19,16 @@ template.innerHTML = `
             text-overflow: ellipsis;
         }
     </style>
-    <div class="container post-container p-3 d-flex align-items-start mb-2">
-        <img id="post-img" class="rounded-circle mr-3" style="width: 50px; height: 50px;">
-        <div class="wrapper d-flex flex-column">
-            <span style="font-weight: bold; font-size: 1rem" id="title" class="content-container">Tiêu đề của một bài viết</span>
-            <span style="font-size: 0.7rem; color: #5b5e62" class="content-container">
-                <span style="font-weight: bold;" id="user-name">User</span> đã đăng <span id="time-up">25</span> minutes ago
-            </span>
-            <span style="font-size: 0.7rem; color: #5b5e62" id="content" class="content-container">Nội dung chính của bài đăng</span>
-        </div>
-    </div>
+    <tr>
+        <td>bacnxph44315@fpt.edu.vn</td>
+        <td>123</td>
+        <td style="gap: 20px; font-size: 20px" class="d-flex justify-content-end">
+        <i class="bi bi-pen"></i> 
+        <i class="bi bi-trash3"></i></td>
+    </tr>
 `;
 
-class CustomCard extends HTMLElement {
+class CardUser extends HTMLElement {
     static get observedAttributes() {
         return ['title', 'time', 'user', 'content', 'img']; // Thêm thuộc tính 'img' để theo dõi
     }
@@ -74,6 +71,6 @@ class CustomCard extends HTMLElement {
 }
 
 // Định nghĩa phần tử custom-card
-window.customElements.define('custom-card', CustomCard);
+window.customElements.define('card-user', CardUser);
 
-export default CustomCard;
+export default CardUser;

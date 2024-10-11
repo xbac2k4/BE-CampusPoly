@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 const postModel = new Schema({
     user_id: {
         type: Schema.Types.ObjectId, 
-        ref: 'users', // Liên kết với bảng 'users'
+        ref: 'user', // Liên kết với bảng 'users'
         required: true
     },
     group_id: {
@@ -34,4 +34,4 @@ const postModel = new Schema({
     }
 });
 
-module.exports = mongoose.model('posts', postModel);
+module.exports = mongoose.model('post', postModel);

@@ -7,8 +7,8 @@ const loading = document.getElementById('spinner');
 let currentPage = 1;
 let totalPages;
 
-const loadPosts = () => {
-    fetch(`${DOMAIN}posts/get-post-by-page?page=${currentPage}&limit=5`)
+const loadPosts = async () => {
+    await fetch(`${DOMAIN}posts/get-post-by-page?page=${currentPage}&limit=5`)
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -17,8 +17,8 @@ const loadPosts = () => {
         })
         .then(data => {
             data.data.posts.map(items => {
-                console.log(items.user_id.avatar);
-                let html = `<custom-card img="${items.user_id.avatar !== ""  ? items.user_id.avatar : "https://placehold.co/50x50"}" title="${items.title}" content="${items.content}" user="${items.user_id.full_name}" time="12"></custom-card>`;
+                // console.log(items.user_id.avatar);
+                let html = `<card-post img="${items.user_id.avatar !== ""  ? items.user_id.avatar : "https://placehold.co/50x50"}" title="${items.title}" content="${items.content}" user="${items.user_id.full_name}" time="12"></card-post>`;
                 tbody.insertAdjacentHTML('beforeend', html);
             });
             // preloader.style.display = 'none';
