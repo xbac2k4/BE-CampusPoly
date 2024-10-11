@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel='stylesheet' href='/stylesheets/post.css' />
-    <script type="module" src="components/CustomCard/CustomCard.js"></script>
+    <script type="module" src="components/cards/cardPost.js"></script>
     <title>{{title}}</title>
 </head>
 
@@ -38,14 +38,13 @@
                 <input type="text" class="input-search form-control border-0" placeholder="Search..." id="searchInput">
             </div>
         </div>
-
         <div class="wrapper-posts" id="wrapper-posts"></div>
         <div class="d-flex justify-content-center align-items-center">
             <div class="load-more w-100" id="load-more">Tải thêm <i class="bi bi-chevron-down"></i></div>
             <span id="spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
         </div>
     </main>
-    <script type="module" src="javascripts/post.js"></script>
+    <script src="javascripts/post.js"></script>
 </body>
 
 </html>

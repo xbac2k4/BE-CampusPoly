@@ -33,6 +33,10 @@ const userModel = new Schema({
         type: String,
         default: "avatar"    
     },
+    bio: {
+        type: String,
+        default: ""
+    },
     last_login: {
         type: Date
     },

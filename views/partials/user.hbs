@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=
+    , initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel='stylesheet' href='/stylesheets/user.css' />
+    <script type="module" src="components/cards/cardUser.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+    <main class="w-100 pl-4">
+        <div class="header d-flex justify-content-between align-items-center pb-3">
+            <div class="dropdown">
+                <li class="nav-item" style="list-style: none;">
+                    <a data-mdb-dropdown-init class="nav-link dropdown-toggle d-flex align-items-center" href="#"
+                        id="navbarDropdownMenuLink" role="button" data-mdb-toggle="dropdown" aria-expanded="false">
+                        Lọc
+                    </a>
+                    <ul class="dropdown-menu .bg-primary" aria-labelledby="navbarDropdownMenuLink">
+                        <li>
+                            <a class="dropdown-item" href="#">Gần đây</a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="#">Hàng đầu</a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="#">Phổ biến</a>
+                        </li>
+                    </ul>
+                </li>
+            </div>
+            <div class="input-group d-flex align-items-center px-2"
+                style="width: 300px; border: #8f8f8f 2px solid; border-radius: 10px;">
+                <i class="bi bi-search"></i>
+                <input type="text" class="input-search form-control border-0" placeholder="Search..." id="searchInput">
+            </div>
+        </div>
+        <div class="table-container p-0">
+            <div class="table-wrapper">
+                <table class="table table-striped table-hover table-bordered">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th class="resizable-col">Email</th>
+                            <th class="resizable-col">Vai trò</th>
+                            <th class="resizable-col">Tên</th>
+                            <th class="resizable-col">Thời gian tạo</th>
+                            <th class="resizable-col">Trạng thái</th>
+                            <!-- Thêm các trường khác ở đây -->
+                            <th>Hành động</th> <!-- Cột cuối cùng sticky -->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Dữ liệu hàng -->
+                        <tr>
+                            <td>1</td>
+                            <td>bacnxph44315@fpt.edu.vn</td>
+                            <td>
+                                <div class="badge bg-secondary p-2 text-light">
+                                    <span>Sinh viên</span>
+                                </div>
+                                <div class="badge bg-secondary p-2 text-light">
+                                    <span>Sinh viên</span>
+                                </div>
+                                <div class="badge bg-secondary p-2 text-light">
+                                    <span>Sinh viên</span>
+                                </div>
+                            </td>
+                            <td>Portland</td>
+                            <td>97219</td>
+                            <td>
+                                <div class="badge badge-success p-2">
+                                    <span>Active</span>
+                                </div>
+                            </td>
+                            <!-- Dữ liệu các cột khác -->
+                            <td>
+                                <a href="#" class="block" title="Block User" data-toggle="tooltip">
+                                    <i class="material-icons">&#xE14B;</i>
+                                </a>
+                                <a href="#" class="edit" title="Edit" data-toggle="tooltip"><i
+                                        class="material-icons">&#xE254;</i></a>
+                                <a href="#" class="delete" title="Delete" data-toggle="tooltip"><i
+                                        class="material-icons">&#xE872;</i></a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>bacnxph44315@fpt.edu.vn</td>
+                            <td>
+                                <div class="badge bg-secondary p-2 text-light">
+                                    <span>Sinh viên</span>
+                                </div>
+                                <div class="badge bg-secondary p-2 text-light">
+                                    <span>Sinh viên</span>
+                                </div>
+                                <div class="badge bg-secondary p-2 text-light">
+                                    <span>Sinh viên</span>
+                                </div>
+                            </td>
+                            <td>Portland</td>
+                            <td>97219</td>
+                            <td>
+                                <div class="badge badge-success p-2">
+                                    <span>Active</span>
+                                </div>
+                            </td>
+                            <!-- Dữ liệu các cột khác -->
+                            <td>
+                                <a href="#" class="block" title="Block User" data-toggle="tooltip">
+                                    <i class="material-icons">&#xE14B;</i>
+                                </a>
+                                <a href="#" class="edit" title="Edit" data-toggle="tooltip"><i
+                                        class="material-icons">&#xE254;</i></a>
+                                <a href="#" class="delete" title="Delete" data-toggle="tooltip"><i
+                                        class="material-icons">&#xE872;</i></a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>bacnxph44315@fpt.edu.vn</td>
+                            <td>
+                                <div class="badge bg-secondary p-2 text-light">
+                                    <span>Sinh viên</span>
+                                </div>
+                                <div class="badge bg-secondary p-2 text-light">
+                                    <span>Sinh viên</span>
+                                </div>
+                                <div class="badge bg-secondary p-2 text-light">
+                                    <span>Sinh viên</span>
+                                </div>
+                            </td>
+                            <td>Portland</td>
+                            <td>97219</td>
+                            <td>
+                                <div class="badge badge-success p-2">
+                                    <span>Active</span>
+                                </div>
+                            </td>
+                            <!-- Dữ liệu các cột khác -->
+                            <td>
+                                <a href="#" class="block" title="Block User" data-toggle="tooltip">
+                                    <i class="material-icons">&#xE14B;</i>
+                                </a>
+                                <a href="#" class="edit" title="Edit" data-toggle="tooltip"><i
+                                        class="material-icons">&#xE254;</i></a>
+                                <a href="#" class="delete" title="Delete" data-toggle="tooltip"><i
+                                        class="material-icons">&#xE872;</i></a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>bacnxph44315@fpt.edu.vn</td>
+                            <td>
+                                <div class="badge bg-secondary p-2 text-light">
+                                    <span>Sinh viên</span>
+                                </div>
+                                <div class="badge bg-secondary p-2 text-light">
+                                    <span>Sinh viên</span>
+                                </div>
+                                <div class="badge bg-secondary p-2 text-light">
+                                    <span>Sinh viên</span>
+                                </div>
+                            </td>
+                            <td>Portland</td>
+                            <td>97219</td>
+                            <td>
+                                <div class="badge badge-success p-2">
+                                    <span>Active</span>
+                                </div>
+                            </td>
+                            <!-- Dữ liệu các cột khác -->
+                            <td>
+                                <a href="#" class="block" title="Block User" data-toggle="tooltip">
+                                    <i class="material-icons">&#xE14B;</i>
+                                </a>
+                                <a href="#" class="edit" title="Edit" data-toggle="tooltip"><i
+                                        class="material-icons">&#xE254;</i></a>
+                                <a href="#" class="delete" title="Delete" data-toggle="tooltip"><i
+                                        class="material-icons">&#xE872;</i></a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>bacnxph44315@fpt.edu.vn</td>
+                            <td>
+                                <div class="badge bg-secondary p-2 text-light">
+                                    <span>Sinh viên</span>
+                                </div>
+                                <div class="badge bg-secondary p-2 text-light">
+                                    <span>Sinh viên</span>
+                                </div>
+                                <div class="badge bg-secondary p-2 text-light">
+                                    <span>Sinh viên</span>
+                                </div>
+                            </td>
+                            <td>Portland</td>
+                            <td>97219</td>
+                            <td>
+                                <div class="badge badge-success p-2">
+                                    <span>Active</span>
+                                </div>
+                            </td>
+                            <!-- Dữ liệu các cột khác -->
+                            <td>
+                                <a href="#" class="block" title="Block User" data-toggle="tooltip">
+                                    <i class="material-icons">&#xE14B;</i>
+                                </a>
+                                <a href="#" class="edit" title="Edit" data-toggle="tooltip"><i
+                                        class="material-icons">&#xE254;</i></a>
+                                <a href="#" class="delete" title="Delete" data-toggle="tooltip"><i
+                                        class="material-icons">&#xE872;</i></a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>bacnxph44315@fpt.edu.vn</td>
+                            <td>
+                                <div class="badge bg-secondary p-2 text-light">
+                                    <span>Sinh viên</span>
+                                </div>
+                                <div class="badge bg-secondary p-2 text-light">
+                                    <span>Sinh viên</span>
+                                </div>
+                                <div class="badge bg-secondary p-2 text-light">
+                                    <span>Sinh viên</span>
+                                </div>
+                            </td>
+                            <td>Portland</td>
+                            <td>97219</td>
+                            <td>
+                                <div class="badge badge-success p-2">
+                                    <span>Active</span>
+                                </div>
+                            </td>
+                            <!-- Dữ liệu các cột khác -->
+                            <td>
+                                <a href="#" class="block" title="Block User" data-toggle="tooltip">
+                                    <i class="material-icons">&#xE14B;</i>
+                                </a>
+                                <a href="#" class="edit" title="Edit" data-toggle="tooltip"><i
+                                        class="material-icons">&#xE254;</i></a>
+                                <a href="#" class="delete" title="Delete" data-toggle="tooltip"><i
+                                        class="material-icons">&#xE872;</i></a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>bacnxph44315@fpt.edu.vn</td>
+                            <td>
+                                <div class="badge bg-secondary p-2 text-light">
+                                    <span>Sinh viên</span>
+                                </div>
+                                <div class="badge bg-secondary p-2 text-light">
+                                    <span>Sinh viên</span>
+                                </div>
+                                <div class="badge bg-secondary p-2 text-light">
+                                    <span>Sinh viên</span>
+                                </div>
+                            </td>
+                            <td>Portland</td>
+                            <td>97219</td>
+                            <td>
+                                <div class="badge badge-success p-2">
+                                    <span>Active</span>
+                                </div>
+                            </td>
+                            <!-- Dữ liệu các cột khác -->
+                            <td>
+                                <a href="#" class="block" title="Block User" data-toggle="tooltip">
+                                    <i class="material-icons">&#xE14B;</i>
+                                </a>
+                                <a href="#" class="edit" title="Edit" data-toggle="tooltip"><i
+                                        class="material-icons">&#xE254;</i></a>
+                                <a href="#" class="delete" title="Delete" data-toggle="tooltip"><i
+                                        class="material-icons">&#xE872;</i></a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>bacnxph44315@fpt.edu.vn</td>
+                            <td>
+                                <div class="badge bg-secondary p-2 text-light">
+                                    <span>Sinh viên</span>
+                                </div>
+                                <div class="badge bg-secondary p-2 text-light">
+                                    <span>Sinh viên</span>
+                                </div>
+                                <div class="badge bg-secondary p-2 text-light">
+                                    <span>Sinh viên</span>
+                                </div>
+                            </td>
+                            <td>Portland</td>
+                            <td>97219</td>
+                            <td>
+                                <div class="badge badge-success p-2">
+                                    <span>Active</span>
+                                </div>
+                            </td>
+                            <!-- Dữ liệu các cột khác -->
+                            <td>
+                                <a href="#" class="block" title="Block User" data-toggle="tooltip">
+                                    <i class="material-icons">&#xE14B;</i>
+                                </a>
+                                <a href="#" class="edit" title="Edit" data-toggle="tooltip"><i
+                                        class="material-icons">&#xE254;</i></a>
+                                <a href="#" class="delete" title="Delete" data-toggle="tooltip"><i
+                                        class="material-icons">&#xE872;</i></a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>bacnxph44315@fpt.edu.vn</td>
+                            <td>
+                                <div class="badge bg-secondary p-2 text-light">
+                                    <span>Sinh viên</span>
+                                </div>
+                                <div class="badge bg-secondary p-2 text-light">
+                                    <span>Sinh viên</span>
+                                </div>
+                                <div class="badge bg-secondary p-2 text-light">
+                                    <span>Sinh viên</span>
+                                </div>
+                            </td>
+                            <td>Portland</td>
+                            <td>97219</td>
+                            <td>
+                                <div class="badge badge-success p-2">
+                                    <span>Active</span>
+                                </div>
+                            </td>
+                            <!-- Dữ liệu các cột khác -->
+                            <td>
+                                <a href="#" class="block" title="Block User" data-toggle="tooltip">
+                                    <i class="material-icons">&#xE14B;</i>
+                                </a>
+                                <a href="#" class="edit" title="Edit" data-toggle="tooltip"><i
+                                        class="material-icons">&#xE254;</i></a>
+                                <a href="#" class="delete" title="Delete" data-toggle="tooltip"><i
+                                        class="material-icons">&#xE872;</i></a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>bacnxph44315@fpt.edu.vn</td>
+                            <td>
+                                <div class="badge bg-secondary p-2 text-light">
+                                    <span>Sinh viên</span>
+                                </div>
+                                <div class="badge bg-secondary p-2 text-light">
+                                    <span>Sinh viên</span>
+                                </div>
+                                <div class="badge bg-secondary p-2 text-light">
+                                    <span>Sinh viên</span>
+                                </div>
+                            </td>
+                            <td>Portland</td>
+                            <td>97219</td>
+                            <td>
+                                <div class="badge badge-success p-2">
+                                    <span>Active</span>
+                                </div>
+                            </td>
+                            <!-- Dữ liệu các cột khác -->
+                            <td>
+                                <a href="#" class="block" title="Block User" data-toggle="tooltip">
+                                    <i class="material-icons">&#xE14B;</i>
+                                </a>
+                                <a href="#" class="edit" title="Edit" data-toggle="tooltip"><i
+                                        class="material-icons">&#xE254;</i></a>
+                                <a href="#" class="delete" title="Delete" data-toggle="tooltip"><i
+                                        class="material-icons">&#xE872;</i></a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="clearfix">
+                <div class="hint-text">Showing <b>5</b> out of <b>25</b> entries</div>
+                <ul class="pagination">
+                    <li class="page-item disabled"><a href="#"><i class="fa fa-angle-double-left"></i></a></li>
+                    <li class="page-item"><a href="#" class="page-link">1</a></li>
+                    <li class="page-item"><a href="#" class="page-link">2</a></li>
+                    <li class="page-item active"><a href="#" class="page-link">3</a></li>
+                    <li class="page-item"><a href="#" class="page-link">4</a></li>
+                    <li class="page-item"><a href="#" class="page-link">5</a></li>
+                    <li class="page-item"><a href="#" class="page-link"><i class="fa fa-angle-double-right"></i></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </main>
+    <script src="javascripts/user.js"></script>
+</body>
+
+</html>

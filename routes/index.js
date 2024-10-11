@@ -32,4 +32,25 @@ router.get("/post", function(req, res, next) {
       body: content,
   });
 });
+router.get("/user", function(req, res, next) {
+  const content = renderPartial('user');
+  res.render('main', { 
+      title: 'Người dùng',
+      body: content,
+  });
+});
+router.get("/group", function(req, res, next) {
+  const content = renderPartial('group');
+  res.render('main', { 
+      title: 'Nhóm',
+      body: content,
+  });
+});
+router.get("/report", function(req, res, next) {
+  const content = renderPartial('report');
+  res.render('main', { 
+      title: 'Báo cáo',
+      body: content,
+  });
+});
 module.exports = router;
