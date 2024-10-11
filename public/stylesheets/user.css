@@ -12,7 +12,7 @@ main {
     background-color: white;
     padding: 5vh 15vh 10vh 10vh;
 }
-/*  
+ 
 ::-webkit-scrollbar {
     height: 6px;
 }
@@ -30,7 +30,7 @@ main {
     background-color: transparent; 
 }
 
-*/
+
 .table-container {
     overflow: hidden;
 }

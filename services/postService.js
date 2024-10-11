@@ -5,6 +5,16 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 class PostService {
+    getAllPost = async (req, res) => {
+        try {
+            const data = await Post.find().populate('user_id').populate('group_id');
+            // console.log('data: ', data);
+            return HttpResponse.success(data, HttpResponse.getErrorMessages('getDataSucces'));
+        } catch (error) {
+            console.log(error);
+            return HttpResponse.error(error);
+        }
+    }
     getPostByPage = async (page, limit) => {
         try {
             const skip = (parseInt(page) - 1) * parseInt(limit);
