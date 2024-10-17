@@ -1,5 +1,6 @@
 const Users = require("../models/userModel");
 const UserStatus = require("../models/userStatusModel");
+const Role = require("../models/roleModel");
 const JWT = require('jsonwebtoken');
 const HttpResponse = require("../utils/httpResponse");
 const UtilsFunctions = require("../utils/utilsFunction");
@@ -10,7 +11,7 @@ const SECRETKEY = process.env.SECRETKEY
 class UserService {
     login = async (email, password) => {
         try {
-            const user = await Users.findOne({ email, password })
+            const user = await Users.findOne({ email, password }).populate('user_status_id').populate('role');
             if (user) {
                 //Token người dùng sẽ sử dụng gửi lên trên header mỗi lần muốn gọi api
                 const token = JWT.sign({ id: user._id }, SECRETKEY, { expiresIn: '1h' });
@@ -29,7 +30,7 @@ class UserService {
             return HttpResponse.error(error);
         }
     }
-    register = async (email, password, full_name, sex) => {
+    register = async (email, password, full_name, sex, role) => {
         try {
             const existing = await Users.findOne({
                 email
@@ -43,7 +44,8 @@ class UserService {
                 email,
                 password: password ?? passwordEncryption,
                 full_name,
-                sex
+                sex,
+                role
             });
             const result = await newUser.save();
             if (result) {
@@ -58,7 +60,7 @@ class UserService {
     }
     getAllUser = async (req, res) => {
         try {
-            const result = await Users.find().populate('user_status_id');
+            const result = await Users.find().populate('user_status_id').populate('role');
             if (result) {
                 return HttpResponse.success(result, HttpResponse.getErrorMessages('success'));
             } else {
@@ -72,7 +74,7 @@ class UserService {
     getUserByPage = async (page, limit) => {
         try {
             const skip = (parseInt(page) - 1) * parseInt(limit);
-            const users = await Users.find().skip(skip).limit(parseInt(limit)).populate('user_status_id');
+            const users = await Users.find().skip(skip).limit(parseInt(limit)).populate('user_status_id').populate('role');
             const total = await Users.countDocuments();
             const totalPages = Math.ceil(total / parseInt(limit));
             // console.log('data: ', data);
@@ -88,7 +90,7 @@ class UserService {
     }
     getUserByID = async (id) => {
         try {
-            const result = await Users.findById(id).populate('user_status_id');
+            const result = await Users.findById(id).populate('user_status_id').populate('role');
             if (result) {
                 return HttpResponse.success(result, HttpResponse.getErrorMessages('success'));
             } else {

@@ -106,3 +106,16 @@ aside .nav-item.active span {
 aside .nav-item.active i {
   color: #4C79C2;
 }
+.button {
+  transform: none !important; /* Bỏ hiệu ứng scale */
+  padding: 5px 20px;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  outline: none;
+}
+.input-search:focus {
+  box-shadow: none;
+  outline: none;
+}

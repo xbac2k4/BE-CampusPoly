@@ -19,20 +19,22 @@ const userModel = new Schema({
         type: String,
         enum: ['male', 'female', 'other'],
         required: true,
-      },
+    },
     role: {
-        type: Number,
-        required: true,
-        default: 1 // 0: admin, 1: người dùng
+        type: [{
+            type: Schema.Types.ObjectId,
+            ref: 'role'
+        }],
+        default: ['670c86268cfc1be4b41b180c']  // Default to an array with one ObjectId
     },
     user_status_id: {
         type: Schema.Types.ObjectId, ref: 'userstatus',
-        required: true, 
+        required: true,
         default: "67089cc2862f7badead53eb9"
     },
     avatar: {
         type: String,
-        default: ""    
+        default: ""
     },
     bio: {
         type: String,
@@ -40,8 +42,10 @@ const userModel = new Schema({
     },
     last_login: {
         type: Date,
-        default: Date.now() 
+        default: Date.now()
     },
+}, {
+    timestamps: true // Kích hoạt tính năng tự động tạo createdAt và updatedAt
 });
 
 module.exports = mongoose.model('user', userModel);

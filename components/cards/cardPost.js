@@ -14,6 +14,7 @@ template.innerHTML = `
             background-color: #f2f5fa;
         }
         .content-container {
+            width: 50vw;
             white-space: nowrap; 
             overflow: hidden; 
             text-overflow: ellipsis;
