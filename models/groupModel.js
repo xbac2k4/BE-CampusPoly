@@ -20,6 +20,8 @@ const groupModel = new Schema({
         type: String,
         required: false
     }
+}, {
+    timestamps: true // Kích hoạt tính năng tự động tạo createdAt và updatedAt
 });
 
 module.exports = mongoose.model('group', groupModel);

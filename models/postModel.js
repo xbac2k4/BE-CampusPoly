@@ -32,6 +32,7 @@ const postModel = new Schema({
         type: Boolean,
         default: false
     }
+}, {
+    timestamps: true // Kích hoạt tính năng tự động tạo createdAt và updatedAt
 });
-
 module.exports = mongoose.model('post', postModel);

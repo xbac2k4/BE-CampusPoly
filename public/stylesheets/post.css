@@ -31,11 +31,6 @@ main {
     height: 3vh;
 }
 
-.input-search:focus {
-    box-shadow: none;
-    outline: none;
-}
-
 .header > .dropdown {
     background-color: #e4ebf6;
     border-radius: 2vh;
