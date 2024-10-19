@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const UserController = require('../../controllers/userController');
+const UserController = require('../../controllers/api/userController');
 const Upload = require('../../config/common/upload');
 
 router.post('/login', new UserController().postLogin);

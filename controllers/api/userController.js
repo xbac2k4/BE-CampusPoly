@@ -1,36 +1,31 @@
-const User = require("../models/userModel");
-const UserService = require("../services/userService");
-const HttpResponse = require("../utils/httpResponse");
+const User = require("../../models/userModel");
+const UserService = require("../../services/userService");
+const HttpResponse = require("../../utils/httpResponse");
 
 class UserController {
-    userLogin = async (req, res) => {
+    postLogin = async (req, res) => {
         const { email, password } = req.body;
+        // console.log(email, password);
 
         try {
-            // Find the user based on the provided email and password
-            const data = await User.findOne({ email: email, password: password }).populate('role').populate('');
+            const data = await new UserService().login(email, password);
 
-            if (data) {       
-                const userRoles = data.role.map(r => r.role_name);
-                
-                if (userRoles.includes("Admin")) {
-                    // Set the session if the user has the "Admin" role
-                    req.session.admin = data;
-                    return res.json({ success: true, message: 'Login successful!' });
-                } else {
-                    // Return an error if the user does not have the "Admin" role
-                    return res.json({ success: false, message: 'Access denied. Only users with Admin role can log in.' });
-                }
+            if (data) {     
+                console.log(data);
+                                 
+                // Cập nhật trạng thái người dùng trong MongoDB
+                data.status == 200 ? req.session.admin = data : null; // Store user in session
+                // console.log(data);
+                // req.app.get('io').emit('user-login', data);
+                return res.json(HttpResponse.resultAuth(data));
             } else {
-                // Return an error if the user is not found
-                return res.json({ success: false, message: 'Invalid email or password. Please try again.' });
+                return res.json(HttpResponse.fail(HttpResponse.getErrorMessages('dataNotFound')));
             }
         } catch (error) {
-            // Handle any unexpected errors
-            return res.json({ success: false, message: 'An error occurred. Please try again.' });
+            console.log(error);
+            return res.json(HttpResponse.error(error));
         }
-    };
-
+    }
     postRegister = async (req, res) => {
         const { email, password, full_name, sex, role } = req.body;
         // console.log(res.body);

@@ -1,8 +1,8 @@
-const Post = require("../models/postModel");
-const User = require("../models/userModel");
-const Group = require("../models/groupModel");
-const PostService = require("../services/postService");
-const HttpResponse = require("../utils/httpResponse");
+const Post = require("../../models/postModel");
+const User = require("../../models/userModel");
+const Group = require("../../models/groupModel");
+const PostService = require("../../services/postService");
+const HttpResponse = require("../../utils/httpResponse");
 
 class PostController {
     getAllPost = async (req, res) => {

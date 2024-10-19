@@ -114,8 +114,8 @@ togglePassword.addEventListener('click', function (e) {
 
 // Đăng nhập
 const loginForm = document.getElementById('loginForm');
-const email = document.getElementById('emailInput');
-const password = document.getElementById('passwordInput');
+const email = document.getElementById('email');
+const password = document.getElementById('password');
 const DOMAIN = `http://localhost:3000/api/v1/`;
 
 const buttonText = document.getElementById("buttonText");
@@ -144,12 +144,8 @@ const loginProcessing = async () => {
         errorMessage.style.display = "none";
 
         if (result.status === 200) {
-            // Đăng nhập thành công, khởi tạo WebSocket
-             // Send email or username for identifying the user
-            // response.session.admin; // Store user in session
-            
             // Redirect to dashboard or main page
-            // window.location.href = '/post';
+            window.location.href = '/';
         } else {
             // Hiển thị thông báo lỗi
             errorMessage.innerText = `*${result.message}`;
@@ -173,4 +169,15 @@ loginForm.addEventListener('submit', async event => {
 
 socket.on('redirect', (url) => {
     window.location.href = url;  // Redirect the user to the '/post' page
+});
+
+$(document).ready(function() {
+    // Check if there is an error message to show the toast
+    var errorMessage = '{{errorMessage}}';
+    if (errorMessage) {
+        $('#errorToast').toast({
+            delay: 3000 // 3 seconds
+        });
+        $('#errorToast').toast('show');
+    }
 });
