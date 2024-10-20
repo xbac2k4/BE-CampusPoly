@@ -5,7 +5,7 @@ const isAuthenticated = (req, res, next) => {
     // Kiểm tra xem người dùng đã đăng nhập chưa
     if (req.cookies && req.cookies.admin) {
         // Nếu cookie tồn tại, chuyển hướng người dùng đến trang chủ
-        return res.redirect('/home'); // Đường dẫn trang chủ của bạn
+        return res.redirect('/'); // Đường dẫn trang chủ của bạn
     }
     if (req.session && req.session.admin) {
         // Nếu người dùng đã đăng nhập, cho phép tiếp tục xử lý request

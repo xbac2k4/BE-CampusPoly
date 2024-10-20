@@ -92,7 +92,7 @@ io.on('connection', (socket) => {
     //     socket.emit('redirect', '/post');  // Emit an event to trigger redirect on the client side
     // });
 
-    // initializeAdminSocket(io, socket);
+    initializeAdminSocket(io, socket);
 
     // When the user disconnects
     socket.on('disconnect', () => {

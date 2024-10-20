@@ -142,9 +142,13 @@ const loginProcessing = async () => {
         const result = await response.json();
 
         errorMessage.style.display = "none";
-
+    
         if (result.status === 200) {
             // Redirect to dashboard or main page
+            // console.log(result.data);
+            // console.log("123");
+            // Gọi hàm xử lý sự kiện khi trang được tải
+            handleLoginSuccess(result.data);
             window.location.href = '/';
         } else {
             // Hiển thị thông báo lỗi
@@ -164,20 +168,11 @@ loginForm.addEventListener('submit', async event => {
     buttonText.style.display = "none";
     spinner.style.display = "inline-block";
     buttonLogin.disabled = true;
+    console.log("1111111");
     loginProcessing();
 });
 
-socket.on('redirect', (url) => {
-    window.location.href = url;  // Redirect the user to the '/post' page
-});
-
-$(document).ready(function() {
-    // Check if there is an error message to show the toast
-    var errorMessage = '{{errorMessage}}';
-    if (errorMessage) {
-        $('#errorToast').toast({
-            delay: 3000 // 3 seconds
-        });
-        $('#errorToast').toast('show');
-    }
-});
+function handleLoginSuccess(data) {
+    // Gửi yêu cầu để nhận thông tin của khách hàng từ máy chủ, lưu lại danh sách customer đang online
+    socket.emit('admin_login', data);
+}

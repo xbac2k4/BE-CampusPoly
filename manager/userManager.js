@@ -22,8 +22,9 @@ const removeUser = (userId) => {
 const getUser = (socketId) => {
   return activeUsers.get(socketId);
 };
-
 const getUsers = () => {
+  console.log(Array.from(activeUsers.values()));
+  
   return Array.from(activeUsers.values());
 };
 

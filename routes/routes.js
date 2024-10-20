@@ -9,8 +9,8 @@ const UserController = require('../controllers/userController');
 router.get('/login', function(req, res, next) {
   res.render('login', { title: 'LOGIN' });
 });
-router.post('/login', new UserController().userLogin);
-router.use(['/', '/post', '/user', '/group', '/report'], isAuthenticated);
+// router.post('/login', new UserController().userLogin);
+router.use(['/', '/post', '/user', '/group', '/report', '/login'], isAuthenticated);
 router.use("/", managerRouter);
 
 module.exports = router;
