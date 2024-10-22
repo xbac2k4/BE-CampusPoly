@@ -13,7 +13,7 @@ const postModel = new Schema({
         default: null // Mặc định là null
     },
     image: {
-        type: String,
+        type: Array,
         default: null // Mặc định là null
     },
     title: {
@@ -31,6 +31,14 @@ const postModel = new Schema({
     is_pinned: {
         type: Boolean,
         default: false
+    },
+    like_count: {
+        type: Number,
+        default: 0
+    },
+    comment_count: {
+        type: Number,
+        default: 0
     }
 }, {
     timestamps: true // Kích hoạt tính năng tự động tạo createdAt và updatedAt

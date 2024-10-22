@@ -25,7 +25,7 @@ template.innerHTML = `
         <div class="wrapper d-flex flex-column">
             <span style="font-weight: bold; font-size: 1rem" id="title" class="content-container">Tiêu đề của một bài viết</span>
             <span style="font-size: 0.7rem; color: #5b5e62" class="content-container">
-                <span style="font-weight: bold;" id="user-name">User</span> đã đăng <span id="time-up">25</span> minutes ago
+                <span style="font-weight: bold;" id="user-name">User</span> đã đăng <span id="time-up">25</span>
             </span>
             <span style="font-size: 0.7rem; color: #5b5e62" id="content" class="content-container">Nội dung chính của bài đăng</span>
         </div>
@@ -65,12 +65,27 @@ class CardPost extends HTMLElement {
                 userElement.textContent = newValue; // Cập nhật tên người dùng
                 break;
             case 'time':
-                timeElement.textContent = newValue; // Cập nhật thời gian
+                timeElement.textContent = this.timeAgo(newValue); // Sử dụng hàm timeAgo để cập nhật thời gian
                 break;
             case 'img':
                 imgElement.src = newValue; // Cập nhật hình ảnh từ API
                 break;
         }
+    }
+
+    // Hàm tính thời gian trôi qua
+    timeAgo(date) {
+        const now = new Date();
+        const postDate = new Date(date);
+        const diff = Math.floor((now - postDate) / 1000); // Chênh lệch thời gian tính bằng giây
+
+        if (diff < 60) return `${diff} seconds ago`;
+        const minutes = Math.floor(diff / 60);
+        if (minutes < 60) return `${minutes} minutes ago`;
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return `${hours} hours ago`;
+        const days = Math.floor(hours / 24);
+        return `${days} days ago`;
     }
 }
 
