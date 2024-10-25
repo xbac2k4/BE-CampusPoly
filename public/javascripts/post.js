@@ -18,7 +18,7 @@ const loadPosts = async () => {
         .then(data => {
             data.data.posts.map(items => {
                 // console.log(items.user_id.avatar);
-                let html = `<card-post img="${items.user_id.avatar !== ""  ? items.user_id.avatar : "https://placehold.co/50x50"}" title="${items.title}" content="${items.content}" user="${items.user_id.full_name}" time="${items.createdAt}"></card-post>`;
+                let html = `<card-post post-id="${items._id}" img="${items.user_id.avatar !== ""  ? items.user_id.avatar : "https://placehold.co/50x50"}" title="${items.title}" content="${items.content}" user="${items.user_id.full_name}" time="${items.createdAt}" likes="${items.like_count}" comments="${items.comment_count}"></card-post>`;
                 tbody.insertAdjacentHTML('beforeend', html);
             });
             // preloader.style.display = 'none';

@@ -4,7 +4,7 @@ const HttpResponse = require("../utils/httpResponse");
 class LikeService {
     getAllLike = async () => {
         try {
-            const data = await Like.find().populate('user_id_like').populate('post_id');
+            const data = await Like.find().populate('user_id_like', 'full_name avatar').populate('post_id');
             // console.log('data: ', data);
             return HttpResponse.success(data, HttpResponse.getErrorMessages('getDataSucces'));
         } catch (error) {
@@ -14,7 +14,7 @@ class LikeService {
     }
     getLikeByPost = async (post_id) => {
         try {
-            const data = await Like.findOne({
+            const data = await Like.find({
                 post_id: post_id
             }).populate('user_id_like').populate('post_id');
             return HttpResponse.success(data, HttpResponse.getErrorMessages('getDataSucces'));

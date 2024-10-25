@@ -1,10 +1,12 @@
 const Post = require("../models/postModel");
 const Group = require("../models/groupModel");
 const Like = require("../models/likeModel");
+const Comment = require("../models/commentModel");
 const HttpResponse = require("../utils/httpResponse");
 const dotenv = require('dotenv');
 const { use } = require("../routes/api");
 dotenv.config();
+const displayedPostIds = new Set(); // Set để lưu trữ ID bài viết đã hiển thị
 
 class PostService {
     getAllPost = async () => {
@@ -31,7 +33,7 @@ class PostService {
     getPostByPage = async (page, limit) => {
         try {
             const skip = (parseInt(page) - 1) * parseInt(limit);
-            const posts = await Post.find().skip(skip).limit(parseInt(limit)).populate('group_id').populate('user_id');
+            const posts = await Post.find().skip(skip).limit(parseInt(limit)).populate('group_id').populate('user_id', 'full_name avatar');
             const total = await Post.countDocuments();
             const totalPages = Math.ceil(total / parseInt(limit));
             // console.log('data: ', data);
@@ -42,8 +44,8 @@ class PostService {
                 post.like_count = likeData.length;
 
                 // Lấy số lượng comment cho bài viết
-                // const commentData = await Comment.find({ post_id: post._id });
-                // post.comment_count = commentData.length;
+                const commentData = await Comment.find({ post_id: post._id });
+                post.comment_count = commentData.length;
 
                 return post;
             }));
@@ -58,15 +60,61 @@ class PostService {
             return HttpResponse.error(error);
         }
     }
+
+    // getPostByPage = async (page, limit) => {
+    //     try {
+    //         // Lấy tất cả bài viết
+    //         const allPosts = await Post.find().populate('group_id').populate('user_id', 'full_name avatar');
+    //         // Trộn ngẫu nhiên các bài viết
+    //         const shuffledPosts = allPosts.sort(() => Math.random() - 0.5);
+    //         // Lọc ra bài viết chưa hiển thị
+    //         const newPosts = shuffledPosts.filter(post => !displayedPostIds.has(post._id.toString()));
+    //         // Tính toán chỉ số để phân trang
+    //         const skip = (parseInt(page) - 1) * parseInt(limit);
+    //         // Lấy bài viết theo phân trang
+    //         const paginatedPosts = newPosts.slice(skip, skip + parseInt(limit));
+    //         // Cập nhật like_count và comment_count cho từng bài viết
+    //         const updatedPosts = await Promise.all(paginatedPosts.map(async (post) => {
+    //             // Lấy số lượng like cho bài viết
+    //             const likeData = await Like.find({ post_id: post._id });
+    //             post.like_count = likeData.length;
+    //             // Lấy số lượng comment cho bài viết
+    //             const commentData = await Comment.find({ post_id: post._id });
+    //             post.comment_count = commentData.length;
+    //             return post;
+    //         }));
+    //         // Lưu ID các bài viết đã hiển thị vào Set
+    //         updatedPosts.forEach(post => displayedPostIds.add(post._id.toString()));
+    //         // Tính tổng số trang
+    //         const totalPages = Math.ceil(allPosts.length / parseInt(limit));
+    //         const data = {
+    //             posts: updatedPosts,
+    //             totalPages
+    //         };
+    //         return HttpResponse.success(data, HttpResponse.getErrorMessages('getDataSucces'));
+    //     } catch (error) {
+    //         console.log(error);
+    //         return HttpResponse.error(error);
+    //     }
+    // }
+
     getPostByID = async (id) => {
         try {
-            const data = await Post.findById(id).populate('user_id').populate('group_id');
+            const data = await Post.findById(id).populate('user_id', 'full_name avatar').populate('group_id');
             // console.log('data: ', data);
             if (data) {
                 // Lấy số lượng like cho bài viết
-                const likeData = await Like.find({ post_id: data._id });
+                const likeData = await Like.find({ post_id: data._id }).select('user_id_like').populate('user_id_like', 'full_name');
                 data.like_count = likeData.length;
-                return HttpResponse.success(data, HttpResponse.getErrorMessages('getDataSucces'));
+                // Lấy số lượng comment cho bài viết
+                const commentData = await Comment.find({ post_id: data._id }).populate('user_id_comment', 'avatar full_name');
+                data.comment_count = commentData.length;
+                const postData = {
+                    postData: data,
+                    // likeData,
+                    commentData
+                }
+                return HttpResponse.success(postData, HttpResponse.getErrorMessages('getDataSucces'));
             }
         } catch (error) {
             console.log(error);
@@ -123,12 +171,17 @@ class PostService {
             // Tìm bài viết theo ID
             const post = await Post.findById(id);
             // console.log(post.user_id.toString(), user_id);
-            const postData = post;
             if (!post || post.user_id.toString() !== user_id) {
                 return
             }
+            // Xóa bài viết
             const result = await post.deleteOne();
-            return HttpResponse.success({result, post}, HttpResponse.getErrorMessages('success'));
+            if (result) {
+                // Xóa like và comment
+                await Like.deleteMany({ post_id: id });
+                await Comment.deleteMany({ post_id: id });
+            }
+            return HttpResponse.success({ result, post }, HttpResponse.getErrorMessages('success'));
         } catch (error) {
             console.log(error);
             return HttpResponse.error(error);
