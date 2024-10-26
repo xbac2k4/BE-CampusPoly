@@ -59,13 +59,13 @@
                 <div class="modal-content">
                     <div class="modal-header d-flex align-items-center">
                         <h2><i class="bi bi-exclamation-circle text-warning pr-2"></i></h2></i>
-                        <h5 class="modal-title" id="confirmDeleteModalLabel">XÓA TÀI KHOẢN</h5>
+                        <h5 class="modal-title" id="confirmDeleteModalLabel">CHẶN TÀI KHOẢN</h5>
                         <button type="button" class="close" aria-label="Close">
                             <span>&times;</span>
                         </button>
                     </div>
-                    <div class="modal-body">
-                        Bạn có chắc muốn xoá không? Hành động này không thể được hoàn tác.
+                    <div class="modal-body" id="confirmDeleteModalBody">
+                        Bạn có chắc muốn chặn tài khoản này không? Hành động này không thể được hoàn tác.
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="button btn-secondary dismis-modal">Hủy</button>
@@ -74,48 +74,43 @@
                 </div>
             </div>
         </div>
-        <div class="modal fade" id="editUserModal" tabindex="-1" role="dialog" aria-labelledby="editUserModalLabel"
+        <div class="modal fade" id="roleUserModal" tabindex="-1" role="dialog" aria-labelledby="roleUserModalLabel"
             aria-hidden="true">
-            <div class="modal-dialog" role="document">
+            <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="editUserModalLabel">Edit User</h5>
+                        <h5 class="modal-title" id="roleUserModalLabel">Phân vai trò người dùng</h5>
                         <button type="button" class="close" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
                     <div class="modal-body">
-                        <div class="form-group">
-                            <label for="user-email">Email</label>
-                            <input type="email" class="form-control" id="user-email" placeholder="Email" disabled>
+                        <div id="container-role" class="container-role d-flex flex-wrap">
+                            {{!-- <div class="wapper-role rounded border-0 bg-secondary py-1 px-2 mr-1 d-flex align-item-center">
+                                <span id="role-name" class="text-light">Admin</span>
+                                <button type="button" class="close ml-1 p-0" aria-label="Close"
+                                    onclick="this.parentElement.remove()">
+                                    <span aria-hidden="true" class="text-center text-light">&times;</span>
+                                </button>
+                            </div> --}}
                         </div>
-                        <div class="form-group">
-                            <label for="user-fullname">Full Name</label>
-                            <input type="text" class="form-control" id="user-fullname" placeholder="Full Name">
-                        </div>
-                        <div class="form-group">
-                            <label for="user-sex">Sex</label>
-                            <select class="form-control" id="user-sex">
-                                <option value="male">Male</option>
-                                <option value="female">Female</option>
-                                <option value="other">Other</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="user-status">User Status</label>
-                            <select class="form-control" id="user-status" disabled>
-                                <option value="Đang hoạt động">Đang hoạt động</option>
-                                <option value="Không hoạt động">Không hoạt động</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="user-bio">Bio</label>
-                            <textarea class="form-control" id="user-bio" rows="3" placeholder="Bio"></textarea>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group m-0">
+                            <div class="d-flex">
+                                <select class="form-control mr-2" id="select-role">
+                                    {{!-- <option value="" selected>Chọn vai trò</option>
+                                    <option value="admin">Admin</option>
+                                    <option value="giangvien">Giảng viên</option>
+                                    <option value="sinhvien">Sinh viên</option>
+                                    <!-- Thêm các vai trò khác nếu cần --> --}}
+                                </select>
+                                <button type="button" class="button btn-primary" onclick="addRole()">Thêm</button>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="button btn-secondary" id="closeModalFooter">Close</button>
-                        <button type="button" class="button btn-primary" id="saveChanges">Save Changes</button>
+                        <button type="button" class="button btn-secondary" id="closeModalFooter">Đóng</button>
                     </div>
                 </div>
             </div>

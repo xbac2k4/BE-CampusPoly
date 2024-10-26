@@ -28,7 +28,7 @@ const userModel = new Schema({
         default: ['670c86268cfc1be4b41b180c']  // Default to an array with one ObjectId
     },
     user_status_id: {
-        type: Schema.Types.ObjectId, ref: 'userstatus',
+        type: Schema.Types.ObjectId, ref: 'status',
         required: true,
         default: "67089cc2862f7badead53eb9"
     },
