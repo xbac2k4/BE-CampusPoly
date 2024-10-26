@@ -330,7 +330,112 @@
                 </ul>
             </div>
         </div>
+            <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog"
+            aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header d-flex align-items-center">
+                        <h2><i class="bi bi-exclamation-circle text-warning pr-2"></i></h2></i>
+                        <h5 class="modal-title" id="confirmDeleteModalLabel">XÓA NHÓM</h5>
+                        <button type="button" class="close" aria-label="Close" id="cancel">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        Bạn có chắc muốn xoá không? Hành động này không thể được hoàn tác.
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="button btn-secondary" data-dismiss="modal"
+                            id="cancelButton">Hủy</button>
+                        <button type="button" class="button btn-danger" id="confirmDeleteBtn">Xóa</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="confirmBlockModal" tabindex="-1" role="dialog"
+            aria-labelledby="confirmBlockModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header d-flex align-items-center">
+                        <h2><i class="bi bi-exclamation-circle text-warning pr-2"></i></h2>
+                        <h5 class="modal-title" id="confirmBlockModalLabel">ĐỔI TRẠNG THÁI NHÓM</h5>
+                        <button type="button" class="close" aria-label="Close" id="cancel">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        Bạn có chắc muốn thay đổi trạng thái nhóm này không?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="button btn-secondary" data-dismiss="modal"
+                            id="cancelBlockButton">Hủy</button>
+                        <button type="button" class="button btn-danger" id="confirmBlockBtn">Có</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
+      <script>
+        $(document).ready(function() {
+           let currentIcon = null; // Biến để lưu icon hiện tại khi nhấn vào Block
+
+            // Khi nhấn vào nút Block Post
+            $('.block').on('click', function (e) {
+                e.preventDefault(); // Ngăn chặn hành động mặc định
+                currentIcon = $(this).find('i'); // Lưu lại biểu tượng hiện tại để thay đổi sau
+                $('#confirmBlockModal').modal('show'); // Hiển thị modal xác nhận block
+            });
+
+            // Khi nhấn vào nút "Có" trong modal "Block"
+            $('#confirmBlockBtn').on('click', function () {
+                if (currentIcon) {
+                    // Nếu là nút Block, chỉ đổi màu sau khi xác nhận
+                    if (currentIcon.hasClass('blocked')) {
+                        currentIcon.removeClass('blocked');
+                        currentIcon.css('color', ''); // Trở về màu mặc định
+                    } else {
+                        currentIcon.addClass('blocked');
+                        currentIcon.css('color', 'red'); // Đổi màu sang đỏ
+                    }
+                }
+                $('#confirmBlockModal').modal('hide'); // Đóng modal sau khi xác nhận
+                currentIcon = null; // Reset lại biến sau khi đã xử lý
+            });
+
+            // Khi nhấn vào nút "Hủy" hoặc nút "Đóng" trong modal "Block"
+            $('#cancelBlockButton').on('click', function () {
+                $('#confirmBlockModal').modal('hide'); // Đóng modal mà không thực hiện hành động
+                currentIcon = null; // Reset lại biến để không thay đổi màu khi nhấn "Hủy"
+            });
+            $('#cancel').on('click', function () {
+                $('#confirmBlockModal').modal('hide'); // Đóng modal mà không thực hiện hành động
+                currentIcon = null; 
+            });
+             // Khi nhấn vào nút delete
+            $('.delete').on('click', function (e) {
+                e.preventDefault(); // Ngăn chặn hành động mặc định
+                $('#confirmDeleteModal').modal('show'); // Hiển thị modal
+            });
+
+            // Xử lý sự kiện khi nhấn vào nút Xóa trong modal
+            $('#confirmDeleteBtn').on('click', function () {
+                // Logic xóa có thể thêm ở đây
+                alert('Bài viết đã được xóa');
+                $('#confirmDeleteModal').modal('hide'); // Đóng modal
+            });
+            $('#cancelButton').on('click', function () {
+                // Đóng modal khi nhấn nút Hủy
+                $('#confirmDeleteModal').modal('hide');
+                console.log('Modal đã đóng khi nhấn Hủy');
+            });
+            $('#cancel').on('click', function () {
+                // Đóng modal khi nhấn nút Hủy
+                $('#confirmDeleteModal').modal('hide');
+                console.log('Modal đã đóng khi nhấn Hủy');
+            });
+            // Nút Hủy, đã có data-dismiss="modal", không cần xử lý thêm logic nếu không cần thiết
+        });
+    </script>
     <script src="javascripts/group.js"></script>
 </body>
 
