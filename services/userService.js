@@ -1,5 +1,5 @@
 const Users = require("../models/userModel");
-const UserStatus = require("../models/userStatusModel");
+const status = require("../models/statusModel");
 const Role = require("../models/roleModel");
 const JWT = require('jsonwebtoken');
 const HttpResponse = require("../utils/httpResponse");

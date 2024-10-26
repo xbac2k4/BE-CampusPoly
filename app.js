@@ -92,7 +92,7 @@ io.on('connection', (socket) => {
     //     socket.emit('redirect', '/post');  // Emit an event to trigger redirect on the client side
     // });
 
-    // initializeAdminSocket(io, socket);
+    initializeAdminSocket(io, socket);
 
     // When the user disconnects
     socket.on('disconnect', () => {
@@ -111,8 +111,6 @@ io.on('connection', (socket) => {
         }
     });
 });
-
-//
 server.listen(3000, () => {
   console.log('Server is running on port 3000');
 });

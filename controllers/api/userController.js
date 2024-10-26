@@ -1,4 +1,3 @@
-const User = require("../../models/userModel");
 const UserService = require("../../services/userService");
 const HttpResponse = require("../../utils/httpResponse");
 
@@ -11,11 +10,10 @@ class UserController {
             const data = await new UserService().login(email, password);
 
             if (data) {     
-                console.log(data);
+                // console.log(data);
                                  
                 // Cập nhật trạng thái người dùng trong MongoDB
                 data.status == 200 ? req.session.admin = data : null; // Store user in session
-                // console.log(data);
                 // req.app.get('io').emit('user-login', data);
                 return res.json(HttpResponse.resultAuth(data));
             } else {

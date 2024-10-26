@@ -3,9 +3,15 @@ const managerRouter = express.Router();
 
 const fs = require('fs');
 const path = require('path');
-const renderPartial = (partialName) => {
+const hbs = require('hbs'); // Import Handlebars
+
+const renderPartial = (partialName, data = {}) => {
     const partialPath = path.join(__dirname, '../views/partials', `${partialName}.hbs`);
-    return fs.readFileSync(partialPath, 'utf8');
+    const template = fs.readFileSync(partialPath, 'utf8');
+    
+    // Biên dịch template với dữ liệu
+    const compiledTemplate = hbs.compile(template);
+    return compiledTemplate(data); // Trả về HTML đã được biên dịch
 };
 
 // Điều hướng cho trang quản lý tài xế của admin
@@ -52,6 +58,25 @@ managerRouter.use("/report", function (req, res, next) {
     res.render('main', {
         title: 'Báo cáo',
         body: content,
+    });
+});
+
+managerRouter.use("/post-detail/:id", function (req, res, next) {
+    const admin = req.session.admin;
+    console.log(admin); // Kiểm tra xem session có lưu admin không
+
+    // Thực hiện logic để lấy chi tiết bài viết dựa trên `req.params.id`
+    const postId = req.params.id;
+    const content = renderPartial('post_detail', {
+        postId: postId, // Truyền thông tin id bài viết cho view
+    });
+    console.log(postId);
+    
+    // Render giao diện chi tiết bài viết
+    res.render('main', {
+        title: 'Chi tiết bài viết',
+        body: content,  // Tên đúng của phần template/partial
+        admin: admin,    // Truyền thông tin admin nếu cần sử dụng trong view
     });
 });
 

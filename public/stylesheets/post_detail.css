@@ -1,0 +1,57 @@
+.time-up {
+    font-size: small;
+    color: gray !important;
+}
+
+.image {
+    height: 200px;
+}
+
+.wrapper-post,
+.wrapper-comment {
+    background-color: #E4EBF6;
+    border-radius: 2vh;
+    overflow: hidden;
+}
+.container {
+    height: 100vh; /* Đặt chiều cao cố định */
+    overflow-y: scroll; /* Cho phép cuộn theo chiều dọc */
+    padding-bottom: 10vh;
+}
+#wrapper-image-post {
+    display: none; /* Sử dụng flexbox để sắp xếp hình ảnh theo hàng */
+    overflow-x: auto; /* Cho phép cuộn theo chiều ngang */
+    max-width: 68vw; /* Đảm bảo chiều rộng không vượt quá chiều rộng của phần tử cha */
+    padding: 5px;
+}
+.hidden {
+    display: none;
+}
+::-webkit-scrollbar {
+    height: 6px;
+}
+::-webkit-scrollbar-button {
+    display: none; 
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #b0b0b4; 
+    border-radius: 20px; 
+}
+
+
+::-webkit-scrollbar-track {
+    background-color: transparent; 
+}
+
+#user-name {
+    font-weight: bold;
+    font-size: small;
+}
+.comment-content {
+    color: rgb(0, 0, 0);
+    background-color: #dddddd;
+}
+#comment-content {
+    font-size: medium;
+}
