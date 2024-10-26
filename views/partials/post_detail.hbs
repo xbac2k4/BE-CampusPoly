@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel='stylesheet' href='/stylesheets/post_detail.css' />
+    <title>{{title}}</title>
+</head>
+
+<body>
+    <main class="w-100 pl-4">
+        <div class="container pt-4 pl-0 hidden" id="post-container">
+            <div class="wrapper-post d-flex p-3 mb-3">
+                <div class="content-main">
+                    <div class="title mb-3 d-flex">
+                        <img src="https://placehold.co/50x50" id="post-avatar" alt="" width="70" height="70"
+                            class="rounded-circle mr-3">
+                        <div class="">
+                            <h2 id="post-title" class="m-0">Tiêu đề bài viết</h2>
+                            <span class="d-flex align-item-center m-0">
+                                <span id="name-user-up" class="user-up mr-3">Xuân Bắc</span>
+                                <p id="time-up" class="time-up m-0 p-0">11 hours ago</p>
+                            </span>
+                        </div>
+                    </div>
+                    <div id="post-content" class="content">
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed nonummy ipsum dolor. Nam quam nunc,
+                        blandit vel sapien non, tristique tempor nisi. Proin non est in ipsum tincidunt scelerisque. Sed
+                        ac justo vel velit ultricies tempor. Aliquam erat volutpat
+                    </div>
+                    <div id="wrapper-image-post" class="image pt-1 mt-2 d-flex"></div>
+                    <div class="post-icons ml-auto pt-2">
+                        <span class="icon mr-3">
+                            <i class="bi bi-heart-fill"></i> <span id="like-count">0</span>
+                        </span>
+                        <span class="icon">
+                            <i class="bi bi-chat-fill"></i> <span id="comment-count">0</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div id="wrapper-comment" class="wrapper-comment d-flex p-3 flex-column"></div>
+        </div>
+    </main>
+    <script>
+        const postId = '{{postId}}';
+
+        fetch(`http://localhost:3000/api/v1/posts/get-post-by-id/{{postId}}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                document.getElementById('post-title').textContent = data.data.postData.title;
+                document.getElementById('name-user-up').textContent = data.data.postData.user_id.full_name;
+                document.getElementById('time-up').textContent = timeAgo(data.data.postData.createdAt);
+                document.getElementById('post-content').textContent = data.data.postData.content;
+                document.getElementById('post-avatar').src = data.data.postData.user_id.avatar === "" ? "https://placehold.co/50x50" : data.data.postData.user_id.avatar;
+                document.getElementById('like-count').textContent = data.data.postData.like_count;
+                document.getElementById('comment-count').textContent = data.data.postData.comment_count;
+                // Hiển thị like và comment
+                // Hiển thị hình ảnh nếu có
+                const images = data.data.postData.image; // Giả sử hình ảnh nằm trong thuộc tính 'image'
+                const wrapperImagePost = document.getElementById('wrapper-image-post');
+                if (images.length > 0) {
+                    images.forEach(imageUrl => {
+                        const imgElement = document.createElement('img');
+                        imgElement.style.marginRight = '10px';
+                        imgElement.src = imageUrl; // Gán URL của hình ảnh
+                        imgElement.alt = 'Hình ảnh bài viết'; // Gán thuộc tính alt
+                        wrapperImagePost.appendChild(imgElement); // Thêm vào wrapper
+                    });
+                } else {
+                    wrapperImagePost.style.display = 'none'; // Ẩn nếu không có ảnh
+                }
+
+                // Hiển thị bình luận nếu có
+                const comments = data.data.commentData; // Giả sử comment nằm trong 'commentData'
+                const wrapperComment = document.getElementById('wrapper-comment');
+                if (comments.length > 0) {
+                    comments.forEach(comment => {
+                        const commentHTML = `
+                            <div class="d-flex mb-2">
+                                <img src="${comment.user_id_comment.avatar === "" ? "https://placehold.co/50x50" : comment.user_id_comment.avatar}" id="user-avatar" alt="" width="40" height="40" class="rounded-circle mr-3">
+                                <div class="comment-content rounded p-2 d-flex flex-column">
+                                    <span id="user-name">${comment.user_id_comment.full_name}</span>
+                                    <span id="comment-content">${comment.comment_content}</span>
+                                </div>
+                            </div>
+                        `;
+                        wrapperComment.innerHTML += commentHTML; // Thêm từng bình luận vào phần tử
+                    });
+                }
+                // Hiện container sau khi đã fetch xong
+                document.getElementById('post-container').classList.remove('hidden');
+            });
+
+        const timeAgo = (date) => {
+            const now = new Date();
+            const postDate = new Date(date);
+            const diff = Math.floor((now - postDate) / 1000); // Chênh lệch thời gian tính bằng giây
+
+            if (diff < 60) return `${diff} seconds ago`;
+            const minutes = Math.floor(diff / 60);
+            if (minutes < 60) return `${minutes} minutes ago`;
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `${hours} hours ago`;
+            const days = Math.floor(hours / 24);
+            return `${days} days ago`;
+        }
+    </script>
+</body>
+
+</html>

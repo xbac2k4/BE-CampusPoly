@@ -1,27 +1,23 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const groupModel = new Schema({
-    group_name: {
-        type: String,
-        required: true
-    },
-    conversation_id: {
+const commentModel = new Schema({
+    post_id: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'conversation',
+        ref: 'post',
         required: true
     },
-    owner_id: {
+    user_id_comment: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'user',
         required: true
     },
-    description: {
+    comment_content: {
         type: String,
-        required: false
+        required: true
     }
 }, {
     timestamps: true // Kích hoạt tính năng tự động tạo createdAt và updatedAt
 });
 
-module.exports = mongoose.model('group', groupModel);
+module.exports = mongoose.model('comment', commentModel);

@@ -45,8 +45,9 @@ main {
 
 table.table {
     width: 100%;
-    border-spacing: 0;
     min-width: 800px; /* Đảm bảo bảng có kích thước tối thiểu */
+    border-collapse: collapse; /* Đảm bảo các viền bảng được ghép lại */
+    position: relative;
 }
 
 table.table th, table.table td {
@@ -57,28 +58,34 @@ table.table th, table.table td {
     white-space: nowrap; /* Đảm bảo nội dung không bị xuống dòng */
 }
 
-table.table th:nth-child(1),
-table.table td:nth-child(1) {
+table.table th:first-child,
+table.table td:first-child {
+    background-color: #ffffff;
+    z-index: 2;
     width: 5vh;
     text-align: center;
     min-width: 50px;
 }
-
 table.table th:last-child,
 table.table td:last-child {
     position: sticky;
     right: 0;
     background-color: #ffffff;
-    z-index: 2;
+    z-index: 3;
     min-width: 120px; /* Đặt chiều rộng tối thiểu để tránh co lại */
+    border-left: 1px solid black;
 }
 
 /* Đảm bảo các cột khác không bị co */
 table.table th.resizable-col, 
 table.table td.resizable-col {
-    min-width: 100px;
+    min-width: 120px;
+    /* border-right: 1px solid black; */
 }
 
+table.table div {
+    border: 1px solid black;
+}
 /* Các thuộc tính khác */
 table.table-striped tbody tr:nth-of-type(odd) {
     background-color: #fcfcfc;
@@ -141,5 +148,3 @@ table.table td i {
     margin-top: 6px;
     font-size: 95%;
 }    
-
-
