@@ -45,7 +45,7 @@ app.use(session({
   saveUninitialized: false,
   cookie: { secure: false } // Đặt secure: true nếu bạn sử dụng HTTPS
 }));
-app.use('/', indexRouter);
+app.use('/api/v1', indexRouter);
 app.use('/', routes);
 // Cấu hình body-parser
 app.use(bodyParser.urlencoded({ extended: false }));
