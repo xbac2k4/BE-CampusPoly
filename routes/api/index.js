@@ -10,10 +10,10 @@ const commentRoutes = require('./commentRoutes');
 const roleRoutes = require('./roleRoutes');
 //====================== Sử dụng ==========================//
 //Routes
-router.use('/api/v1/users', userRoutes);
-router.use('/api/v1/posts', postRoutes);
-router.use('/api/v1/likes', likeRoutes);
-router.use('/api/v1/comments', commentRoutes);
-router.use('/api/v1/roles', roleRoutes);
+router.use('/users', userRoutes);
+router.use('/posts', postRoutes);
+router.use('/likes', likeRoutes);
+router.use('/comments', commentRoutes);
+router.use('/roles', roleRoutes);
 
 module.exports = router;
