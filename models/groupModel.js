@@ -6,6 +6,14 @@ const groupModel = new Schema({
         type: String,
         required: true
     },
+    avatar: {
+        type: String,
+        default: ""
+    },
+    background_image: {
+        type: String,
+        default: ""
+    },
     conversation_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'conversation',
@@ -19,7 +27,12 @@ const groupModel = new Schema({
     description: {
         type: String,
         required: false
-    }
+    },
+    members: [{ 
+        type: Schema.Types.ObjectId, 
+        ref: 'user',
+        default: []
+    }],
 }, {
     timestamps: true // Kích hoạt tính năng tự động tạo createdAt và updatedAt
 });
