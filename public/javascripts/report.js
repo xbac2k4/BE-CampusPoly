@@ -49,10 +49,10 @@ const renderTable = (reports) => {
                 <td>${report.reported_by_user_id.full_name}</td>
                 <td>${report.post_id._id}</td> 
                 <td>${report.post_id.user_id.full_name}</td> 
-                <td>${report.report_reason}</td>
+                <td>${report.report_type_id.report_name}</td>
                 <td>${formatDateTime(report.createdAt)}</td>
                 <td>
-                    <div class="badge border-0 text-light ${report.report_status_id.status_name === 'Đã xử lý' ? 'badge-success' : 'bg-danger'} p-2"
+                    <div style="cursor: pointer;" class="badge border-0 text-light ${report.report_status_id.status_name === 'Đã xử lý' ? 'badge-success' : 'bg-danger'} p-2"
                          onclick="toggleReportStatus('${report._id}', '${report.report_status_id._id}', this)">
                         <span id="status-${report._id}">${report.report_status_id.status_name}</span>
                     </div>
@@ -70,6 +70,10 @@ const renderTable = (reports) => {
 }
 // Khi trang tải lần đầu, gọi API để hiển thị 10 người dùng đầu tiên
 window.addEventListener('DOMContentLoaded', (event) => {
+    fetchDataForPage(currentPage);
+});
+
+document.addEventListener('DOMContentLoaded', () => {
     fetchDataForPage(currentPage);
 });
 

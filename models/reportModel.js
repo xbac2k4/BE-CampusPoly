@@ -12,8 +12,9 @@ const reportModel = new Schema({
         ref: 'post', // Liên kết với bảng 'post'
         required: true
     },
-    report_reason: {
-        type: String,
+    report_type_id: {
+        type: Schema.Types.ObjectId, 
+        ref: 'reporttype', // Chắc chắn rằng tên này phải trùng với tên model đã đăng ký
         required: true
     },
     report_status_id: {

@@ -3,12 +3,12 @@ const HttpResponse = require("../utils/httpResponse");
 const Status = require('../models/statusModel')
 
 class ReportService {
-    addReport = async (reported_by_user_id, post_id, report_reason) => {
+    addReport = async (reported_by_user_id, post_id, report_type_id) => {
         try {
             const report = new Reports({
                 reported_by_user_id,
                 post_id,
-                report_reason,
+                report_type_id,
             });
             const savedReport = await report.save();
             return HttpResponse.success(savedReport, HttpResponse.getErrorMessages('success'));
@@ -20,7 +20,12 @@ class ReportService {
     
     getReportById = async (id) => {
         try {
-            const result = await Reports.findById(id).populate('reported_by_user_id', 'full_name').populate('post_id', '_id').populate('report_status_id', 'status_name').populate('resolved_by_user_id', 'full_name');
+            const result = await Reports.findById(id)
+                .populate('reported_by_user_id', 'full_name')  // Lấy full_name từ model User
+                .populate('post_id', '_id')  // Lấy _id từ model Post
+                .populate('report_status_id', 'status_name')  // Lấy status_name từ model Status
+                .populate('report_type_id', 'report_name'); // Đảm bảo tên model trong ref phải đúng
+    
             if (result) {
                 return HttpResponse.success(result, HttpResponse.getErrorMessages('success'));
             } else {
@@ -31,6 +36,8 @@ class ReportService {
             return HttpResponse.error(error);
         }
     }
+    
+    
 
     async updateReportStatus(id, report_status_id, resolved_by_user_id) {
         console.log(`Updating status for report ${id} to ${report_status_id}`);
@@ -56,7 +63,7 @@ class ReportService {
 
     getAllReport = async () => {
         try {            
-            const reports = await Reports.find().populate('reported_by_user_id', 'full_name').populate('post_id', '_id').populate('report_status_id', 'status_name');
+            const reports = await Reports.find().populate('reported_by_user_id', 'full_name').populate('post_id', '_id').populate('report_status_id', 'status_name').populate('report_type_id','report_name');
             
             return HttpResponse.success(reports, HttpResponse.getErrorMessages('success'));
         } catch (error) {
@@ -92,7 +99,7 @@ class ReportService {
                         select: 'full_name'  // Chỉ lấy trường full_name
                     }
                 })
-                // .populate('post_id', '_id')
+                .populate('report_type_id', 'report_name')
                 .populate('report_status_id', 'status_name');
                 // .populate('post_id', '_id.user_id.full_name');
             const total = await Reports.countDocuments();

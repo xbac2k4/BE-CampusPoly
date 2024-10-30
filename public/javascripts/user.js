@@ -162,6 +162,7 @@ function confirmDeleteBtn(userData) {
     if (user.user_status_id.status_name === 'Bị chặn') {
         document.getElementById('confirmDeleteModalLabel').innerText = 'BỎ CHẶN TÀI KHOẢN';
         document.getElementById('confirmDeleteModalBody').innerText = 'Bạn có chắc muốn bỏ chặn tài khoản này không? Hành động này không thể được hoàn tác.';
+        document.getElementById('confirmDeleteBtn').innerText = 'Bỏ chặn';
         blockUser = {
             user_status_id: {
                 _id: '67089cc2862f7badead53eb9',

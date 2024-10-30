@@ -18,8 +18,8 @@ class ReportController {
     // };
     addReport = async (req, res, next) => {
         try {        
-            const { reported_by_user_id, post_id, report_reason } = req.body;
-            const createdReport = await new ReportService().addReport(reported_by_user_id, post_id, report_reason);
+            const { reported_by_user_id, post_id, report_type_id } = req.body;
+            const createdReport = await new ReportService().addReport(reported_by_user_id, post_id, report_type_id);
             if (createdReport) {
                 return res.json(HttpResponse.result(createdReport));
             } else {
