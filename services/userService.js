@@ -5,6 +5,8 @@ const JWT = require('jsonwebtoken');
 const HttpResponse = require("../utils/httpResponse");
 const UtilsFunctions = require("../utils/utilsFunction");
 const dotenv = require('dotenv');
+const transporter = require("../config/common/mail");
+const nodemailer = require("nodemailer");
 dotenv.config();
 const SECRETKEY = process.env.SECRETKEY
 
@@ -30,26 +32,88 @@ class UserService {
             return HttpResponse.error(error);
         }
     }
+    // register = async (email, password, full_name, sex, role) => {
+    //     try {
+    //         const existing = await Users.findOne({
+    //             email
+    //         });
+    //         // console.log(existingShowtime);
+    //         if (existing) {
+    //             return HttpResponse.fail(HttpResponse.getErrorMessages('registerEmailExists'));
+    //         }
+    //         const passwordEncryption = await UtilsFunctions.passwordEncryption(password);
+    //         const newUser = new Users({
+    //             email,
+    //             password: password ?? passwordEncryption,
+    //             full_name,
+    //             sex,
+    //             role
+    //         });
+    //         const result = await newUser.save();
+    //         if (result) {
+    //             return HttpResponse.success(result, HttpResponse.getErrorMessages('registerSuccess'));
+    //         } else {
+    //             return HttpResponse.fail(HttpResponse.getErrorMessages('registerFail'));
+    //         }
+    //     } catch (error) {
+    //         console.log(error);
+    //         return HttpResponse.error(error);
+    //     }
+    // }
     register = async (email, password, full_name, sex, role) => {
         try {
-            const existing = await Users.findOne({
-                email
-            });
-            // console.log(existingShowtime);
+            // Kiểm tra xem email đã tồn tại chưa
+            const existing = await Users.findOne({ email });
             if (existing) {
                 return HttpResponse.fail(HttpResponse.getErrorMessages('registerEmailExists'));
             }
+
+            // Mã hóa mật khẩu
             const passwordEncryption = await UtilsFunctions.passwordEncryption(password);
+
+            // Tạo mã xác thực ngẫu nhiên
+            const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+            // Tạo người dùng mới
             const newUser = new Users({
                 email,
-                password: password ?? passwordEncryption,
+                password: passwordEncryption,
                 full_name,
                 sex,
-                role
+                role,
+                verificationCode, // Thêm mã xác thực vào cơ sở dữ liệu
+                isVerified: false  // Giả sử có thêm cờ xác thực tài khoản
             });
+
+            // Lưu người dùng vào cơ sở dữ liệu
             const result = await newUser.save();
+
             if (result) {
-                return HttpResponse.success(result, HttpResponse.getErrorMessages('registerSuccess'));
+                // Cấu hình nội dung email xác nhận
+                const mailOptions = {
+                    from: {
+                        name: 'CampusPoly',
+                        address: process.env.EMAIL
+                    },
+                    to: email,
+                    subject: 'Xác nhận đăng ký tài khoản',
+                    html: `
+                        <div style="white-space: pre-line;">
+                            Xin chào <strong>${full_name}</strong>,
+
+                            Cảm ơn bạn đã đăng ký tài khoản. Mã xác thực của bạn là: <strong>${verificationCode}</strong>.
+                            Vui lòng nhập mã này để kích hoạt tài khoản của bạn.
+
+                            Trân trọng!
+                        </div>
+                    `,
+                };
+
+                // Gửi email
+                await transporter.sendMail(mailOptions);
+
+                // Phản hồi thành công
+                return HttpResponse.success({result, verificationCode}, HttpResponse.getErrorMessages('registerSuccess'));
             } else {
                 return HttpResponse.fail(HttpResponse.getErrorMessages('registerFail'));
             }
@@ -57,7 +121,7 @@ class UserService {
             console.log(error);
             return HttpResponse.error(error);
         }
-    }
+    };
     getAllUser = async (req, res) => {
         try {
             const result = await Users.find().populate('user_status_id').populate('role');
@@ -101,23 +165,24 @@ class UserService {
             return HttpResponse.error(error);
         }
     }
-    putUser = async (id, email, password, full_name, sex, role, user_status_id, avatar, bio, last_login) => {
+    putUser = async (id, email, password, full_name, sex, role, user_status_id, avatar, bio, last_login, isVerified) => {
         try {
             const newUpdate = await Users.findById(id);
 
             let result = null;
             if (newUpdate) {
                 newUpdate.email = email ?? newUpdate.email,
-                newUpdate.password = password ?? newUpdate.password,
-                newUpdate.full_name = full_name ?? newUpdate.full_name,
-                newUpdate.sex = sex ?? newUpdate.sex,
-                newUpdate.role = role ?? newUpdate.role,
-                newUpdate.user_status_id = user_status_id ?? newUpdate.user_status_id,
-                newUpdate.avatar = avatar ?? newUpdate.avatar,
-                newUpdate.bio = bio ?? newUpdate.bio,
-                newUpdate.last_login = last_login ?? newUpdate.last_login,
+                    newUpdate.password = password ?? newUpdate.password,
+                    newUpdate.full_name = full_name ?? newUpdate.full_name,
+                    newUpdate.sex = sex ?? newUpdate.sex,
+                    newUpdate.role = role ?? newUpdate.role,
+                    newUpdate.user_status_id = user_status_id ?? newUpdate.user_status_id,
+                    newUpdate.avatar = avatar ?? newUpdate.avatar,
+                    newUpdate.bio = bio ?? newUpdate.bio,
+                    newUpdate.last_login = last_login ?? newUpdate.last_login,
+                    newUpdate.isVerified = isVerified?? newUpdate.isVerified;
 
-                result = await newUpdate.save();
+                    result = await newUpdate.save();
             }
             if (result) {
                 return HttpResponse.success(result, HttpResponse.getErrorMessages('success'));

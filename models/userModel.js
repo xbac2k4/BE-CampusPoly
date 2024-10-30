@@ -44,6 +44,9 @@ const userModel = new Schema({
         type: Date,
         default: Date.now()
     },
+    isVerified: {
+        type: Boolean,
+    }
 }, {
     timestamps: true // Kích hoạt tính năng tự động tạo createdAt và updatedAt
 });
