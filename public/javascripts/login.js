@@ -96,7 +96,7 @@
 
 // Ẩn hiện password
 const togglePassword = document.querySelector('#togglePassword');
-const passwordInput = document.querySelector('#passwordInput');
+const passwordInput = document.querySelector('#password');
 const toggleIcon = document.querySelector('#toggleIcon');
 
 togglePassword.addEventListener('click', function (e) {
@@ -168,7 +168,6 @@ loginForm.addEventListener('submit', async event => {
     buttonText.style.display = "none";
     spinner.style.display = "inline-block";
     buttonLogin.disabled = true;
-    console.log("1111111");
     loginProcessing();
 });
 
