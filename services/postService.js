@@ -19,8 +19,8 @@ class PostService {
                 post.like_count = likeData.length;
 
                 // Lấy số lượng comment cho bài viết
-                // const commentData = await Comment.find({ post_id: post._id });
-                // post.comment_count = commentData.length;
+                const commentData = await Comment.find({ post_id: post._id });
+                post.comment_count = commentData.length;
 
                 return post;
             }));

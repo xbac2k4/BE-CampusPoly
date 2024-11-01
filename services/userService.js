@@ -101,7 +101,7 @@ class UserService {
             //     users,
             //     totalPages
             // }
-            const usersWithFriends = await Promise.all(users.map(async (user) => {
+            const userData = await Promise.all(users.map(async (user) => {
                 // Tìm danh sách bạn bè cho từng người dùng
                 const friends = await Friend.find({ user_id: user._id })
                     .select('user_friend_id status_id')
@@ -110,14 +110,14 @@ class UserService {
                 return {
                     ...user.toObject(), // Chuyển đổi đối tượng mongoose thành đối tượng thuần
                     friends,
-                    totalPages // Thêm danh sách bạn bè vào đối tượng người dùng
+                     // Thêm danh sách bạn bè vào đối tượng người dùng
                 };
             }));
     
-            // console.log(usersWithFriends);
+            // console.log(userData);
             
-            if (usersWithFriends.length > 0) {
-                return HttpResponse.success(usersWithFriends, HttpResponse.getErrorMessages('success'));
+            if (userData.length > 0) {
+                return HttpResponse.success({userData, totalPages}, HttpResponse.getErrorMessages('success'));
             } else {
                 return HttpResponse.fail(HttpResponse.getErrorMessages('dataNotFound'));
             }

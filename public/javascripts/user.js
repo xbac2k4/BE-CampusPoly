@@ -18,11 +18,11 @@ const fetchDataForPage = async (page) => {
             throw new Error('Network response was not ok');
         }
         const data = await response.json();
-        // console.log(data);
+        console.log(data);
 
         // Cập nhật dữ liệu
         totalPages = data.data.totalPages; // Giả sử totalPages là thuộc tính của response
-        const users = data.data; // Lấy danh sách người dùng
+        const users = data.data.userData; // Lấy danh sách người dùng
         renderTable(users); // Gọi hàm renderTable để hiển thị dữ liệu
         renderPagination(); // Gọi hàm renderPagination để cập nhật phân trang
 
