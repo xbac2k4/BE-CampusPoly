@@ -1,4 +1,4 @@
-const DOMAIN = `http://localhost:3000/api/v1/`;
+const DOMAIN = window.APP_CONFIG.API_URL;
 
 // Fetch API
 const tbody = document.querySelector('tbody');
@@ -10,6 +10,7 @@ let totalPages;
 const itemsPerPage = 10; // Số lượng mục mỗi trang
 let userIdToDelete; // Biến để lưu ID của người dùng cần xóa
 let userID;
+
 
 const fetchDataForPage = async (page) => {
     try {
