@@ -157,7 +157,7 @@ class UserService {
         }
     };
     
-    putUser = async (id, email, password, full_name, sex, role, user_status_id, avatar, bio, last_login) => {
+    putUser = async (id, email, password, full_name, sex, role, user_status_id, avatar, bio, last_login, date_of_birth, background) => {
         try {
             const newUpdate = await Users.findById(id);
 
@@ -172,6 +172,8 @@ class UserService {
                 newUpdate.avatar = avatar ?? newUpdate.avatar,
                 newUpdate.bio = bio ?? newUpdate.bio,
                 newUpdate.last_login = last_login ?? newUpdate.last_login,
+                newUpdate.date_of_birth = date_of_birth?? newUpdate.date_of_birth,
+                newUpdate.background = background?? newUpdate.background,
 
                 result = await newUpdate.save();
             }

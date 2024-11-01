@@ -40,6 +40,14 @@ const userModel = new Schema({
         type: String,
         default: ""
     },
+    background: {
+        type: String,
+        default: ""
+    },
+    date_of_birth: {
+        type: Date,
+        default: null // Hoặc có thể để undefined
+    },
     last_login: {
         type: Date,
         default: Date.now()
