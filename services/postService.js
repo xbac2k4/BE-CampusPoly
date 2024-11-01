@@ -121,6 +121,32 @@ class PostService {
             return HttpResponse.error(error);
         }
     }
+    getPostByUserID = async (user_id) => {
+        try {
+            const data = await Post.find({
+                user_id
+            }).populate('user_id', 'full_name avatar').populate('group_id');
+            if (data) {
+                // Lấy số lượng like cho bài viết
+                const updatedPosts = await Promise.all(data.map(async (post) => {
+                    // Lấy số lượng like cho bài viết
+                    const likeData = await Like.find({ post_id: post._id });
+                    post.like_count = likeData.length;
+    
+                    // Lấy số lượng comment cho bài viết
+                    const commentData = await Comment.find({ post_id: post._id });
+                    post.comment_count = commentData.length;
+    
+                    return post;
+                }));
+                
+                return HttpResponse.success(updatedPosts, HttpResponse.getErrorMessages('getDataSucces'));
+            }
+        } catch (error) {
+            console.log(error);
+            return HttpResponse.error(error);
+        }
+    }
     addPost = async (user_id, group_id, title, content, post_type, imageArray) => {
         try {
             // Tạo bài viết mới

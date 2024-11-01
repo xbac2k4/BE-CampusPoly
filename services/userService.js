@@ -129,17 +129,34 @@ class UserService {
     }
     getUserByID = async (id) => {
         try {
-            const result = await Users.findById(id).populate('user_status_id').populate('role');
-            if (result) {
-                return HttpResponse.success(result, HttpResponse.getErrorMessages('success'));
-            } else {
+            // Tìm người dùng theo ID và populate các trường liên quan
+            const user = await Users.findById(id)
+                .populate('user_status_id')
+                .populate('role');
+    
+            if (!user) {
                 return HttpResponse.fail(HttpResponse.getErrorMessages('dataNotFound'));
             }
+    
+            // Tìm danh sách bạn bè của người dùng
+            const friends = await Friend.find({ user_id: user._id })
+                .select('user_friend_id status_id')
+                .populate('status_id', 'status_name -_id') // Chỉ lấy các trường cần thiết
+                .populate('user_friend_id', 'full_name avatar');
+    
+            // Tạo đối tượng người dùng kèm danh sách bạn bè
+            const userData = {
+                ...user.toObject(), // Chuyển đổi đối tượng mongoose thành đối tượng thuần
+                friends, // Thêm danh sách bạn bè vào đối tượng người dùng
+            };
+    
+            return HttpResponse.success(userData, HttpResponse.getErrorMessages('success'));
         } catch (error) {
             console.log(error);
             return HttpResponse.error(error);
         }
-    }
+    };
+    
     putUser = async (id, email, password, full_name, sex, role, user_status_id, avatar, bio, last_login) => {
         try {
             const newUpdate = await Users.findById(id);
