@@ -5,6 +5,7 @@ const JWT = require('jsonwebtoken');
 const HttpResponse = require("../utils/httpResponse");
 const UtilsFunctions = require("../utils/utilsFunction");
 const dotenv = require('dotenv');
+const Friend = require("../models/friendModel");
 dotenv.config();
 const SECRETKEY = process.env.SECRETKEY
 
@@ -60,9 +61,26 @@ class UserService {
     }
     getAllUser = async (req, res) => {
         try {
-            const result = await Users.find().populate('user_status_id').populate('role');
-            if (result) {
-                return HttpResponse.success(result, HttpResponse.getErrorMessages('success'));
+            // Tìm tất cả người dùng và đính kèm thông tin về trạng thái và vai trò
+            const users = await Users.find().populate('user_status_id', '-_id').populate('role');
+            
+            // Tạo một mảng để chứa thông tin người dùng và bạn bè của họ
+            const usersWithFriends = await Promise.all(users.map(async (user) => {
+                // Tìm danh sách bạn bè cho từng người dùng
+                const friends = await Friend.find({ user_id: user._id })
+                    .select('user_friend_id status_id')
+                    .populate('status_id', 'status_name -_id') // Chỉ lấy các trường cần thiết
+                    .populate('user_friend_id', 'full_name avatar');
+                return {
+                    ...user.toObject(), // Chuyển đổi đối tượng mongoose thành đối tượng thuần
+                    friends // Thêm danh sách bạn bè vào đối tượng người dùng
+                };
+            }));
+    
+            // console.log(usersWithFriends);
+            
+            if (usersWithFriends.length > 0) {
+                return HttpResponse.success(usersWithFriends, HttpResponse.getErrorMessages('success'));
             } else {
                 return HttpResponse.fail(HttpResponse.getErrorMessages('dataNotFound'));
             }
@@ -70,19 +88,40 @@ class UserService {
             console.log(error);
             return HttpResponse.error(error);
         }
-    }
+    };
+    
     getUserByPage = async (page, limit) => {
         try {
             const skip = (parseInt(page) - 1) * parseInt(limit);
-            const users = await Users.find().skip(skip).limit(parseInt(limit)).populate('user_status_id').populate('role');
+            const users = await Users.find().skip(skip).limit(parseInt(limit)).populate('user_status_id', '-_id').populate('role');
             const total = await Users.countDocuments();
             const totalPages = Math.ceil(total / parseInt(limit));
             // console.log('data: ', data);
-            const data = {
-                users,
-                totalPages
+            // const data = {
+            //     users,
+            //     totalPages
+            // }
+            const usersWithFriends = await Promise.all(users.map(async (user) => {
+                // Tìm danh sách bạn bè cho từng người dùng
+                const friends = await Friend.find({ user_id: user._id })
+                    .select('user_friend_id status_id')
+                    .populate('status_id', 'status_name -_id') // Chỉ lấy các trường cần thiết
+                    .populate('user_friend_id', 'full_name avatar');
+                return {
+                    ...user.toObject(), // Chuyển đổi đối tượng mongoose thành đối tượng thuần
+                    friends,
+                    totalPages // Thêm danh sách bạn bè vào đối tượng người dùng
+                };
+            }));
+    
+            // console.log(usersWithFriends);
+            
+            if (usersWithFriends.length > 0) {
+                return HttpResponse.success(usersWithFriends, HttpResponse.getErrorMessages('success'));
+            } else {
+                return HttpResponse.fail(HttpResponse.getErrorMessages('dataNotFound'));
             }
-            return HttpResponse.success(data, HttpResponse.getErrorMessages('getDataSucces'));
+            // return HttpResponse.success(data, HttpResponse.getErrorMessages('getDataSucces'));
         } catch (error) {
             console.log(error);
             return HttpResponse.error(error);
