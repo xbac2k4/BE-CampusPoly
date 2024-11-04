@@ -9,6 +9,7 @@ const reportRoutes = require('./reportRoutes');
 const likeRoutes = require('./likeRoutes');
 const commentRoutes = require('./commentRoutes');
 const roleRoutes = require('./roleRoutes');
+const groupRoutes = require('./groupRoutes');
 const friendRoutes = require('./friendRoutes');
 const reporttypeRoutes = require('./reportTypeRoutes');
 //====================== Sử dụng ==========================//
@@ -19,6 +20,7 @@ router.use('/reports', reportRoutes);
 router.use('/likes', likeRoutes);
 router.use('/comments', commentRoutes);
 router.use('/roles', roleRoutes);
+router.use('/groups', groupRoutes);
 router.use('/friends', friendRoutes);
 router.use('/reporttypes', reporttypeRoutes);
 

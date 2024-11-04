@@ -41,7 +41,7 @@
                     </div>
                 </div>
             </div>
-            <div id="wrapper-comment" class="wrapper-comment d-flex p-3 flex-column"></div>
+            <div id="wrapper-comment" class="wrapper-comment d-flex flex-column"></div>
         </div>
     </main>
     <script>
@@ -62,12 +62,15 @@
                 // Hiển thị hình ảnh nếu có
                 const images = data.data.postData.image; // Giả sử hình ảnh nằm trong thuộc tính 'image'
                 const wrapperImagePost = document.getElementById('wrapper-image-post');
+                console.log(images);
                 if (images.length > 0) {
                     images.forEach(imageUrl => {
                         const imgElement = document.createElement('img');
+                        imgElement.style.height = '200px';
+                        imgElement.style.objectFit = 'cover';
                         imgElement.style.marginRight = '10px';
                         imgElement.src = imageUrl; // Gán URL của hình ảnh
-                        imgElement.alt = 'Hình ảnh bài viết'; // Gán thuộc tính alt
+                        //imgElement.alt = 'Hình ảnh bài viết'; // Gán thuộc tính alt
                         wrapperImagePost.appendChild(imgElement); // Thêm vào wrapper
                     });
                 } else {
@@ -76,6 +79,7 @@
 
                 // Hiển thị bình luận nếu có
                 const comments = data.data.commentData; // Giả sử comment nằm trong 'commentData'
+                console.log(comments);
                 const wrapperComment = document.getElementById('wrapper-comment');
                 if (comments.length > 0) {
                     comments.forEach(comment => {
@@ -90,6 +94,9 @@
                         `;
                         wrapperComment.innerHTML += commentHTML; // Thêm từng bình luận vào phần tử
                     });
+                } else {
+                    wrapperComment.style.padding = '0px'; 
+                    wrapperComment.style.display = 'none'; // Ẩn nếu không có ảnh
                 }
                 // Hiện container sau khi đã fetch xong
                 document.getElementById('post-container').classList.remove('hidden');
