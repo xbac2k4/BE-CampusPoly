@@ -8,6 +8,7 @@ const postRoutes = require('./postRoutes');
 const likeRoutes = require('./likeRoutes');
 const commentRoutes = require('./commentRoutes');
 const roleRoutes = require('./roleRoutes');
+const friendRoutes = require('./friendRoutes');
 //====================== Sử dụng ==========================//
 //Routes
 router.use('/users', userRoutes);
@@ -15,5 +16,6 @@ router.use('/posts', postRoutes);
 router.use('/likes', likeRoutes);
 router.use('/comments', commentRoutes);
 router.use('/roles', roleRoutes);
+router.use('/friends', friendRoutes);
 
 module.exports = router;
