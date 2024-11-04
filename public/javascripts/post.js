@@ -1,4 +1,4 @@
-const DOMAIN = `http://localhost:3000/api/v1/`;
+const DOMAIN = window.APP_CONFIG.API_URL;
 
 // fetch api
 const tbody = document.getElementById('wrapper-posts');
