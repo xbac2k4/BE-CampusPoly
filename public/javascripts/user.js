@@ -1,4 +1,4 @@
-const DOMAIN = `http://localhost:3000/api/v1/`;
+const DOMAIN = window.APP_CONFIG.API_URL;
 
 // Fetch API
 const tbody = document.querySelector('tbody');
@@ -11,6 +11,7 @@ const itemsPerPage = 10; // Số lượng mục mỗi trang
 let userIdToDelete; // Biến để lưu ID của người dùng cần xóa
 let userID;
 
+
 const fetchDataForPage = async (page) => {
     try {
         const response = await fetch(`${DOMAIN}users/get-user-by-page?page=${page}&limit=${itemsPerPage}`);
@@ -18,10 +19,11 @@ const fetchDataForPage = async (page) => {
             throw new Error('Network response was not ok');
         }
         const data = await response.json();
+        console.log(data);
 
         // Cập nhật dữ liệu
         totalPages = data.data.totalPages; // Giả sử totalPages là thuộc tính của response
-        const users = data.data.users; // Lấy danh sách người dùng
+        const users = data.data.userData; // Lấy danh sách người dùng
         renderTable(users); // Gọi hàm renderTable để hiển thị dữ liệu
         renderPagination(); // Gọi hàm renderPagination để cập nhật phân trang
 
@@ -47,7 +49,7 @@ const renderTable = (users) => {
         const rolesHtml = user.role.map(role => {
             return `<div class="badge border-0 bg-secondary p-2 text-light mr-1"><span>${role.role_name}</span></div>`;
         }).join(''); // Nối các vai trò lại thành một chuỗi
-
+        // console.log(user);
         return /*html*/ `
             <tr data-user='${JSON.stringify(user)}'>
                 <td>${stt}</td>
@@ -55,6 +57,9 @@ const renderTable = (users) => {
                 <td>${rolesHtml}</td>
                 <td>${user.full_name}</td>
                 <td>${user.sex === 'male' ? 'Nam' : 'Nữ'}</td>
+                <td>
+                    <button onclick="showFriendList(this.closest('tr').dataset.user)" class="badge border-0 bg-secondary p-2 text-light mr-1"><span>${user.friends.length}</span></button>
+                </td>
                 <td>${formatDateTime(user.createdAt)}</td>
                 <td>
                     <div class="badge border-0 text-light ${user.user_status_id.status_name === 'Đang hoạt động' ? 'badge-success' : user.user_status_id.status_name === 'Không hoạt động' ? 'bg-danger' : 'bg-warning'} p-2">
@@ -158,6 +163,8 @@ document.getElementById("next").onclick = function () {
 let blockUser;
 function confirmDeleteBtn(userData) {
     const user = JSON.parse(userData); // Phân tích cú pháp JSON
+    console.log(user);
+
     userID = user._id;
     if (user.user_status_id.status_name === 'Bị chặn') {
         document.getElementById('confirmDeleteModalLabel').innerText = 'BỎ CHẶN TÀI KHOẢN';
@@ -169,6 +176,9 @@ function confirmDeleteBtn(userData) {
             }
         }
     } else {
+        document.getElementById('confirmDeleteModalLabel').innerText = 'CHẶN TÀI KHOẢN';
+        document.getElementById('confirmDeleteModalBody').innerText = 'Bạn có chắc muốn chặn tài khoản này không? Hành động này không thể được hoàn tác.';
+        document.getElementById('confirmDeleteBtn').innerText = 'Chặn';
         blockUser = {
             user_status_id: {
                 _id: '67089ccb862f7badead53eba',
@@ -191,6 +201,7 @@ closeButtons.forEach(button => {
         // Đóng modal
         $('#confirmDeleteModal').modal('hide'); // Ẩn modal xác nhận
         $('#roleUserModal').modal('hide'); // Ẩn modal chỉnh sửa
+        $('#friendListModal').modal('hide'); //
     });
 });
 
@@ -198,6 +209,7 @@ closeButtons.forEach(button => {
 document.querySelector('.btn-secondary').addEventListener('click', function () {
     // Đóng modal
     $('#confirmDeleteModal').modal('hide'); // Ẩn modal
+    $('#friendListModal').modal('hide'); //
 });
 
 // Hàm xóa người dùng
@@ -337,5 +349,47 @@ async function loadRoles() {
 // Gọi hàm loadRoles() khi modal hiển thị
 document.getElementById('roleUserModal').addEventListener('show.bs.modal', loadRoles);
 
+const showFriendList = (userData) => {
+    const user = JSON.parse(userData); // Phân tích cú pháp JSON
+    const friendList = user.friends;
 
+    // Tạo modal
+    const modal = document.createElement('div');
+    
+    modal.classList.add('modal', 'fade');
+    modal.setAttribute('id', 'friendListModal');
+    modal.setAttribute('tabindex', '-1');
+    modal.setAttribute('role', 'dialog');
+    modal.style.height = '100vh'; // Cố định chiều cao của modal
+    modal.style.overflow = 'hidden'
+    friendList.map(friend =>                            
+        console.log(friend.user_friend_id.avatar)
+    )
+
+    modal.innerHTML = `
+        <div class="modal-dialog modal-dialog-centered" role="document" style="height: 100%;">
+            <div class="modal-content" style="height: 80%;">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="friendListModalLabel">Danh sách bạn bè</h5>
+                </div>
+                <div class="modal-body" style="overflow-y: auto; height: calc(100% - 56px);"> <!-- Chiều cao body chiếm phần còn lại -->
+                    <ul id="friendList" class="list-group">
+                        ${friendList.length > 0 ? friendList.map(friend =>                            
+                            `<li class="list-group-item d-flex align-items-center">
+                                <img src="${friend.user_friend_id.avatar}" alt="${friend.user_friend_id.full_name}" class="rounded-circle" width="40" height="40" style="margin-right: 10px;">
+                                ${friend.user_friend_id.full_name}
+                            </li>`
+                        ).join('') : '<li class="list-group-item">Không có bạn bè nào.</li>'}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Thêm modal vào body
+    document.body.appendChild(modal);
+
+    // // Hiển thị modal
+    $(modal).modal('show');
+};
 
