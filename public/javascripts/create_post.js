@@ -115,7 +115,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 const postResult = await postResponse.json();
                 if (postResult.status === 200) {
-                    alert("Đăng bài thành công!");
+                    // Mở dialog thành công
+                    const successDialog = document.getElementById('successDialog');
+                    const viewPostButton = document.getElementById('viewPostButton');
+                    const closeDialogButton = document.getElementById('closeDialogButton');
+
+                    if (successDialog) {
+                        successDialog.style.display = 'flex'; // Hiển thị dialog
+                    }
+
+                    // Thêm sự kiện cho nút "Xem bài viết"
+                    if (viewPostButton) {
+                        viewPostButton.addEventListener("click", () => {
+                            // Mở bài viết vừa đăng
+                            window.location.href = `/post-detail/${postResult.data._id}`;
+                        });
+                    }
+
+                    // Thêm sự kiện cho nút "Đóng" để đóng dialog
+                    if (closeDialogButton) {
+                        closeDialogButton.addEventListener("click", () => {
+                            successDialog.style.display = 'none'; // Đóng dialog
+                        });
+                    }
+
                     // Làm trắng các trường nhập liệu
                     if (postTextarea) postTextarea.value = ""; // Xóa nội dung sau khi đăng
                     if (postTitleInput) postTitleInput.value = ""; // Xóa tiêu đề sau khi đăng
@@ -137,3 +160,4 @@ document.addEventListener("DOMContentLoaded", () => {
         fileInput.addEventListener('change', handleFileSelect);
     }
 });
+

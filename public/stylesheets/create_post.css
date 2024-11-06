@@ -39,6 +39,7 @@ main {
     align-items: center;
     justify-content: center;
 }
+
 .custom-button-icon {
     color: #c82333;
     border-radius: 50%;
@@ -77,4 +78,52 @@ button.custom-button:last-child {
 
 button.custom-button:last-child:hover {
     background-color: #c82333;
+}
+
+/* Cấu hình cho dialog */
+#successDialog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Mờ nền */
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+#successDialog .modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    width: 400px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#successDialog .modal-content h3 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+
+#successDialog .modal-content p {
+    font-size: 1rem;
+    margin-bottom: 20px;
+}
+
+#successDialog .modal-content button {
+    margin-top: 10px;
+    background-color: #e75b2a; /* Màu nền nút */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+#successDialog .modal-content button:hover {
+    background-color: #d54c1e;
 }
