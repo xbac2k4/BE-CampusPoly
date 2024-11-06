@@ -53,6 +53,9 @@ const loginProcessing = async () => {
             // console.log("123");
             // Gọi hàm xử lý sự kiện khi trang được tải
             handleLoginSuccess(result.data);
+            const userId = result.data._id;
+            // Lưu userId vào localStorage
+            localStorage.setItem('userId', userId);
             window.location.href = '/';
         } else {
             // Hiển thị thông báo lỗi

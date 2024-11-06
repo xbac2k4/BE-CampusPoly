@@ -1,0 +1,80 @@
+/* Ngăn chặn các nút và icon thay đổi kích thước khi bấm */
+button, .bi {
+    transform: none !important;
+    transition: none !important;
+}
+
+/* Xóa hiệu ứng khi nút bấm (khi bấm vào sẽ không thay đổi trạng thái) */
+button:active, .bi:active {
+    transform: none !important;
+    outline: none !important;
+}
+
+/* Đảm bảo các icon giữ nguyên kích thước */
+.bi {
+    font-size: 1.5rem; /* Bạn có thể thay đổi kích thước tùy ý */
+}
+
+/* Cấu hình cho phần main */
+main {
+    flex: 1;
+    max-height: 100vh;
+    overflow: auto;
+    background-color: white;
+    padding: 5vh 15vh 10vh 10vh;
+}
+
+/* Chỉnh sửa cho nút tùy chỉnh */
+.custom-button {
+    background-color: #007bff;
+    color: white;
+    padding: 12px 12px; /* Chỉ padding đều cho nút hình vuông */
+    border-radius: 30%;
+    border: none; /* Loại bỏ viền */
+    cursor: pointer;
+    text-align: center;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.custom-button-icon {
+    color: #c82333;
+    border-radius: 50%;
+    border: none; /* Loại bỏ viền */
+    cursor: pointer;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.custom-button:hover {
+    background-color: #0056b3;
+}
+
+/* Nút chọn ảnh (biểu tượng hình ảnh) */
+button.custom-button i {
+    margin: 0; /* Loại bỏ margin để giữ icon ở vị trí chính giữa */
+}
+
+/* Đảm bảo nút giữ nguyên trạng thái khi nhấn */
+button:active {
+    outline: none;
+}
+
+/* Cấu hình cho card */
+.card {
+    border-radius: 15px;
+    background-color: #e9f1ff;
+}
+
+/* Nút Đăng với màu đỏ */
+button.custom-button:last-child {
+    background-color: #dc3545;
+}
+
+button.custom-button:last-child:hover {
+    background-color: #c82333;
+}

@@ -63,7 +63,7 @@ class GroupController {
         }
     }
     deleteGroup = async (req, res, next) => {
-        const { owner_id } = req.body;
+        const { owner_id } = req.query;
         const { id } = req.params;
         // console.log(owner_id, id);
 
@@ -79,6 +79,20 @@ class GroupController {
             return res.json(HttpResponse.error(error));
         }
     }
+    getGroupsByPage = async (req, res) => {
+        const { page, limit } = req.query;
+        try {
+            const data = await new GroupService().getGroupsByPage(page, limit);
+            if (data) {
+                return res.json(HttpResponse.result(data));
+            } else {
+                return res.json(HttpResponse.fail(HttpResponse.getErrorMessages('dataNotFound')));
+            }
+        } catch (error) {
+            console.log(error);
+            return res.json(HttpResponse.error(error));
+        }
+    };
 }
 
 module.exports = GroupController;

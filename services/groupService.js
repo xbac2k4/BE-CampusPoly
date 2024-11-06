@@ -87,6 +87,36 @@ class GroupService {
             return HttpResponse.error(error);
         }
     }
+    getGroupsByPage = async (page, limit) => {
+        try {
+            const skip = (parseInt(page) - 1) * parseInt(limit);
+            const groups = await Group.find()
+                .skip(skip)
+                .limit(parseInt(limit))
+                .populate('_id', 'group_name')
+                .populate({
+                    path: 'owner_id',
+                    populate: {
+                        path: '_id',
+                        select: 'full_name'  // Chỉ lấy trường full_name
+                    }
+                })
+                .populate('members')
+                .populate('description');
+                // .populate('post_id', '_id.user_id.full_name');
+            const total = await Group.countDocuments();
+            const totalPages = Math.ceil(total / parseInt(limit));
+    
+            if (!groups) {
+                throw new Error('No reports found');
+            }
+    
+            return HttpResponse.success({ groups, totalPages }, 'Groups fetched successfully');
+        } catch (error) {
+            console.error("Error fetching reports by page:", error);
+            return HttpResponse.error(error);
+        }
+    }
 }
 
 module.exports = GroupService;

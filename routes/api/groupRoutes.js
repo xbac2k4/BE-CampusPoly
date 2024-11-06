@@ -8,5 +8,7 @@ router.get('/get-group-by-id/:id', new GroupController().getGroupByID);
 router.post('/create-group', new GroupController().createGroup);
 router.put('/update-group/:id', upload.single('image'), new GroupController().updateGroup);
 router.delete('/delete-group/:id', new GroupController().deleteGroup);
+router.get('/get-group-by-page', new GroupController().getGroupsByPage);
+
 
 module.exports = router;

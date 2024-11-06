@@ -34,7 +34,7 @@ table.table {
 
 /* Căn giữa nội dung trong các ô tiêu đề */
 table.table th {
-    text-align: center;
+    text-align: left;
     vertical-align: middle; /* Đảm bảo nội dung căn giữa theo chiều dọc */
     padding: 8px;
     border-color: #e9e9e9;
@@ -43,7 +43,7 @@ table.table th {
 }
 
 table.table td {
-    text-align: center;
+    text-align: left;
     vertical-align: middle; /* Đảm bảo nội dung căn giữa theo chiều dọc */
     padding: 8px;
     /* text-align: left; */
