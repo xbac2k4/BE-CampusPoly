@@ -122,7 +122,7 @@ class UserService {
             console.log(error);
             return HttpResponse.error(error);
         }
-    };
+    }
     getAllUser = async (req, res) => {
         try {
             // Tìm tất cả người dùng và đính kèm thông tin về trạng thái và vai trò
@@ -152,7 +152,7 @@ class UserService {
             console.log(error);
             return HttpResponse.error(error);
         }
-    };
+    }
     
     getUserByPage = async (page, limit) => {
         try {
@@ -219,6 +219,7 @@ class UserService {
             console.log(error);
             return HttpResponse.error(error);
         } 
+    }
     putUser = async (id, email, password, full_name, sex, role, user_status_id, avatar, bio, last_login, date_of_birth, isVerified) => {
         try {
             const newUpdate = await Users.findById(id);
