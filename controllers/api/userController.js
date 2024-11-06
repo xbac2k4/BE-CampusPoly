@@ -86,11 +86,11 @@ class UserController {
     putUser = async (req, res) => {
         const file = req.file;
         const { id } = req.params;
-        const { email, password, full_name, sex, role, user_status_id, bio, last_login, date_of_birth, background } = req.body;
+        const { email, password, full_name, sex, role, user_status_id, bio, last_login, date_of_birth, isVerified } = req.body;
         let avatar = file?.filename === undefined ? '' : `${req.protocol}://${req.get("host")}/uploads/${file?.filename}`;
 
         try {
-            const data = await new UserService().putUser(id, email, password, full_name, sex, role, user_status_id, avatar, bio, last_login, date_of_birth, background);
+            const data = await new UserService().putUser(id, email, password, full_name, sex, role, user_status_id, avatar, bio, last_login, date_of_birth, isVerified);
             if (data) {
                 return res.json(HttpResponse.result(data));
             } else {
