@@ -3,15 +3,14 @@
     color: gray !important;
 }
 
-.image {
-    height: 200px;
-}
-
 .wrapper-post,
 .wrapper-comment {
     background-color: #E4EBF6;
     border-radius: 2vh;
     overflow: hidden;
+}
+.wrapper-comment {
+    padding: 2vh;
 }
 .container {
     height: 100vh; /* Đặt chiều cao cố định */
@@ -19,9 +18,9 @@
     padding-bottom: 10vh;
 }
 #wrapper-image-post {
-    display: none; /* Sử dụng flexbox để sắp xếp hình ảnh theo hàng */
     overflow-x: auto; /* Cho phép cuộn theo chiều ngang */
     max-width: 68vw; /* Đảm bảo chiều rộng không vượt quá chiều rộng của phần tử cha */
+    height: auto;
     padding: 5px;
 }
 .hidden {

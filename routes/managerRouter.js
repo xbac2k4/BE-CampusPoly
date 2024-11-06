@@ -92,5 +92,16 @@ managerRouter.get('/', (req, res) => {
         admin, // Gửi ID người dùng tới view nếu cần
     });
 });
+managerRouter.get('/create_post', (req, res) => {
+    const admin = req.session.admin;
+    console.log(admin);
+
+    const drivers = [];
+    const content = renderPartial('create_post'); 
+    res.render('main', {
+        title: 'Tạo bài viết',
+        body: content,
+    });
+});
 
 module.exports = managerRouter;
