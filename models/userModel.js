@@ -46,7 +46,7 @@ const userModel = new Schema({
         default: ""
     },
     birthday: {
-        type: String,
+        type: Date,
         default: null // Hoặc có thể để undefined
     },
     last_login: {

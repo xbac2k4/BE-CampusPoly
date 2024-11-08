@@ -220,7 +220,7 @@ class UserService {
             return HttpResponse.error(error);
         }
     }
-    putUser = async (id, email, password, full_name, sex, role, user_status_id, avatar, bio, last_login, date_of_birth, isVerified) => {
+    putUser = async (id, email, password, full_name, sex, role, user_status_id, avatar, bio, last_login, birthday, isVerified) => {
         try {
             const newUpdate = await Users.findById(id);
 
@@ -235,7 +235,7 @@ class UserService {
                     newUpdate.avatar = avatar ?? newUpdate.avatar,
                     newUpdate.bio = bio ?? newUpdate.bio,
                     newUpdate.last_login = last_login ?? newUpdate.last_login,
-                    newUpdate.date_of_birth = date_of_birth ?? newUpdate.date_of_birth,
+                    newUpdate.birthday = birthday ?? newUpdate.birthday,
                     newUpdate.isVerified = isVerified ?? newUpdate.isVerified;
 
                 result = await newUpdate.save();
