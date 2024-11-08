@@ -1,29 +1,39 @@
 const { getUsers, addUser, removeUser } = require("../manager/userManager");
 
 const initializeAdminSocket = (io, socket) => {
+  // Xử lý sự kiện khi admin đăng nhập
   socket.on('admin_login', (adminInfo) => {
-    // console.log(socket.id, adminInfo);
-    console.log(`${adminInfo.full_name} đã đăng nhập`);
-    addUser(socket.id, adminInfo);
+    const { _id: userId } = adminInfo; // Giả sử `_id` là định danh duy nhất của admin
+
+    // Lưu hoặc cập nhật thông tin người dùng với userId và Socket ID mới
+    addUser(userId, socket.id, adminInfo);
+    console.log(`${adminInfo.full_name} đã đăng nhập với socket ID: ${socket.id}`);
+
+    // Cập nhật danh sách admin cho tất cả client
     updateAdminList(io);
-    // notifyOnlineCustomers(io, driverInfo);
-  });
-  socket.on('admin_connect_from_manage_user_page_to_get_admins', () => {
-    const users = getUsers();
-    socket.emit('send_user_list_from_admin_socket_to_manage_user_page', users);
   });
 
-  socket.on('admin_connect_from_manage_customer_page_to_get_customers', () => {
-    // const customers = getCustomers();
-    // socket.emit('send_customer_list_from_admin_socket_to_manage_customer_page', customers);
-  });
+  // Cập nhật danh sách admin khi kết nối hoặc ngắt kết nối
   socket.on('disconnect', () => {
-    removeUser(socket.id);
+    console.log(`Socket ID ${socket.id} đã ngắt kết nối`);
+
+    // Tìm userId tương ứng với socketId đã ngắt kết nối và xóa người dùng đó
+    const users = getUsers();
+    const disconnectedUser = users.find(user => user.socketId === socket.id);
+
+    if (disconnectedUser) {
+      removeUser(disconnectedUser._id); // Xóa người dùng dựa trên userId
+      console.log(`${disconnectedUser.full_name} đã bị xóa khỏi danh sách online.`);
+    }
+
+    // Cập nhật danh sách admin sau khi ngắt kết nối
     updateAdminList(io);
   });
+
+  // Hàm để cập nhật danh sách admin cho tất cả client
   const updateAdminList = (io) => {
-    const customers = getUsers();
-    io.emit('update_admin_list', customers);
+    const users = getUsers();
+    io.emit('update_user_list', users);
   };
 };
 

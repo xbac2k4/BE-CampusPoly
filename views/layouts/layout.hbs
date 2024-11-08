@@ -1,10 +1,56 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>{{title}}</title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
-  </head>
-  <body>
-    {{{body}}}
-  </body>
+
+<head>
+  <title>{{title}}</title>
+  <link rel='stylesheet' href='/stylesheets/style.css' />
+</head>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  // Khởi tạo socket ở đây để duy trì kết nối cho mọi trang
+  const socket = io({
+    reconnection: true,
+    reconnectionAttempts: 10,
+    reconnectionDelay: 5000,
+  });
+
+  // Lắng nghe sự kiện kết nối thành công
+  socket.on('connect', () => {
+    console.log('Connected to server with socket ID:', socket.id);
+
+    // Kiểm tra trạng thái đăng nhập (có thể kiểm tra session hoặc local storage)
+    const isLoggedIn = sessionStorage.getItem('isLoggedIn');
+    const userId = sessionStorage.getItem('userId');
+    console.log('User:', userId);
+    if (isLoggedIn === 'true' && userId) {
+      // Gửi sự kiện cập nhật socket ID lên server
+      socket.emit('update_socket', { _id: userId });
+      // console.log(`Updated socket ID for user ID: ${userId}`);
+      // socket.emit('get_user_online');
+    }
+  });
+
+  // Lắng nghe sự kiện ngắt kết nối
+  socket.on('disconnect', (reason) => {
+    console.log('Disconnected from server due to:', reason);
+  });
+
+  // Lắng nghe các thông báo chung
+  socket.on('user-login-notification', (notification) => {
+    alert(notification.message);
+  });
+
+  // Lắng nghe thông báo từ server khi có yêu cầu đăng nhập từ người dùng
+  socket.on('admin-notification', (notification) => {
+    alert(notification.message);
+  });
+
+  // Đảm bảo rằng kết nối socket này luôn tồn tại cho mọi trang
+  window.socket = socket;
+</script>
+
+<body>
+  {{{body}}}
+</body>
+
 </html>

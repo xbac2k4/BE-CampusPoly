@@ -74,42 +74,93 @@ const server = http.createServer(app);
 const io = socketIo(server);
 
 app.set('io', io);
-// Socket.IO server-side
-const { initializeAdminSocket } = require('./sockets/adminSocket.js');
-//
-// A simple in-memory object to store online users
-const onlineUsers = {};
+// Import custom socket logic
+const { addUser, removeUser, getUsers, updateUserSocket, getUserSocketId } = require('./manager/userManager');
+const { initializeUserSocket } = require('./sockets/userSocket.js');
 
+// Hàm chỉ để lấy ra _id và socketId và in ra log
+const logOnlineUsers = () => {
+  const users = getUsers();
+  const userLog = users.map(user => ({ userId: user._id, socketId: user.socketId }));
+  console.log('Current online users:', userLog);
+};
+
+// Handle connection event
 io.on('connection', (socket) => {
-    // When a user logs in or connects, store their status
-    // socket.on('user-login', (user) => {
-    //     // Store the user as online
-    //     onlineUsers[user.id] = { user, socketId: socket.id };
-    //     console.log(`${user.full_name} is now online`);
+  // console.log('A user connected:', socket.id);
+  // console.log('Danh sách online khi admin chưa đăng nhập:');
+  logOnlineUsers(); // Log danh sách người dùng hiện tại
+  initializeUserSocket(io, socket);
+  // Handle admin login
+  socket.on('admin_login', (userData) => {
+    const { _id: userId } = userData;
 
-    //     // Notify other users that this user is online
-    //     socket.broadcast.emit('user-online', { userId: user.id });
-    //     socket.emit('redirect', '/post');  // Emit an event to trigger redirect on the client side
-    // });
+    // Thêm hoặc cập nhật người dùng dựa trên `_id` và socketId
+    addUser(userId, socket.id, userData);
+    console.log(`${userData.full_name} is now online with socket ID: ${socket.id} and user ID: ${userId}`);
 
-    initializeAdminSocket(io, socket);
-
-    // When the user disconnects
-    socket.on('disconnect', () => {
-        // Find the user by their socket ID and mark them as offline
-        for (const userId in onlineUsers) {
-            if (onlineUsers[userId].socketId === socket.id) {
-                console.log(`${onlineUsers[userId].user.full_name} has gone offline`);
-                
-                // Notify others that the user is now offline
-                socket.broadcast.emit('user-offline', { userId });
-
-                // Remove the user from the online users list
-                delete onlineUsers[userId];
-                break;
-            }
-        }
+    // Notify all clients about the user login
+    io.emit('user-login-notification', {
+      message: `${userData.full_name} has logged in.`,
+      userId,
     });
+
+    // Log danh sách người dùng hiện tại
+    console.log('Danh sách online sau khi admin đã đăng nhập:');
+    logOnlineUsers();
+  });
+
+  // mobile socket đăng nhập
+  // addUser
+
+  // Handle cập nhật socket khi người dùng đã đăng nhập
+  socket.on('update_socket', (userData) => {
+    const { _id: userId } = userData;
+
+    // Chỉ cập nhật socketId mới cho userId đã tồn tại
+    updateUserSocket(userId, socket.id);
+    console.log(`Updated socket ID for user with user ID: ${userId} to new socket ID: ${socket.id}`);
+    console.log('Danh sách online sau khi admin đã đăng nhập và reload lại trang:');
+    logOnlineUsers();
+  });
+
+  // Handle user disconnect
+  socket.on('disconnect', () => {
+    // Tìm userId dựa trên socketId
+    const users = getUsers();
+    let disconnectedUserId = null;
+
+    // Kiểm tra xem socketId nào tương ứng với user
+    for (const user of users) {
+      if (user.socketId === socket.id) {
+        disconnectedUserId = user._id;
+        break;
+      }
+    }
+
+    if (disconnectedUserId) {
+      // Đặt timeout để chờ xem người dùng có kết nối lại không
+      setTimeout(() => {
+        // Sử dụng getUser từ userManager để kiểm tra thông tin người dùng
+        const user = getUsers().find(user => user._id === disconnectedUserId);
+        // Nếu socketId của người dùng không phải là socket ID mới, nghĩa là họ đã thực sự ngắt kết nối
+        if (!user || user.socketId === socket.id) {
+          // Xóa người dùng khỏi danh sách dựa trên _id
+          removeUser(disconnectedUserId);
+          console.log(`User with userId ${disconnectedUserId} has disconnected.`);
+
+          // Notify all clients about the user disconnect
+          io.emit('user-offline', {
+            userId: disconnectedUserId,
+          });
+
+          // Log danh sách người dùng hiện tại
+          console.log('Current users online:');
+          logOnlineUsers();
+        }
+      }, 2000);
+    }
+  });
 });
 server.listen(3000, () => {
   console.log('Server is running on port 3000');

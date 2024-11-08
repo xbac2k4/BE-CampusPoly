@@ -26,7 +26,6 @@ const buttonText = document.getElementById("buttonText");
 const spinner = document.getElementById("spinner");
 const errorMessage = document.getElementById("errorMessage");
 const buttonLogin = document.getElementById('buttonLogin');
-const socket = io();
 
 // Kết nối đến Socket.IO
 const loginProcessing = async () => {
@@ -35,7 +34,7 @@ const loginProcessing = async () => {
             email: email.value,
             password: password.value
         };
-        
+
         const response = await fetch(`${DOMAIN}users/login`, {
             method: "POST",
             headers: {
@@ -46,24 +45,19 @@ const loginProcessing = async () => {
         const result = await response.json();
 
         errorMessage.style.display = "none";
-    
+
         if (result.status === 200) {
-            // Redirect to dashboard or main page
             // console.log(result.data);
-            // console.log("123");
-            // Gọi hàm xử lý sự kiện khi trang được tải
-            handleLoginSuccess(result.data);
-            const userId = result.data._id;
-            // Lưu userId vào localStorage
-            localStorage.setItem('userId', userId);
-            window.location.href = '/';
+            const isAdmin = result.data.role.some(role => role.role_name === 'Admin');
+            if (isAdmin) {
+                handleLoginSuccess(result.data);
+                window.location.href = '/';
+            } else {
+                displayErrorMessage(`You are not admin!`);
+            }
         } else {
             // Hiển thị thông báo lỗi
-            errorMessage.innerText = `*${result.message}`;
-            errorMessage.style.display = "inline-block";
-            spinner.style.display = "none";
-            buttonText.style.display = "inline-block";
-            buttonLogin.disabled = false;
+            displayErrorMessage(result.message);
         }
     } catch (error) {
         console.error('Error:', error);
@@ -79,6 +73,24 @@ loginForm.addEventListener('submit', async event => {
 });
 
 function handleLoginSuccess(data) {
-    // Gửi yêu cầu để nhận thông tin của khách hàng từ máy chủ, lưu lại danh sách customer đang online
-    socket.emit('admin_login', data);
+    // Sử dụng socket từ layout tổng để bắn tín hiệu đăng nhập
+    if (window.socket) {
+        window.socket.emit('admin_login', data);
+        console.log("Admin login event sent to server.");
+    } else {
+        console.error("Socket is not initialized.");
+    }
+    // console.log(data);
+
+    // Lưu thông tin đăng nhập vào sessionStorage
+    sessionStorage.setItem('userId', data._id);
+    sessionStorage.setItem('isLoggedIn', 'true');
+}
+
+function displayErrorMessage(message) {
+    errorMessage.innerText = `*${message}`;
+    errorMessage.style.display = "inline-block";
+    spinner.style.display = "none";
+    buttonText.style.display = "inline-block";
+    buttonLogin.disabled = false;
 }

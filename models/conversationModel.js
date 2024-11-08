@@ -2,12 +2,13 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const conversationModel = new Schema({
-    type: { 
-        type: String, 
-        required: true 
+    is_group: {
+        type: Boolean,
+        required: true,
+        default: false
     },
-    members: [{ 
-        type: Schema.Types.ObjectId, 
+    members: [{
+        type: Schema.Types.ObjectId,
         ref: 'user',
         default: []
     }],

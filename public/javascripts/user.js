@@ -10,7 +10,7 @@ let totalPages;
 const itemsPerPage = 10; // Số lượng mục mỗi trang
 let userIdToDelete; // Biến để lưu ID của người dùng cần xóa
 let userID;
-
+let listUserOnline = [];
 
 const fetchDataForPage = async (page) => {
     try {
@@ -19,7 +19,7 @@ const fetchDataForPage = async (page) => {
             throw new Error('Network response was not ok');
         }
         const data = await response.json();
-        console.log(data);
+        // console.log(data);
 
         // Cập nhật dữ liệu
         totalPages = data.data.totalPages; // Giả sử totalPages là thuộc tính của response
@@ -42,6 +42,25 @@ const fetchDataForPage = async (page) => {
     }
 };
 
+const handleUserOnline = async () => {
+    return new Promise((resolve, reject) => {
+        if (window.socket) {
+            // Đảm bảo chỉ lắng nghe một lần
+            if (!window.socket._hasListener) {
+                window.socket.on('update_user_list', (users) => {
+                    listUserOnline = users;
+                    // console.log('Updated user list:', listUserOnline);
+                    resolve();  // Khi cập nhật xong, gọi resolve để tiếp tục
+                });
+                window.socket._hasListener = true; // Đánh dấu đã lắng nghe
+            }
+        } else {
+            console.error("Socket is not initialized.");
+            reject("Socket is not initialized.");
+        }
+    });
+};
+
 // Hàm để hiển thị dữ liệu trong bảng
 const renderTable = (users) => {
     const html = users.map((user, index) => {
@@ -50,6 +69,21 @@ const renderTable = (users) => {
             return `<div class="badge border-0 bg-secondary p-2 text-light mr-1"><span>${role.role_name}</span></div>`;
         }).join(''); // Nối các vai trò lại thành một chuỗi
         // console.log(user);
+        // console.log(listUserOnline);
+        const isUserOnline = listUserOnline.some(userOnline => userOnline._id === user._id);
+        let statusClass = '';
+        let statusText = '';
+
+        if (user.user_status_id.status_name === 'Bị chặn') {
+            statusClass = 'bg-warning'; // Chặn => màu đỏ
+            statusText = 'Bị chặn';
+        } else if (isUserOnline) {
+            statusClass = 'badge-success'; // Nếu có trong listUserOnline => hoạt động
+            statusText = 'Đang hoạt động';
+        } else {
+            statusClass = 'bg-danger'; // Nếu không có trong listUserOnline => không hoạt động
+            statusText = 'Không hoạt động';
+        }
         return /*html*/ `
             <tr data-user='${JSON.stringify(user)}'>
                 <td>${stt}</td>
@@ -62,8 +96,8 @@ const renderTable = (users) => {
                 </td>
                 <td>${formatDateTime(user.createdAt)}</td>
                 <td>
-                    <div class="badge border-0 text-light ${user.user_status_id.status_name === 'Đang hoạt động' ? 'badge-success' : user.user_status_id.status_name === 'Không hoạt động' ? 'bg-danger' : 'bg-warning'} p-2">
-                        <span>${user.user_status_id.status_name}</span>
+                    <div class="badge border-0 text-light ${statusClass} p-2">
+                        <span>${statusText}</span>
                     </div>
                 </td>
                 <td>${user.bio}</td>
@@ -82,7 +116,9 @@ const renderTable = (users) => {
 // <a href="#" class="delete" title="Delete" data-toggle="tooltip" onclick="confirmDeleteBtn('${user._id}')">
 // <i class="material-icons">&#xE872;</i></a>
 // Khi trang tải lần đầu, gọi API để hiển thị 10 người dùng đầu tiên
-window.addEventListener('DOMContentLoaded', (event) => {
+window.addEventListener('DOMContentLoaded', async (event) => {
+    window.socket.emit('get_user_online');
+    await handleUserOnline();
     fetchDataForPage(currentPage);
 });
 
@@ -355,14 +391,14 @@ const showFriendList = (userData) => {
 
     // Tạo modal
     const modal = document.createElement('div');
-    
+
     modal.classList.add('modal', 'fade');
     modal.setAttribute('id', 'friendListModal');
     modal.setAttribute('tabindex', '-1');
     modal.setAttribute('role', 'dialog');
     modal.style.height = '100vh'; // Cố định chiều cao của modal
     modal.style.overflow = 'hidden'
-    friendList.map(friend =>                            
+    friendList.map(friend =>
         console.log(friend.user_friend_id.avatar)
     )
 
@@ -374,12 +410,12 @@ const showFriendList = (userData) => {
                 </div>
                 <div class="modal-body" style="overflow-y: auto; height: calc(100% - 56px);"> <!-- Chiều cao body chiếm phần còn lại -->
                     <ul id="friendList" class="list-group">
-                        ${friendList.length > 0 ? friendList.map(friend =>                            
-                            `<li class="list-group-item d-flex align-items-center">
+                        ${friendList.length > 0 ? friendList.map(friend =>
+        `<li class="list-group-item d-flex align-items-center">
                                 <img src="${friend.user_friend_id.avatar}" alt="${friend.user_friend_id.full_name}" class="rounded-circle" width="40" height="40" style="margin-right: 10px;">
                                 ${friend.user_friend_id.full_name}
                             </li>`
-                        ).join('') : '<li class="list-group-item">Không có bạn bè nào.</li>'}
+    ).join('') : '<li class="list-group-item">Không có bạn bè nào.</li>'}
                     </ul>
                 </div>
             </div>
