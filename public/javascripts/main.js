@@ -1,6 +1,10 @@
 const buttonLogout = document.getElementById('buttonLogout');
 
 buttonLogout.addEventListener('click', async () => {
+    // Xóa các biến đã lưu trong sessionStorage
+    sessionStorage.removeItem('userId');
+    sessionStorage.removeItem('isLoggedIn');
+
     // Đẩy trạng thái mới vào lịch sử trình duyệt, không lưu lại trang trước đó   
     history.pushState(null, null, window.location.href = '/login');
     window.addEventListener('load', () => {
@@ -17,15 +21,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const navItems = document.querySelectorAll('aside .nav-item');
 
     // Lấy đường dẫn hiện tại
-    const currentPath = window.location.pathname;   
+    const currentPath = window.location.pathname;
     console.log(currentPath);
-    
+
 
     // Duyệt qua từng nav-item
     navItems.forEach(item => {
         const path = item.getAttribute('data-path'); // Lấy đường dẫn từ data-path
         console.log(path);
-        
+
 
         // Nếu đường dẫn hiện tại trùng với đường dẫn của nav-item, thêm class 'active'
         if (currentPath === path) {

@@ -12,6 +12,7 @@ const roleRoutes = require('./roleRoutes');
 const groupRoutes = require('./groupRoutes');
 const friendRoutes = require('./friendRoutes');
 const reporttypeRoutes = require('./reportTypeRoutes');
+const conversationRoutes = require('./conversationRoutes');
 //====================== Sử dụng ==========================//
 //Routes
 router.use('/users', userRoutes);
@@ -23,5 +24,6 @@ router.use('/roles', roleRoutes);
 router.use('/groups', groupRoutes);
 router.use('/friends', friendRoutes);
 router.use('/reporttypes', reporttypeRoutes);
+router.use('/conversations', conversationRoutes);
 
 module.exports = router;
