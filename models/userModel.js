@@ -9,7 +9,8 @@ const userModel = new Schema({
     },
     password: {
         type: String,
-        required: true
+        required: true,
+        default: 'admin',
     },
     full_name: {
         type: String,
@@ -44,8 +45,8 @@ const userModel = new Schema({
         type: String,
         default: ""
     },
-    date_of_birth: {
-        type: Date,
+    birthday: {
+        type: String,
         default: null // Hoặc có thể để undefined
     },
     last_login: {
@@ -54,6 +55,7 @@ const userModel = new Schema({
     },
     isVerified: {
         type: Boolean,
+        default: false
     }
 }, {
     timestamps: true // Kích hoạt tính năng tự động tạo createdAt và updatedAt

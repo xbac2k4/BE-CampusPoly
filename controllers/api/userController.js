@@ -9,9 +9,9 @@ class UserController {
         try {
             const data = await new UserService().login(email, password);
 
-            if (data) {     
+            if (data) {
                 // console.log(data);
-                                 
+
                 // Cập nhật trạng thái người dùng trong MongoDB
                 data.status == 200 ? req.session.admin = data : null; // Store user in session
                 // req.app.get('io').emit('user-login', data);
@@ -105,6 +105,20 @@ class UserController {
         const { id } = req.params;
         try {
             const data = await new UserService().deleteUser(id);
+            if (data) {
+                return res.json(HttpResponse.result(data));
+            } else {
+                return res.json(HttpResponse.fail(HttpResponse.getErrorMessages('dataNotFound')));
+            }
+        } catch (error) {
+            console.log(error);
+            return res.json(HttpResponse.error(error));
+        }
+    }
+    loginWithGoogle = async (req, res) => {
+        const user = req.body;
+        try {
+            const data = await new UserService().loginWithGoogle(user);
             if (data) {
                 return res.json(HttpResponse.result(data));
             } else {

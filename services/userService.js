@@ -114,7 +114,7 @@ class UserService {
                 await transporter.sendMail(mailOptions);
 
                 // Phản hồi thành công
-                return HttpResponse.success({result, verificationCode}, HttpResponse.getErrorMessages('registerSuccess'));
+                return HttpResponse.success({ result, verificationCode }, HttpResponse.getErrorMessages('registerSuccess'));
             } else {
                 return HttpResponse.fail(HttpResponse.getErrorMessages('registerFail'));
             }
@@ -127,7 +127,7 @@ class UserService {
         try {
             // Tìm tất cả người dùng và đính kèm thông tin về trạng thái và vai trò
             const users = await Users.find().populate('user_status_id', '-_id').populate('role');
-            
+
             // Tạo một mảng để chứa thông tin người dùng và bạn bè của họ
             const usersWithFriends = await Promise.all(users.map(async (user) => {
                 // Tìm danh sách bạn bè cho từng người dùng
@@ -140,9 +140,9 @@ class UserService {
                     friends // Thêm danh sách bạn bè vào đối tượng người dùng
                 };
             }));
-    
+
             // console.log(usersWithFriends);
-            
+
             if (usersWithFriends.length > 0) {
                 return HttpResponse.success(usersWithFriends, HttpResponse.getErrorMessages('success'));
             } else {
@@ -153,7 +153,7 @@ class UserService {
             return HttpResponse.error(error);
         }
     }
-    
+
     getUserByPage = async (page, limit) => {
         try {
             const skip = (parseInt(page) - 1) * parseInt(limit);
@@ -174,14 +174,14 @@ class UserService {
                 return {
                     ...user.toObject(), // Chuyển đổi đối tượng mongoose thành đối tượng thuần
                     friends,
-                     // Thêm danh sách bạn bè vào đối tượng người dùng
+                    // Thêm danh sách bạn bè vào đối tượng người dùng
                 };
             }));
-    
+
             // console.log(userData);
-            
+
             if (userData.length > 0) {
-                return HttpResponse.success({userData, totalPages}, HttpResponse.getErrorMessages('success'));
+                return HttpResponse.success({ userData, totalPages }, HttpResponse.getErrorMessages('success'));
             } else {
                 return HttpResponse.fail(HttpResponse.getErrorMessages('dataNotFound'));
             }
@@ -197,28 +197,28 @@ class UserService {
             const user = await Users.findById(id)
                 .populate('user_status_id')
                 .populate('role');
-    
+
             if (!user) {
                 return HttpResponse.fail(HttpResponse.getErrorMessages('dataNotFound'));
             }
-    
+
             // Tìm danh sách bạn bè của người dùng
             const friends = await Friend.find({ user_id: user._id })
                 .select('user_friend_id status_id')
                 .populate('status_id', 'status_name -_id') // Chỉ lấy các trường cần thiết
                 .populate('user_friend_id', 'full_name avatar');
-    
+
             // Tạo đối tượng người dùng kèm danh sách bạn bè
             const userData = {
                 ...user.toObject(), // Chuyển đổi đối tượng mongoose thành đối tượng thuần
                 friends, // Thêm danh sách bạn bè vào đối tượng người dùng
             };
-    
+
             return HttpResponse.success(userData, HttpResponse.getErrorMessages('success'));
         } catch (error) {
             console.log(error);
             return HttpResponse.error(error);
-        } 
+        }
     }
     putUser = async (id, email, password, full_name, sex, role, user_status_id, avatar, bio, last_login, date_of_birth, isVerified) => {
         try {
@@ -227,16 +227,16 @@ class UserService {
             let result = null;
             if (newUpdate) {
                 newUpdate.email = email ?? newUpdate.email,
-                newUpdate.password = password ?? newUpdate.password,
-                newUpdate.full_name = full_name ?? newUpdate.full_name,
-                newUpdate.sex = sex ?? newUpdate.sex,
-                newUpdate.role = role ?? newUpdate.role,
-                newUpdate.user_status_id = user_status_id ?? newUpdate.user_status_id,
-                newUpdate.avatar = avatar ?? newUpdate.avatar,
-                newUpdate.bio = bio ?? newUpdate.bio,
-                newUpdate.last_login = last_login ?? newUpdate.last_login,
-                newUpdate.date_of_birth = date_of_birth?? newUpdate.date_of_birth,
-                newUpdate.isVerified = isVerified?? newUpdate.isVerified;
+                    newUpdate.password = password ?? newUpdate.password,
+                    newUpdate.full_name = full_name ?? newUpdate.full_name,
+                    newUpdate.sex = sex ?? newUpdate.sex,
+                    newUpdate.role = role ?? newUpdate.role,
+                    newUpdate.user_status_id = user_status_id ?? newUpdate.user_status_id,
+                    newUpdate.avatar = avatar ?? newUpdate.avatar,
+                    newUpdate.bio = bio ?? newUpdate.bio,
+                    newUpdate.last_login = last_login ?? newUpdate.last_login,
+                    newUpdate.date_of_birth = date_of_birth ?? newUpdate.date_of_birth,
+                    newUpdate.isVerified = isVerified ?? newUpdate.isVerified;
 
                 result = await newUpdate.save();
             }
@@ -254,6 +254,85 @@ class UserService {
     deleteUser = async (id) => {
         try {
             const result = await Users.findByIdAndDelete(id);
+            if (result) {
+                return HttpResponse.success(result, HttpResponse.getErrorMessages('success'));
+            } else {
+                return HttpResponse.fail(HttpResponse.getErrorMessages('dataNotFound'));
+            }
+        } catch (error) {
+            console.log(error);
+            return HttpResponse.error(error);
+        }
+    }
+    loginWithGoogle = async (user) => {
+        try {
+            // Gọi Google People API để lấy thêm thông tin ngày sinh và giới tính
+            const response = await fetch('https://people.googleapis.com/v1/people/me?personFields=genders,birthdays', {
+                headers: {
+                    Authorization: `Bearer ${user.accessToken}`, // Gửi accessToken
+                },
+            });
+            const data = await response.json();
+            const birthday = data.birthdays;
+            const gender = data.genders;
+            // console.log('Ngày sinh:', birthday[0].date);
+            // console.log('Giới tính:', gender[0].value);
+            // console.log('Access Token:', user.accessToken);
+
+            // Trả về thông tin người dùng
+            const { accessToken, ...userWithoutToken } = user;
+
+            let result;
+
+            const existingUser = await Users.findOne({ email: user.email });
+            if (existingUser) {
+                result = await Users.findByIdAndUpdate(existingUser._id, {
+                    ...userWithoutToken,
+                    birthday: `${birthday[0].date.day}-${birthday[0].date.month}-${birthday[0].date.year}`,
+                    sex: gender[0].value,
+                    last_login: Date.now()
+                })
+            } else {
+                const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+                const newUser = new Users({
+                    ...userWithoutToken,
+                    birthday: `${birthday[0].date.day}-${birthday[0].date.month}-${birthday[0].date.year}`,
+                    sex: gender[0].value,
+                });
+
+                result = await newUser.save();
+                // if (result) {
+                //     const mailOptions = {
+                //         from: {
+                //             name: 'CampusPoly',
+                //             address: process.env.EMAIL
+                //         },
+                //         to: user.email,
+                //         subject: 'Xác nhận đăng ký tài khoản',
+                //         html: `
+                //             <div style="white-space: pre-line;">
+                //                 Xin chào <strong>${user.full_name}</strong>,
+
+                //                 Cảm ơn bạn đã đăng ký tài khoản. Mã xác thực của bạn là: <strong>${verificationCode}</strong>.
+                //                 Vui lòng nhập mã này để kích hoạt tài khoản của bạn.
+
+                //                 Trân trọng!
+                //             </div>
+                //         `,
+                //     };
+
+                //     // Gửi email
+                //     await transporter.sendMail(mailOptions);
+
+                //     result = {
+                //         user: result,
+                //         verificationCode
+                //     }
+                // }
+            }
+            // console.log(result);
+
             if (result) {
                 return HttpResponse.success(result, HttpResponse.getErrorMessages('success'));
             } else {

@@ -10,5 +10,6 @@ router.get('/get-user-by-page', new UserController().getUserByPage);
 router.get('/get-user-by-id/:id', new UserController().getUserByID);
 router.put('/update-user/:id', Upload.single('avatar'), new UserController().putUser);
 router.delete('/delete-user/:id', new UserController().deleteUser);
+router.post('/login-with-google', new UserController().loginWithGoogle);
 
 module.exports = router;
