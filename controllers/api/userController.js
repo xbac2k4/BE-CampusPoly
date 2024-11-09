@@ -87,7 +87,7 @@ class UserController {
         const file = req.file;
         const { id } = req.params;
         const { email, password, full_name, sex, role, user_status_id, bio, last_login, birthday, isVerified } = req.body;
-        let avatar = file?.filename === undefined ? '' : `${req.protocol}://${req.get("host")}/uploads/${file?.filename}`;
+        let avatar = file?.filename === undefined ? undefined : `${req.protocol}://${req.get("host")}/uploads/${file?.filename}`;        
 
         try {
             const data = await new UserService().putUser(id, email, password, full_name, sex, role, user_status_id, avatar, bio, last_login, birthday, isVerified);

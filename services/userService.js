@@ -232,7 +232,7 @@ class UserService {
                     newUpdate.sex = sex ?? newUpdate.sex,
                     newUpdate.role = role ?? newUpdate.role,
                     newUpdate.user_status_id = user_status_id ?? newUpdate.user_status_id,
-                    newUpdate.avatar = avatar ?? newUpdate.avatar,
+                    newUpdate.avatar = !avatar ? newUpdate.avatar : avatar,
                     newUpdate.bio = bio ?? newUpdate.bio,
                     newUpdate.last_login = last_login ?? newUpdate.last_login,
                     newUpdate.birthday = birthday ?? newUpdate.birthday,
@@ -287,9 +287,10 @@ class UserService {
             const existingUser = await Users.findOne({ email: user.email });
             if (existingUser) {
                 result = await Users.findByIdAndUpdate(existingUser._id, {
-                    ...userWithoutToken,
-                    birthday: `${birthday[0].date.day}-${birthday[0].date.month}-${birthday[0].date.year}`,
-                    sex: gender[0].value,
+                    // ...userWithoutToken,
+                    // birthday: `${birthday[0].date.day}-${birthday[0].date.month}-${birthday[0].date.year}`,
+                    // sex: gender[0].value,
+                    ...existingUser,
                     last_login: Date.now()
                 })
             } else {
@@ -297,7 +298,7 @@ class UserService {
 
                 const newUser = new Users({
                     ...userWithoutToken,
-                    birthday: `${birthday[0].date.day}-${birthday[0].date.month}-${birthday[0].date.year}`,
+                    birthday: UtilsFunctions.convertStringToISODate(`${birthday[0].date.day}-${birthday[0].date.month}-${birthday[0].date.year}`),
                     sex: gender[0].value,
                 });
 
