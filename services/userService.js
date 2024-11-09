@@ -265,6 +265,14 @@ class UserService {
         }
     }
     loginWithGoogle = async (user) => {
+        function stringToISODate(dateString) {
+            const [day, month, year] = dateString.split('-').map(Number);
+            const date = new Date(Date.UTC(year, month - 1, day)); // Sử dụng Date.UTC để tạo đối tượng Date ở UTC
+            return date.toISOString();
+        }
+        
+        // const isoDate = stringToISODate("24-1-2001");
+        // console.log(isoDate); // Kết quả: 2001-01-24T00:00:00.000Z
         try {
             // Gọi Google People API để lấy thêm thông tin ngày sinh và giới tính
             const response = await fetch('https://people.googleapis.com/v1/people/me?personFields=genders,birthdays', {
@@ -288,7 +296,7 @@ class UserService {
             if (existingUser) {
                 result = await Users.findByIdAndUpdate(existingUser._id, {
                     ...userWithoutToken,
-                    birthday: `${birthday[0].date.day}-${birthday[0].date.month}-${birthday[0].date.year}`,
+                    birthday: stringToISODate(`${birthday[0].date.day}-${birthday[0].date.month}-${birthday[0].date.year}`),
                     sex: gender[0].value,
                     last_login: Date.now()
                 })
@@ -297,7 +305,7 @@ class UserService {
 
                 const newUser = new Users({
                     ...userWithoutToken,
-                    birthday: `${birthday[0].date.day}-${birthday[0].date.month}-${birthday[0].date.year}`,
+                    birthday: stringToISODate(`${birthday[0].date.day}-${birthday[0].date.month}-${birthday[0].date.year}`),
                     sex: gender[0].value,
                 });
 
