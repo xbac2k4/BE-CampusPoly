@@ -37,7 +37,6 @@ class ConversationService {
                             user_id: member.user_id._id,
                             full_name: member.user_id.full_name,
                             avatar: member.user_id.avatar,
-                            role: member.role,
                             joined_at: member.joined_at,
                         })),
                     };

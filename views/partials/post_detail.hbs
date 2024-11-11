@@ -55,7 +55,7 @@
                 document.getElementById('name-user-up').textContent = data.data.postData.user_id.full_name;
                 document.getElementById('time-up').textContent = timeAgo(data.data.postData.createdAt);
                 document.getElementById('post-content').textContent = data.data.postData.content;
-                document.getElementById('post-avatar').src = data.data.postData.user_id.avatar === "" ? "https://placehold.co/50x50" : data.data.postData.user_id.avatar;
+                document.getElementById('post-avatar').src = data.data.postData.user_id.avatar === "" ? "https://placehold.co/50x50" : data.data.postData.user_id.avatar.replace("10.0.2.2", "localhost");
                 document.getElementById('like-count').textContent = data.data.postData.like_count;
                 document.getElementById('comment-count').textContent = data.data.postData.comment_count;
                 // Hiển thị like và comment
@@ -69,7 +69,7 @@
                         imgElement.style.height = '200px';
                         imgElement.style.objectFit = 'cover';
                         imgElement.style.marginRight = '10px';
-                        imgElement.src = imageUrl; // Gán URL của hình ảnh
+                        imgElement.src = imageUrl.replaceAll("10.0.2.2", "localhost"); // Gán URL của hình ảnh
                         //imgElement.alt = 'Hình ảnh bài viết'; // Gán thuộc tính alt
                         wrapperImagePost.appendChild(imgElement); // Thêm vào wrapper
                     });
@@ -85,7 +85,7 @@
                     comments.forEach(comment => {
                         const commentHTML = `
                             <div class="d-flex mb-2">
-                                <img src="${comment.user_id_comment.avatar === "" ? "https://placehold.co/50x50" : comment.user_id_comment.avatar}" id="user-avatar" alt="" width="40" height="40" class="rounded-circle mr-3">
+                                <img src="${comment.user_id_comment.avatar === "" ? "https://placehold.co/50x50" : comment.user_id_comment.avatar.replace("10.0.2.2", "localhost")}" id="user-avatar" alt="" width="40" height="40" class="rounded-circle mr-3">
                                 <div class="comment-content rounded p-2 d-flex flex-column">
                                     <span id="user-name">${comment.user_id_comment.full_name}</span>
                                     <span id="comment-content">${comment.comment_content}</span>
@@ -95,7 +95,7 @@
                         wrapperComment.innerHTML += commentHTML; // Thêm từng bình luận vào phần tử
                     });
                 } else {
-                    wrapperComment.style.padding = '0px'; 
+                    wrapperComment.style.padding = '0px';
                     wrapperComment.style.display = 'none'; // Ẩn nếu không có ảnh
                 }
                 // Hiện container sau khi đã fetch xong

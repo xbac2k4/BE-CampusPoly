@@ -220,7 +220,7 @@ class UserService {
             return HttpResponse.error(error);
         }
     }
-    putUser = async (id, email, password, full_name, sex, role, user_status_id, avatar, bio, last_login, birthday, isVerified) => {
+    putUser = async (id, email, password, full_name, sex, role, user_status_id, avatar, background, bio, last_login, birthday, isVerified) => {
         try {
             const newUpdate = await Users.findById(id);
 
@@ -233,6 +233,7 @@ class UserService {
                     newUpdate.role = role ?? newUpdate.role,
                     newUpdate.user_status_id = user_status_id ?? newUpdate.user_status_id,
                     newUpdate.avatar = !avatar ? newUpdate.avatar : avatar,
+                    newUpdate.background = !background ? newUpdate.background : background,
                     newUpdate.bio = bio ?? newUpdate.bio,
                     newUpdate.last_login = last_login ?? newUpdate.last_login,
                     newUpdate.birthday = birthday ?? newUpdate.birthday,
@@ -270,7 +271,7 @@ class UserService {
             const date = new Date(Date.UTC(year, month - 1, day)); // Sử dụng Date.UTC để tạo đối tượng Date ở UTC
             return date.toISOString();
         }
-        
+
         // const isoDate = stringToISODate("24-1-2001");
         // console.log(isoDate); // Kết quả: 2001-01-24T00:00:00.000Z
         try {

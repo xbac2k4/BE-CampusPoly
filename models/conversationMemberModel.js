@@ -5,7 +5,6 @@ const ConversationMemberModel = new Schema({
     conversation_id: { type: mongoose.Schema.Types.ObjectId, ref: "conversation" },
     user_id: { type: mongoose.Schema.Types.ObjectId, ref: "user" },
     joined_at: { type: Date, default: Date.now },
-    role: { type: String, enum: ["Admin", "Member"], default: "Member" },
 }, {
     timestamps: true // Kích hoạt tính năng tự động tạo createdAt và updatedAt
 });
