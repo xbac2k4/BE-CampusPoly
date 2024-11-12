@@ -265,15 +265,89 @@ class UserService {
             return HttpResponse.error(error);
         }
     }
-    loginWithGoogle = async (user) => {
-        function stringToISODate(dateString) {
-            const [day, month, year] = dateString.split('-').map(Number);
-            const date = new Date(Date.UTC(year, month - 1, day)); // Sử dụng Date.UTC để tạo đối tượng Date ở UTC
-            return date.toISOString();
-        }
+    // loginWithGoogle = async (user) => {
+    //     try {
+    //         // Gọi Google People API để lấy thêm thông tin ngày sinh và giới tính
+    //         const response = await fetch('https://people.googleapis.com/v1/people/me?personFields=genders,birthdays', {
+    //             headers: {
+    //                 Authorization: `Bearer ${user.accessToken}`, // Gửi accessToken
+    //             },
+    //         });
+    //         const data = await response.json();
+    //         const birthday = await data.birthdays;
+    //         const gender = await data.genders;
+    //         console.log(user);
 
-        // const isoDate = stringToISODate("24-1-2001");
-        // console.log(isoDate); // Kết quả: 2001-01-24T00:00:00.000Z
+    //         console.log('Ngày sinh:', birthday[0].date);
+    //         console.log('Giới tính:', gender[0].value);
+    //         console.log('Access Token:', user.accessToken);
+
+    //         // Trả về thông tin người dùng
+    //         const { accessToken, ...userWithoutToken } = user;
+
+    //         let result;
+
+    //         const existingUser = await Users.findOne({ email: user.email });
+    //         if (existingUser) {
+    //             result = await Users.findByIdAndUpdate(existingUser._id, {
+    //                 // ...userWithoutToken,
+    //                 // birthday: `${birthday[0].date.day}-${birthday[0].date.month}-${birthday[0].date.year}`,
+    //                 // sex: gender[0].value,
+    //                 ...existingUser,
+    //                 last_login: Date.now()
+    //             })
+    //         } else {
+    //             const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    //             const newUser = new Users({
+    //                 ...userWithoutToken,
+    //                 birthday: UtilsFunctions.convertStringToISODate(`${birthday[0].date.day}-${birthday[0].date.month}-${birthday[0].date.year}`),
+    //                 sex: gender[0].value,
+    //             });
+
+    //             result = await newUser.save();
+    //             // if (result) {
+    //             //     const mailOptions = {
+    //             //         from: {
+    //             //             name: 'CampusPoly',
+    //             //             address: process.env.EMAIL
+    //             //         },
+    //             //         to: user.email,
+    //             //         subject: 'Xác nhận đăng ký tài khoản',
+    //             //         html: `
+    //             //             <div style="white-space: pre-line;">
+    //             //                 Xin chào <strong>${user.full_name}</strong>,
+
+    //             //                 Cảm ơn bạn đã đăng ký tài khoản. Mã xác thực của bạn là: <strong>${verificationCode}</strong>.
+    //             //                 Vui lòng nhập mã này để kích hoạt tài khoản của bạn.
+
+    //             //                 Trân trọng!
+    //             //             </div>
+    //             //         `,
+    //             //     };
+
+    //             //     // Gửi email
+    //             //     await transporter.sendMail(mailOptions);
+
+    //             //     result = {
+    //             //         user: result,
+    //             //         verificationCode
+    //             //     }
+    //             // }
+    //         }
+    //         // console.log(result);
+
+    //         if (result) {
+    //             return HttpResponse.success(result, HttpResponse.getErrorMessages('success'));
+    //         } else {
+    //             return HttpResponse.fail(HttpResponse.getErrorMessages('dataNotFound'));
+    //         }
+    //     } catch (error) {
+    //         console.log(error);
+    //         return HttpResponse.error(error);
+    //     }
+    // }
+    loginWithGoogle = async (user) => {
         try {
             // Gọi Google People API để lấy thêm thông tin ngày sinh và giới tính
             const response = await fetch('https://people.googleapis.com/v1/people/me?personFields=genders,birthdays', {
@@ -282,66 +356,44 @@ class UserService {
                 },
             });
             const data = await response.json();
-            const birthday = data.birthdays;
-            const gender = data.genders;
-            // console.log('Ngày sinh:', birthday[0].date);
-            // console.log('Giới tính:', gender[0].value);
-            // console.log('Access Token:', user.accessToken);
+            const birthdayData = data.birthdays;
+            const genderData = data.genders;
+            console.log(data);
 
-            // Trả về thông tin người dùng
+            // Kiểm tra và lấy ngày sinh
+            let birthday;
+            if (birthdayData && birthdayData[0] && birthdayData[0].date) {
+                const { day, month, year } = birthdayData[0].date;
+                birthday = new Date(year, month - 1, day); // Tháng - 1 vì Date của JS bắt đầu từ 0
+            }
+
+            const gender = genderData && genderData[0] && genderData[0].value !== 'unspecified' ? genderData[0].value : 'other';
+
+            console.log('Ngày sinh:', birthday);
+            console.log('Giới tính:', gender);
+            console.log('Access Token:', user.accessToken);
+
             const { accessToken, ...userWithoutToken } = user;
-
             let result;
 
+            // Kiểm tra nếu người dùng đã tồn tại
             const existingUser = await Users.findOne({ email: user.email });
             if (existingUser) {
                 result = await Users.findByIdAndUpdate(existingUser._id, {
-                    // ...userWithoutToken,
-                    // birthday: `${birthday[0].date.day}-${birthday[0].date.month}-${birthday[0].date.year}`,
-                    // sex: gender[0].value,
                     ...existingUser,
-                    last_login: Date.now()
-                })
+                    last_login: Date.now(),
+                });
             } else {
-                const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-
                 const newUser = new Users({
                     ...userWithoutToken,
-                    birthday: UtilsFunctions.convertStringToISODate(`${birthday[0].date.day}-${birthday[0].date.month}-${birthday[0].date.year}`),
-                    sex: gender[0].value,
+                    birthday, // Sử dụng giá trị Date hợp lệ cho birthday
+                    sex: gender,
                 });
+                console.log(newUser);
+
 
                 result = await newUser.save();
-                // if (result) {
-                //     const mailOptions = {
-                //         from: {
-                //             name: 'CampusPoly',
-                //             address: process.env.EMAIL
-                //         },
-                //         to: user.email,
-                //         subject: 'Xác nhận đăng ký tài khoản',
-                //         html: `
-                //             <div style="white-space: pre-line;">
-                //                 Xin chào <strong>${user.full_name}</strong>,
-
-                //                 Cảm ơn bạn đã đăng ký tài khoản. Mã xác thực của bạn là: <strong>${verificationCode}</strong>.
-                //                 Vui lòng nhập mã này để kích hoạt tài khoản của bạn.
-
-                //                 Trân trọng!
-                //             </div>
-                //         `,
-                //     };
-
-                //     // Gửi email
-                //     await transporter.sendMail(mailOptions);
-
-                //     result = {
-                //         user: result,
-                //         verificationCode
-                //     }
-                // }
             }
-            // console.log(result);
 
             if (result) {
                 return HttpResponse.success(result, HttpResponse.getErrorMessages('success'));

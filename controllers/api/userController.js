@@ -91,7 +91,7 @@ class UserController {
         let avatar;
         let background;
 
-        if (file.filename.slice(13) === 'avatar.jpg') {
+        if (file?.filename?.slice(13) === 'avatar.jpg') {
             avatar = file?.filename === undefined ? undefined : `${req.protocol}://${req.get("host")}/uploads/${file?.filename}`;
         } else {
             background = file?.filename === undefined ? undefined : `${req.protocol}://${req.get("host")}/uploads/${file?.filename}`;
