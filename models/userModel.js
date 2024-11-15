@@ -56,6 +56,10 @@ const userModel = new Schema({
     isVerified: {
         type: Boolean,
         default: false
+    },
+    device_token:{
+        type: String,
+        default: ""
     }
 }, {
     timestamps: true // Kích hoạt tính năng tự động tạo createdAt và updatedAt
