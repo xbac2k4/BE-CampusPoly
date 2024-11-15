@@ -72,17 +72,19 @@ const socketIo = require('socket.io');
 const http = require('http');
 const server = http.createServer(app);
 const io = socketIo(server);
+global.io = io; // Lưu io như biến toàn cục
 
 app.set('io', io);
 // Import custom socket logic
 const { addUser, removeUser, getUsers, updateUserSocket, getUserSocketId } = require('./manager/userManager');
 const { initializeUserSocket } = require('./sockets/userSocket.js');
+const { initializeNotifySocket } = require('./sockets/notifySocket.js');
 
 // Hàm chỉ để lấy ra _id và socketId và in ra log
 const logOnlineUsers = () => {
   const users = getUsers();
   const userLog = users.map(user => ({ userId: user._id, socketId: user.socketId }));
-  console.log('Current online users:', userLog);
+  // console.log('Current online users:', userLog);
 };
 
 // Handle connection event
@@ -91,6 +93,7 @@ io.on('connection', (socket) => {
   // console.log('Danh sách online khi admin chưa đăng nhập:');
   logOnlineUsers(); // Log danh sách người dùng hiện tại
   initializeUserSocket(io, socket);
+  initializeNotifySocket(io, socket);
   // Handle admin login
   socket.on('admin_login', (userData) => {
     const { _id: userId } = userData;

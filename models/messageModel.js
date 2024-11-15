@@ -10,8 +10,13 @@ const messageModel = new Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "user"
     },
-    content: String,
-    sent_at: Date,
+    content: {
+        type: String,
+    },
+    sent_at: {
+        type: Date,
+        default: Date.now,
+    }
 }, {
     timestamps: true // Kích hoạt tính năng tự động tạo createdAt và updatedAt
 });
