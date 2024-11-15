@@ -349,6 +349,8 @@ class UserService {
     // }
     loginWithGoogle = async (user) => {
         try {
+            console.log('user: ', user);
+            
             // Gọi Google People API để lấy thêm thông tin ngày sinh và giới tính
             const response = await fetch('https://people.googleapis.com/v1/people/me?personFields=genders,birthdays', {
                 headers: {
@@ -382,12 +384,14 @@ class UserService {
                 result = await Users.findByIdAndUpdate(existingUser._id, {
                     ...existingUser,
                     last_login: Date.now(),
+                    device_token: user.device_token,
                 });
             } else {
                 const newUser = new Users({
                     ...userWithoutToken,
                     birthday, // Sử dụng giá trị Date hợp lệ cho birthday
                     sex: gender,
+                    device_token: user.device_token,
                 });
                 console.log(newUser);
 
