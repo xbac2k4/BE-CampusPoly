@@ -382,10 +382,10 @@ class UserService {
             const existingUser = await Users.findOne({ email: user.email });
             if (existingUser) {
                 result = await Users.findByIdAndUpdate(existingUser._id, {
-                    ...existingUser,
+                    ...existingUser.toObject(), // Chuyển đổi thành đối tượng thuần túy
                     last_login: Date.now(),
                     device_token: user.device_token,
-                });
+                }, { new: true }); // Thêm tùy chọn { new: true } để trả về đối tượng đã cập nhật
             } else {
                 const newUser = new Users({
                     ...userWithoutToken,
