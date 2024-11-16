@@ -8,6 +8,7 @@ const dotenv = require('dotenv');
 const transporter = require("../config/common/mail");
 const nodemailer = require("nodemailer");
 const Friend = require("../models/friendModel");
+const { sendNotification } = require("../notification/Notification");
 dotenv.config();
 const SECRETKEY = process.env.SECRETKEY
 
@@ -349,7 +350,7 @@ class UserService {
     // }
     loginWithGoogle = async (user) => {
         try {
-            console.log('user: ', user);
+            // console.log('user: ', user);
             
             // Gọi Google People API để lấy thêm thông tin ngày sinh và giới tính
             const response = await fetch('https://people.googleapis.com/v1/people/me?personFields=genders,birthdays', {
@@ -400,6 +401,7 @@ class UserService {
             }
 
             if (result) {
+                await sendNotification('Chào mừng bạn đến với CampusPoly', 'Học tiếng anh đi! 😡', [result]);
                 return HttpResponse.success(result, HttpResponse.getErrorMessages('success'));
             } else {
                 return HttpResponse.fail(HttpResponse.getErrorMessages('dataNotFound'));
