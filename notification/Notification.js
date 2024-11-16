@@ -13,11 +13,13 @@ const sendNotification = async (title, body, userList) => {
             notification: {
                 title,
                 body,
-                imageUrl: 'https://play-lh.googleusercontent.com/DsyWoouXk7psjF7DCG6MJj_rX9RR9-liQskZXoKvcqQIu_ybUm4F5RntxWh1IZAVSLI'
+                imageUrl: 'https://play-lh.googleusercontent.com/DsyWoouXk7psjF7DCG6MJj_rX9RR9-liQskZXoKvcqQIu_ybUm4F5RntxWh1IZAVSLI',
             },
             android: {
                 notification: {
-                    sound: 'default'
+                    sound: 'default',
+                    icon: 'ic_campus_poly',
+                    color: '#211d1e'
                 }
             },
             apns: {
