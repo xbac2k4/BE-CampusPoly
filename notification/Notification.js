@@ -19,16 +19,10 @@ const sendNotification = async (title, body, userList) => {
                 notification: {
                     sound: 'default',
                     icon: 'ic_campus_poly',
-                    color: '#211d1e'
+                    color: '#211d1e',
                 }
             },
-            apns: {
-                payload: {
-                    aps: {
-                        sound: 'default'
-                    }
-                }
-            },
+
             tokens,
         });
         console.log('Successfully sent message:', result);
@@ -56,12 +50,9 @@ const sendOne = async (title, body, token) => {
                     color: '#211d1e'
                 }
             },
-            apns: {
-                payload: {
-                    aps: {
-                        sound: 'default'
-                    }
-                }
+            data:{
+                name: 'Hello',
+                age: '20'
             },
             token,
         });
