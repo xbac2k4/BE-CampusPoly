@@ -112,19 +112,47 @@ class PostController {
     }
     deletePost = async (req, res, next) => {
         try {
-            const { id } = req.params;
-            const { user_id } = req.query
-            const deletedPost = await new PostService().deletePost(id, user_id);
+            const { id } = req.params; // Lấy ID bài viết từ URL params
+            const { user_id, role } = req.query; // Lấy user_id và role từ query string
+    
+            // Gọi PostService để thực hiện xóa bài viết
+            const deletedPost = await new PostService().deletePost(id, user_id, role);
+    
+            // Kiểm tra kết quả xóa bài viết
             if (deletedPost) {
-                return res.json(HttpResponse.result(deletedPost));
+                return res.json(HttpResponse.result(deletedPost)); // Trả kết quả thành công
+            } else {
+                console.log("Không phải admin hoặc người dùng không sở hữu bài viết, không cho phép xóa");
+                return res.json(HttpResponse.fail(HttpResponse.getErrorMessages('dataNotFound'))); // Nếu không tìm thấy bài viết
+            }
+        } catch (error) {
+            console.log(error);
+            
+            return res.json(HttpResponse.error(error)); // Trả về lỗi nếu có
+        }
+    }
+     
+    searchPosts = async (req, res) => {
+        try {
+            const { searchTerm } = req.query;
+    
+            // Gọi service để thực hiện tìm kiếm
+            const posts = await new PostService().searchPosts(searchTerm);
+    
+            if (posts.length > 0) {
+                return res.json({
+                    success: true,
+                    posts,
+                });
             } else {
                 return res.json(HttpResponse.fail(HttpResponse.getErrorMessages('dataNotFound')));
             }
         } catch (error) {
-            console.log(error);
+            console.error(error);
             return res.json(HttpResponse.error(error));
         }
-    }
+    };
+
 }
 
 module.exports = PostController;

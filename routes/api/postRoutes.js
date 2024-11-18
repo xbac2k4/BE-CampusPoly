@@ -10,5 +10,5 @@ router.get('/get-post-by-userID', new PostController().getPostByUserID);
 router.post('/add-post', upload.array('image'), new PostController().addPost);
 router.put('/update-post/:id', upload.array('image'), new PostController().updatePost);
 router.delete('/delete-post/:id', new PostController().deletePost);
-
+router.get('/search', new PostController().searchPosts);
 module.exports = router;

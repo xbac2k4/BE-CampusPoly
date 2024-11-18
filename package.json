@@ -19,6 +19,7 @@
     "express-handlebars": "^8.0.1",
     "express-session": "^1.18.1",
     "fs": "^0.0.1-security",
+    "fuse.js": "^7.0.0",
     "hbs": "~4.0.4",
     "http-errors": "~1.6.3",
     "jsonwebtoken": "^9.0.2",

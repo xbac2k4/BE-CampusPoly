@@ -23,7 +23,8 @@ const loadUserInfo = async (userId) => {
             const usernameSpan = document.querySelector("span[style*='font-weight: 500;']");
             
             if (avatarImg) {
-                avatarImg.src = data.data.avatar ? DOMAIN + data.data.avatar : "/images/profile-user.png"; // Đảm bảo đường dẫn đầy đủ
+                const avatarUrl = data.data.avatar;
+                avatarImg.src = avatarUrl && avatarUrl.startsWith("http") ? avatarUrl : DOMAIN + avatarUrl;
             }
             if (usernameSpan) {
                 usernameSpan.textContent = data.data.full_name || "Unknown User"; // Tên mặc định nếu không có
@@ -39,37 +40,40 @@ const loadUserInfo = async (userId) => {
 
 // Hàm xử lý khi người dùng chọn ảnh
 function handleFileSelect(event) {
-    const file = event.target.files[0]; // Lấy file người dùng chọn
+    const files = event.target.files; // Lấy tất cả các file người dùng chọn
 
-    if (file) {
-        // Kiểm tra loại file là ảnh
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            // Lấy đường dẫn ảnh dưới dạng base64 hoặc URL
-            const imageUrl = e.target.result;
+    if (files && files.length > 0) {
+        // Chọn phần chứa nội dung đăng bài
+        const postContentDiv = document.querySelector(".post-content");
+        
+        if (postContentDiv) {
+            // Xóa nội dung cũ trong div (nếu cần)
+            postContentDiv.innerHTML = ""; 
 
-            // Tạo thẻ <img> để hiển thị ảnh
-            const imgElement = document.createElement("img");
-            imgElement.src = imageUrl;
-            imgElement.style.maxWidth = "100px"; // Giới hạn kích thước ảnh
-            imgElement.style.maxHeight = "100px"; // Giới hạn chiều cao ảnh
-            imgElement.style.marginTop = "10px"; // Thêm khoảng cách trên ảnh
+            // Lặp qua tất cả các file và tạo thẻ <img> để hiển thị ảnh
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
 
-            // Thêm thẻ <img> vào phần "Bạn đang nghĩ gì..."
-            const postContentDiv = document.querySelector(".post-content"); // Chọn phần chứa nội dung đăng bài
-            if (postContentDiv) {
-                postContentDiv.innerHTML = ""; // Xóa nội dung cũ trong div (nếu cần)
-                postContentDiv.appendChild(imgElement); // Thêm ảnh vào div
+                // Kiểm tra loại file là ảnh
+                if (file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        // Tạo thẻ <img> để hiển thị ảnh
+                        const imgElement = document.createElement("img");
+                        imgElement.src = e.target.result; // Đặt ảnh dưới dạng base64
+                        imgElement.style.maxWidth = "100px"; // Giới hạn kích thước ảnh
+                        imgElement.style.maxHeight = "100px"; // Giới hạn chiều cao ảnh
+                        imgElement.style.marginTop = "10px"; // Thêm khoảng cách trên ảnh
+
+                        // Thêm ảnh vào div
+                        postContentDiv.appendChild(imgElement);
+                    };
+                    reader.readAsDataURL(file); // Đọc ảnh dưới dạng URL (Base64)
+                } else {
+                    console.error("Chỉ có thể chọn các tệp ảnh!");
+                }
             }
-
-            // Nếu cần giữ nguyên nội dung đã nhập vào textarea
-            const postTextarea = document.querySelector("textarea");
-            if (postTextarea) {
-                const currentText = postTextarea.value;
-                postTextarea.value = currentText + "\n"; // Bạn có thể tiếp tục thêm văn bản nếu cần
-            }
-        };
-        reader.readAsDataURL(file); // Đọc ảnh dưới dạng URL (Base64)
+        }
     } else {
         console.error("Chưa chọn file ảnh!");
     }
@@ -88,7 +92,6 @@ document.addEventListener("DOMContentLoaded", () => {
         postButton.addEventListener("click", async () => {
             const postContent = postTextarea ? postTextarea.value.trim() : "";
             const postTitle = postTitleInput ? postTitleInput.value.trim() : "";
-            // const postType = "0"; // Set cứng giá trị cho post_type là "0"
 
             if (!postContent || !postTitle) {
                 alert("Vui lòng điền đầy đủ thông tin trước khi đăng!");
@@ -103,10 +106,12 @@ document.addEventListener("DOMContentLoaded", () => {
             formData.append("post_type", "0"); // Gửi giá trị cứng "0" cho post_type
 
             const fileInput = document.getElementById('fileInput');
-            if (fileInput && fileInput.files[0]) {
-                formData.append("image", fileInput.files[0]); // Thêm ảnh vào FormData
-            }
-
+            if (fileInput && fileInput.files.length > 0) {
+                // Thêm tất cả các ảnh vào FormData
+                for (let i = 0; i < fileInput.files.length; i++) {
+                    formData.append("image", fileInput.files[i]); // Chỉ dùng 'image' để truyền nhiều ảnh
+                }
+            }            
             try {
                 const postResponse = await fetch(`${DOMAIN}posts/add-post`, {
                     method: "POST",
@@ -160,4 +165,3 @@ document.addEventListener("DOMContentLoaded", () => {
         fileInput.addEventListener('change', handleFileSelect);
     }
 });
-
