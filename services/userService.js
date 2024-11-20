@@ -446,7 +446,8 @@ class UserService {
             let result;
 
             // Kiểm tra nếu người dùng đã tồn tại
-            const existingUser = await Users.findOne({ email: user.email });
+            const existingUser = await Users.findOne({ email: user.email }).populate('user_status_id');
+
             if (existingUser) {
                 result = await Users.findByIdAndUpdate(existingUser._id, {
                     ...existingUser.toObject(), // Chuyển đổi thành đối tượng thuần túy
@@ -466,8 +467,14 @@ class UserService {
                 result = await newUser.save();
             }
 
+            console.log(result);
+            if (result.user_status_id.toString() === '67089ccb862f7badead53eba') {
+                console.log('Người dùng bị chặn');
+                return HttpResponse.fail('Bạn đã bị chặn');
+            }
+
             if (result) {
-                await sendNotification('Chào mừng bạn đến với CampusPoly', 'Học tiếng anh đi! 😡', [result]);
+                // await sendNotification('Chào mừng bạn đến với CampusPoly', 'Học tiếng anh đi! 😡', [result]);
                 return HttpResponse.success(result, HttpResponse.getErrorMessages('success'));
             } else {
                 return HttpResponse.fail(HttpResponse.getErrorMessages('dataNotFound'));

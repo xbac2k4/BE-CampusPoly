@@ -14,8 +14,9 @@ const initializeUserSocket = (io, socket) => {
         updateUserList(io);
     });
 
-    socket.on('get_user_online', () => {
-        updateUserList(io);
+    socket.on('get_users_online', () => {
+        // updateUserList(io);
+        console.log('get_users_online');
     });
 
     // Hàm để cập nhật danh sách User cho tất cả client
