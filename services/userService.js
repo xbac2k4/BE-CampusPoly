@@ -254,30 +254,31 @@ class UserService {
             const friends = await Friend.find({ user_id: { $in: [id] } })
                 .select('user_id status_id')
                 .populate('status_id', 'status_name -_id')
+                .populate('user_id', '_id full_name avatar')
                 .lean(); // Sử dụng lean() để không cần gọi toObject()
 
             // Lọc ra danh sách bạn bè có trạng thái là "Chấp nhận"
-            const acceptedFriends = friends.filter(friend => friend.status_id.status_name === 'Chấp nhận')
-                .map(friend => {
-                    // Lọc ra bạn bè không chứa user_id là người tìm
-                    const otherFriend = friend.user_id.filter(user => user.toString() !== id.toString());
-                    return otherFriend[0];  // Chỉ lấy user_id của bạn bè
-                });
+            // const acceptedFriends = friends.filter(friend => friend.status_id.status_name === 'Chấp nhận')
+            //     .map(friend => {
+            //         // Lọc ra bạn bè không chứa user_id là người tìm
+            //         const otherFriend = friend.user_id.filter(user => user.toString() !== id.toString());
+            //         return otherFriend[0];  // Chỉ lấy user_id của bạn bè
+            //     });
 
-            // Lấy thông tin chi tiết bạn bè
-            const populatedFriends = await Promise.all(acceptedFriends.map(async (userId) => {
-                const friendDetails = await Users.findById(userId)
-                    .select('full_name avatar'); // Lấy tên và avatar của người bạn
-                return {
-                    _id: friendDetails._id,
-                    full_name: friendDetails.full_name,
-                    avatar: friendDetails.avatar,
-                };
-            }));
+            // // Lấy thông tin chi tiết bạn bè
+            // const populatedFriends = await Promise.all(acceptedFriends.map(async (userId) => {
+            //     const friendDetails = await Users.findById(userId)
+            //         .select('full_name avatar'); // Lấy tên và avatar của người bạn
+            //     return {
+            //         _id: friendDetails._id,
+            //         full_name: friendDetails.full_name,
+            //         avatar: friendDetails.avatar,
+            //     };
+            // }));
 
             const userData = {
                 ...user.toObject(),
-                friends: populatedFriends, // Thêm danh sách bạn bè vào đối tượng người dùng
+                friends: friends, // Thêm danh sách bạn bè vào đối tượng người dùng
             };
 
             return HttpResponse.success(userData, HttpResponse.getErrorMessages('success'));

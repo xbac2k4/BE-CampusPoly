@@ -20,7 +20,7 @@ const removeVietnameseTones = (str) => {
 class PostService {
     getAllPost = async () => {
         try {
-            const data = await Post.find().populate('user_id').populate('group_id');
+            const data = await Post.find().populate('user_id', 'full_name avatar').populate('group_id');
             // console.log('data: ', data);
             const updatedPosts = await Promise.all(data.map(async (post) => {
                 // Lấy số lượng like cho bài viết
@@ -31,7 +31,10 @@ class PostService {
                 const commentData = await Comment.find({ post_id: post._id });
                 post.comment_count = commentData.length;
 
-                return post;
+                return {
+                    post,
+                    likeData
+                };
             }));
             return HttpResponse.success(updatedPosts, HttpResponse.getErrorMessages('getDataSucces'));
         } catch (error) {
@@ -141,14 +144,14 @@ class PostService {
                     // Lấy số lượng like cho bài viết
                     const likeData = await Like.find({ post_id: post._id });
                     post.like_count = likeData.length;
-    
+
                     // Lấy số lượng comment cho bài viết
                     const commentData = await Comment.find({ post_id: post._id });
                     post.comment_count = commentData.length;
-    
+
                     return post;
                 }));
-                
+
                 return HttpResponse.success(updatedPosts, HttpResponse.getErrorMessages('getDataSucces'));
             }
         } catch (error) {
@@ -208,13 +211,13 @@ class PostService {
             if (!post) {
                 return null; // Trả về null nếu không tìm thấy bài viết
             }
-    
+
             // Kiểm tra nếu người dùng có quyền xóa
             if (post.user_id.toString() !== user_id && role !== 'Admin') {
                 console.log("Không phải admin hoặc người dùng không sở hữu bài viết, không cho phép xóa");
                 return; // Nếu không phải admin hoặc người dùng không sở hữu bài viết, không cho phép xóa
             }
-    
+
             // Tiến hành xóa bài viết
             const result = await post.deleteOne();
             if (result) {
@@ -222,23 +225,23 @@ class PostService {
                 await Like.deleteMany({ post_id: id });
                 await Comment.deleteMany({ post_id: id });
             }
-    
+
             return result; // Trả về kết quả xóa bài viết
         } catch (error) {
             console.log(error);
             throw error; // Ném lỗi nếu có sự cố xảy ra
         }
-    }    
-    
+    }
+
     searchPosts = async (searchTerm) => {
         try {
             const normalizedSearchTerm = removeVietnameseTones(searchTerm || "");
-    
+
             // Tải tất cả bài viết từ database
             const posts = await Post.find()
                 .populate("user_id") // Lấy thông tin người dùng liên quan
                 .populate("group_id"); // Lấy thông tin nhóm liên quan
-    
+
             // Lọc bài viết dựa trên tiêu đề hoặc loại bài viết
             const filteredPosts = posts.filter((post) => {
                 const normalizedTitle = removeVietnameseTones(post.title || "");
@@ -248,16 +251,16 @@ class PostService {
                     normalizedPostType.includes(normalizedSearchTerm)
                 );
             });
-    
+
             return filteredPosts; // Trả về danh sách bài viết phù hợp
         } catch (error) {
             console.error(error);
             throw error;
         }
     };
-    
 
-    
+
+
 }
 
 module.exports = PostService;
