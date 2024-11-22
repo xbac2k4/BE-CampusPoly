@@ -15,7 +15,7 @@ const initializeUserSocket = (io, socket) => {
     });
 
     socket.on('get_users_online', () => {
-        // updateUserList(io);
+        updateUserList(io);
         console.log('get_users_online');
     });
 

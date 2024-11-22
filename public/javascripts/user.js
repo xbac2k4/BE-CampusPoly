@@ -60,34 +60,6 @@ const handleUserOnline = async () => {
         }
     });
 };
-// const handleUserOnline = async () => {
-//     // return new Promise((resolve, reject) => {
-//     if (window.socket) {
-//         // Đảm bảo chỉ lắng nghe một lần
-//         console.log('1123');
-
-//         if (!window.socket._hasListener) {
-//             console.log('789');
-//             const startTime = performance.now(); // Bắt đầu đo
-
-//             window.socket.on('update_user_list', (users) => {
-//                 console.log('0987');
-//                 const endTime = performance.now(); // Kết thúc đo
-//                 console.log(`Time taken to update user list: ${endTime - startTime}ms`);
-//                 listUserOnline = users;
-//                 // console.log('Updated user list:', listUserOnline);
-//                 resolve();  // Khi cập nhật xong, gọi resolve để tiếp tục
-//             });
-//             window.socket._hasListener = true; // Đánh dấu đã lắng nghe
-//         } else {
-//             console.log('456');
-//         }
-//     } else {
-//         console.error("Socket is not initialized.");
-//         reject("Socket is not initialized.");
-//     }
-//     // });
-// };
 
 // Hàm để hiển thị dữ liệu trong bảng
 const renderTable = (users) => {
@@ -145,7 +117,7 @@ const renderTable = (users) => {
 // <i class="material-icons">&#xE872;</i></a>
 // Khi trang tải lần đầu, gọi API để hiển thị 10 người dùng đầu tiên
 window.addEventListener('DOMContentLoaded', async (event) => {
-    window.socket.emit('get_user_online');
+    window.socket.emit('get_users_online');
     await handleUserOnline();
     fetchDataForPage(currentPage);
 });
