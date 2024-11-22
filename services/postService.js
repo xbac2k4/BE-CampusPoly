@@ -123,6 +123,7 @@ class PostService {
                 data.comment_count = commentData.length;
                 const postData = {
                     postData: data,
+                    likeData,
                     // likeData,
                     commentData
                 }
