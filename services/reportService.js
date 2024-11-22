@@ -1,22 +1,36 @@
 const Reports = require("../models/reportModel");
 const HttpResponse = require("../utils/httpResponse");
 const Status = require('../models/statusModel')
+const dotenv = require('dotenv');
+dotenv.config();
+const { use } = require("../routes/api");
 
 class ReportService {
     addReport = async (reported_by_user_id, post_id, report_type_id) => {
         try {
+            console.log("Received data in service:", { reported_by_user_id, post_id, report_type_id });
+    
+            // Kiểm tra xem dữ liệu có hợp lệ không
+            if (!reported_by_user_id || !post_id || !report_type_id) {
+                throw new Error("Missing required fields");
+            }
             const report = new Reports({
                 reported_by_user_id,
                 post_id,
                 report_type_id,
             });
+    
+            console.log("Report object to be saved:", report);
+    
             const savedReport = await report.save();
+            console.log("Saved report:", savedReport);
+    
             return HttpResponse.success(savedReport, HttpResponse.getErrorMessages('success'));
         } catch (error) {
-            console.log(error);
+            console.log("Error in saving report:", error);
             return HttpResponse.error(error);
         }
-    }    
+    };   
     
     getReportById = async (id) => {
         try {
@@ -115,8 +129,7 @@ class ReportService {
             return HttpResponse.error(error);
         }
     }
-    
-    
+     
 }
 
 module.exports = ReportService;

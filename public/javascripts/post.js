@@ -16,7 +16,7 @@ let searchTimeout;
 const loadPostsSearch = async () => {
     // Xây dựng URL API tùy theo trạng thái tìm kiếm
     const apiUrl = isSearching
-        ? `${DOMAIN}posts/search?searchTerm=${encodeURIComponent(searchTerm)}`
+        ? `${DOMAIN}posts/admin-search?searchTerm=${encodeURIComponent(searchTerm)}`
         : `${DOMAIN}posts/get-post-by-page?page=${currentPage}&limit=5`;
 
     await fetch(apiUrl)
