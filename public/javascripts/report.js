@@ -43,12 +43,13 @@ const fetchDataForPage = async (page) => {
 const renderTable = (reports) => {
     const html = reports.map((report, index) => {
         const stt = (currentPage - 1) * itemsPerPage + index + 1;
+        console.log('Reported by User ID:', report.reported_by_user_id?._id);
+        console.log('Post User ID:', report.post_id?.user_id);
         return `
             <tr data-report='${JSON.stringify(report)}'>
                 <td>${stt}</td>
                 <td>${report.reported_by_user_id.full_name}</td>
-                <td>${report.post_id._id}</td> 
-                <td>${report.post_id.user_id.full_name}</td> 
+                <td>${report.post_id?.user_id.full_name}</td> 
                 <td>${report.report_type_id.report_name}</td>
                 <td>${formatDateTime(report.createdAt)}</td>
                 <td>
@@ -58,7 +59,7 @@ const renderTable = (reports) => {
                     </div>
                 </td>
                 <td>
-                    <a href="#" class="view" title="View" data-toggle="tooltip" onclick="goToPostDetailPage('${report.post_id._id}')">
+                    <a href="#" class="view" title="View" data-toggle="tooltip" onclick="goToPostDetailPage('${report.post_id?._id}')">
                         <i class="material-icons">visibility</i>
                     </a>
                     <a href="#" class="delete" title="Delete" data-toggle="tooltip" onclick="confirmDelete('${report._id}')"><i class="material-icons">&#xE872;</i></a>

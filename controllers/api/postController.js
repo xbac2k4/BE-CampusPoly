@@ -132,12 +132,12 @@ class PostController {
         }
     }
      
-    searchPosts = async (req, res) => {
+    searchPostsAdmin = async (req, res) => {
         try {
             const { searchTerm } = req.query;
     
             // Gọi service để thực hiện tìm kiếm
-            const posts = await new PostService().searchPosts(searchTerm);
+            const posts = await new PostService().searchPostsAdmin(searchTerm);
     
             if (posts.length > 0) {
                 return res.json({
