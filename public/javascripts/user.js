@@ -51,6 +51,7 @@ const handleUserOnline = async () => {
                     listUserOnline = users;
                     // console.log('Updated user list:', listUserOnline);
                     resolve();  // Khi cập nhật xong, gọi resolve để tiếp tục
+                    fetchDataForPage(currentPage);
                 });
                 window.socket._hasListener = true; // Đánh dấu đã lắng nghe
             }
@@ -119,7 +120,6 @@ const renderTable = (users) => {
 window.addEventListener('DOMContentLoaded', async (event) => {
     window.socket.emit('get_users_online');
     await handleUserOnline();
-    fetchDataForPage(currentPage);
 });
 
 // Số lượng trang tối đa hiển thị

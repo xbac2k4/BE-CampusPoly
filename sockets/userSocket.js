@@ -19,6 +19,11 @@ const initializeUserSocket = (io, socket) => {
         console.log('get_users_online');
     });
 
+    socket.on('disconnect', () => {
+        updateUserList(io);    // Cập nhật danh sách online
+        console.log(`Socket ${socket.id} đã ngắt kết nối.`);
+    });
+
     // Hàm để cập nhật danh sách User cho tất cả client
     const updateUserList = (io) => {
         const users = getUsers();
