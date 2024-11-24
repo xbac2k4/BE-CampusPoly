@@ -133,17 +133,37 @@ class UserService {
             const usersWithFriends = await Promise.all(users.map(async (user) => {
                 // Tìm danh sách bạn bè cho từng người dùng
                 const friends = await Friend.find({ user_id: user._id })
-                    .select('user_friend_id status_id')
-                    .populate('status_id', 'status_name -_id') // Chỉ lấy các trường cần thiết
-                    .populate('user_friend_id', 'full_name avatar');
+                    .select('user_id status_id')  // Chọn trường user_id và status_id
+                    .populate('status_id', 'status_name -_id') // Chỉ lấy trường status_name
+                    .lean();  // Sử dụng lean() để tránh phải gọi toObject()
+
+                // Lọc ra danh sách bạn bè có trạng thái là "Chấp nhận"
+                const acceptedFriends = friends.filter(friend => friend.status_id.status_name === 'Chấp nhận')
+                    .map(friend => {
+                        // Lọc ra bạn bè không chứa user_id là người tìm
+                        const otherFriend = friend.user_id.filter(id => id.toString() !== user._id.toString());
+                        return otherFriend[0];  // Chỉ lấy user_id của bạn bè
+                    });
+
+                // Lấy thông tin chi tiết bạn bè
+                const populatedFriends = await Promise.all(acceptedFriends.map(async (userId) => {
+                    const friendDetails = await Users.findById(userId)
+                        .select('full_name avatar'); // Lấy tên và avatar của người bạn
+                    return {
+                        _id: friendDetails._id,
+                        full_name: friendDetails.full_name,
+                        avatar: friendDetails.avatar,
+                    };
+                }));
+
+                // Trả về thông tin người dùng kèm bạn bè
                 return {
-                    ...user.toObject(), // Chuyển đổi đối tượng mongoose thành đối tượng thuần
-                    friends // Thêm danh sách bạn bè vào đối tượng người dùng
+                    ...user.toObject(),  // Chuyển đối tượng mongoose thành đối tượng thuần
+                    friends: populatedFriends,  // Thêm danh sách bạn bè vào đối tượng người dùng
                 };
             }));
 
-            // console.log(usersWithFriends);
-
+            // Kiểm tra nếu có dữ liệu người dùng
             if (usersWithFriends.length > 0) {
                 return HttpResponse.success(usersWithFriends, HttpResponse.getErrorMessages('success'));
             } else {
@@ -153,48 +173,75 @@ class UserService {
             console.log(error);
             return HttpResponse.error(error);
         }
-    }
+    };
 
     getUserByPage = async (page, limit) => {
         try {
-            const skip = (parseInt(page) - 1) * parseInt(limit);
-            const users = await Users.find().skip(skip).limit(parseInt(limit)).populate('user_status_id', '-_id').populate('role');
-            const total = await Users.countDocuments();
-            const totalPages = Math.ceil(total / parseInt(limit));
-            // console.log('data: ', data);
-            // const data = {
-            //     users,
-            //     totalPages
-            // }
-            const userData = await Promise.all(users.map(async (user) => {
+            const skip = (parseInt(page) - 1) * parseInt(limit);  // Tính số bản ghi cần bỏ qua (skip)
+
+            // Tìm tất cả người dùng với phân trang
+            const users = await Users.find()
+                .skip(skip)  // Bỏ qua số lượng bản ghi
+                .limit(parseInt(limit))  // Giới hạn số lượng bản ghi trả về
+                .populate('user_status_id', '-_id')
+                .populate('role');
+
+            // Tính tổng số bản ghi để tính tổng số trang
+            const totalUsers = await Users.countDocuments();
+            const totalPages = Math.ceil(totalUsers / parseInt(limit));  // Tính tổng số trang
+
+            // Tạo một mảng để chứa thông tin người dùng và bạn bè của họ
+            const usersWithFriends = await Promise.all(users.map(async (user) => {
                 // Tìm danh sách bạn bè cho từng người dùng
                 const friends = await Friend.find({ user_id: user._id })
-                    .select('user_friend_id status_id')
-                    .populate('status_id', 'status_name -_id') // Chỉ lấy các trường cần thiết
-                    .populate('user_friend_id', 'full_name avatar');
+                    .select('user_id status_id')  // Chọn trường user_id và status_id
+                    .populate('status_id', 'status_name -_id') // Chỉ lấy trường status_name
+                    .lean();  // Sử dụng lean() để tránh phải gọi toObject()
+
+                // Lọc ra danh sách bạn bè có trạng thái là "Chấp nhận"
+                const acceptedFriends = friends.filter(friend => friend.status_id.status_name === 'Chấp nhận')
+                    .map(friend => {
+                        // Lọc ra bạn bè không chứa user_id là người tìm
+                        const otherFriend = friend.user_id.filter(id => id.toString() !== user._id.toString());
+                        return otherFriend[0];  // Chỉ lấy user_id của bạn bè
+                    });
+
+                // Lấy thông tin chi tiết bạn bè
+                const populatedFriends = await Promise.all(acceptedFriends.map(async (userId) => {
+                    const friendDetails = await Users.findById(userId)
+                        .select('full_name avatar'); // Lấy tên và avatar của người bạn
+                    return {
+                        _id: friendDetails._id,
+                        full_name: friendDetails.full_name,
+                        avatar: friendDetails.avatar,
+                    };
+                }));
+
+                // Trả về thông tin người dùng kèm bạn bè
                 return {
-                    ...user.toObject(), // Chuyển đổi đối tượng mongoose thành đối tượng thuần
-                    friends,
-                    // Thêm danh sách bạn bè vào đối tượng người dùng
+                    ...user.toObject(),  // Chuyển đối tượng mongoose thành đối tượng thuần
+                    friends: populatedFriends,  // Thêm danh sách bạn bè vào đối tượng người dùng
                 };
             }));
 
-            // console.log(userData);
-
-            if (userData.length > 0) {
-                return HttpResponse.success({ userData, totalPages }, HttpResponse.getErrorMessages('success'));
+            // Kiểm tra nếu có dữ liệu người dùng
+            if (usersWithFriends.length > 0) {
+                return HttpResponse.success({
+                    users: usersWithFriends,  // Dữ liệu người dùng và bạn bè
+                    totalPages,  // Tổng số trang
+                }, HttpResponse.getErrorMessages('success'));
             } else {
                 return HttpResponse.fail(HttpResponse.getErrorMessages('dataNotFound'));
             }
-            // return HttpResponse.success(data, HttpResponse.getErrorMessages('getDataSucces'));
         } catch (error) {
             console.log(error);
             return HttpResponse.error(error);
         }
-    }
+    };
+
+
     getUserByID = async (id) => {
         try {
-            // Tìm người dùng theo ID và populate các trường liên quan
             const user = await Users.findById(id)
                 .populate('user_status_id')
                 .populate('role');
@@ -203,16 +250,35 @@ class UserService {
                 return HttpResponse.fail(HttpResponse.getErrorMessages('dataNotFound'));
             }
 
-            // Tìm danh sách bạn bè của người dùng
-            const friends = await Friend.find({ user_id: user._id })
-                .select('user_friend_id status_id')
-                .populate('status_id', 'status_name -_id') // Chỉ lấy các trường cần thiết
-                .populate('user_friend_id', 'full_name avatar');
+            // Tìm danh sách bạn bè của người dùng, sử dụng lean() để tránh lỗi toObject
+            const friends = await Friend.find({ user_id: { $in: [id] } })
+                .select('user_id status_id')
+                .populate('status_id', 'status_name -_id')
+                .populate('user_id', '_id full_name avatar')
+                .lean(); // Sử dụng lean() để không cần gọi toObject()
 
-            // Tạo đối tượng người dùng kèm danh sách bạn bè
+            // Lọc ra danh sách bạn bè có trạng thái là "Chấp nhận"
+            // const acceptedFriends = friends.filter(friend => friend.status_id.status_name === 'Chấp nhận')
+            //     .map(friend => {
+            //         // Lọc ra bạn bè không chứa user_id là người tìm
+            //         const otherFriend = friend.user_id.filter(user => user.toString() !== id.toString());
+            //         return otherFriend[0];  // Chỉ lấy user_id của bạn bè
+            //     });
+
+            // // Lấy thông tin chi tiết bạn bè
+            // const populatedFriends = await Promise.all(acceptedFriends.map(async (userId) => {
+            //     const friendDetails = await Users.findById(userId)
+            //         .select('full_name avatar'); // Lấy tên và avatar của người bạn
+            //     return {
+            //         _id: friendDetails._id,
+            //         full_name: friendDetails.full_name,
+            //         avatar: friendDetails.avatar,
+            //     };
+            // }));
+
             const userData = {
-                ...user.toObject(), // Chuyển đổi đối tượng mongoose thành đối tượng thuần
-                friends, // Thêm danh sách bạn bè vào đối tượng người dùng
+                ...user.toObject(),
+                friends: friends, // Thêm danh sách bạn bè vào đối tượng người dùng
             };
 
             return HttpResponse.success(userData, HttpResponse.getErrorMessages('success'));
@@ -221,6 +287,7 @@ class UserService {
             return HttpResponse.error(error);
         }
     }
+
     putUser = async (id, email, password, full_name, sex, role, user_status_id, avatar, background, bio, last_login, birthday, isVerified) => {
         try {
             const newUpdate = await Users.findById(id);
@@ -351,7 +418,6 @@ class UserService {
     loginWithGoogle = async (user) => {
         try {
             // console.log('user: ', user);
-            
             // Gọi Google People API để lấy thêm thông tin ngày sinh và giới tính
             const response = await fetch('https://people.googleapis.com/v1/people/me?personFields=genders,birthdays', {
                 headers: {
@@ -361,7 +427,7 @@ class UserService {
             const data = await response.json();
             const birthdayData = data.birthdays;
             const genderData = data.genders;
-            console.log(data);
+            // console.log(data);
 
             // Kiểm tra và lấy ngày sinh
             let birthday;
@@ -380,7 +446,8 @@ class UserService {
             let result;
 
             // Kiểm tra nếu người dùng đã tồn tại
-            const existingUser = await Users.findOne({ email: user.email });
+            const existingUser = await Users.findOne({ email: user.email }).populate('user_status_id');
+
             if (existingUser) {
                 result = await Users.findByIdAndUpdate(existingUser._id, {
                     ...existingUser.toObject(), // Chuyển đổi thành đối tượng thuần túy
@@ -394,10 +461,16 @@ class UserService {
                     sex: gender,
                     device_token: user.device_token,
                 });
-                console.log(newUser);
+                // console.log(newUser);
 
 
                 result = await newUser.save();
+            }
+
+            // console.log(result);
+            if (result.user_status_id.toString() === '67089ccb862f7badead53eba') {
+                console.log('Người dùng bị chặn');
+                return HttpResponse.fail('Bạn đã bị chặn');
             }
 
             if (result) {

@@ -2,15 +2,12 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const friendModel = new Schema({
-    user_id: {
+    user_id: [{
         type: Schema.Types.ObjectId,
         ref: 'user',
         required: true
-    },
-    user_friend_id: {
-        type: Schema.Types.ObjectId,
-        ref: 'user',
-    },
+    }],
+
     status_id: {
         type: Schema.Types.ObjectId,
         ref: 'status',
@@ -21,3 +18,7 @@ const friendModel = new Schema({
 });
 
 module.exports = mongoose.model('friend', friendModel);
+// user_friend_id: {
+//     type: Schema.Types.ObjectId,
+//     ref: 'user',
+// },

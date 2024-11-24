@@ -2,9 +2,9 @@ const { sendOne } = require('../../notification/Notification');
 
 class NotificationController {
     sendNotificationToUsers = async (req, res) => {
-        const { title, body, device_token } = req.body;
+        const { title, body, userId } = req.body;
         try {
-            const result = await sendOne(title, body, device_token);
+            const result = await sendOne(title, body, userId);
             return res.json({ success: true, result });
         } catch (error) {
             console.error('Error sending notification:', error);

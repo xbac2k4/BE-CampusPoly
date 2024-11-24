@@ -41,7 +41,7 @@ main {
 }
 
 .custom-button-icon {
-    color: #c82333;
+    color: #e75b2a;
     border-radius: 50%;
     border: none; /* Loại bỏ viền */
     cursor: pointer;
@@ -73,11 +73,11 @@ button:active {
 
 /* Nút Đăng với màu đỏ */
 button.custom-button:last-child {
-    background-color: #dc3545;
+    background-color: #e75b2a;
 }
 
 button.custom-button:last-child:hover {
-    background-color: #c82333;
+    background-color: #e75b2a;
 }
 
 /* Cấu hình cho dialog */

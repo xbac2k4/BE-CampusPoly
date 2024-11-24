@@ -23,7 +23,7 @@ const fetchDataForPage = async (page) => {
 
         // Cập nhật dữ liệu
         totalPages = data.data.totalPages; // Giả sử totalPages là thuộc tính của response
-        const users = data.data.userData; // Lấy danh sách người dùng
+        const users = data.data.users; // Lấy danh sách người dùng
         renderTable(users); // Gọi hàm renderTable để hiển thị dữ liệu
         renderPagination(); // Gọi hàm renderPagination để cập nhật phân trang
 
@@ -51,6 +51,7 @@ const handleUserOnline = async () => {
                     listUserOnline = users;
                     // console.log('Updated user list:', listUserOnline);
                     resolve();  // Khi cập nhật xong, gọi resolve để tiếp tục
+                    fetchDataForPage(currentPage);
                 });
                 window.socket._hasListener = true; // Đánh dấu đã lắng nghe
             }
@@ -117,9 +118,8 @@ const renderTable = (users) => {
 // <i class="material-icons">&#xE872;</i></a>
 // Khi trang tải lần đầu, gọi API để hiển thị 10 người dùng đầu tiên
 window.addEventListener('DOMContentLoaded', async (event) => {
-    window.socket.emit('get_user_online');
+    window.socket.emit('get_users_online');
     await handleUserOnline();
-    fetchDataForPage(currentPage);
 });
 
 // Số lượng trang tối đa hiển thị
@@ -388,6 +388,8 @@ document.getElementById('roleUserModal').addEventListener('show.bs.modal', loadR
 const showFriendList = (userData) => {
     const user = JSON.parse(userData); // Phân tích cú pháp JSON
     const friendList = user.friends;
+    console.log(friendList);
+
 
     // Tạo modal
     const modal = document.createElement('div');
@@ -399,7 +401,7 @@ const showFriendList = (userData) => {
     modal.style.height = '100vh'; // Cố định chiều cao của modal
     modal.style.overflow = 'hidden'
     friendList.map(friend =>
-        console.log(friend.user_friend_id.avatar)
+        console.log(friend.avatar)
     )
 
     modal.innerHTML = `
@@ -412,8 +414,8 @@ const showFriendList = (userData) => {
                     <ul id="friendList" class="list-group">
                         ${friendList.length > 0 ? friendList.map(friend =>
         `<li class="list-group-item d-flex align-items-center">
-                                <img src="${friend.user_friend_id.avatar}" alt="${friend.user_friend_id.full_name}" class="rounded-circle" width="40" height="40" style="margin-right: 10px;">
-                                ${friend.user_friend_id.full_name}
+                                <img src="${friend.avatar}" alt="${friend.full_name}" class="rounded-circle" width="40" height="40" style="margin-right: 10px;">
+                                ${friend.full_name}
                             </li>`
     ).join('') : '<li class="list-group-item">Không có bạn bè nào.</li>'}
                     </ul>

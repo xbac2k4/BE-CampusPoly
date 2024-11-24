@@ -28,16 +28,33 @@ class CommentController {
         }
     }
     addFriend = async (req, res, next) => {
-        const { user_id, user_friend_id, status_id } = req.body;
+        const { user_id, user_friend_id } = req.body;
         console.log(req.body);
-        
+
         try {
-            const data = await new FriendService().addFriend(user_id, user_friend_id, status_id); 
+            const data = await new FriendService().addFriend(user_id, user_friend_id);
             if (data) {
                 return res.json(HttpResponse.result(data));
             } else {
                 return res.json(HttpResponse.fail(HttpResponse.getErrorMessages('dataNotFound')));
-            }        } catch (error) {
+            }
+        } catch (error) {
+            console.log(error);
+            return res.json(HttpResponse.error(error));
+        }
+    }
+    updateFriend = async (req, res, next) => {
+        const { user_id, user_friend_id } = req.body;
+        console.log(req.body);
+
+        try {
+            const data = await new FriendService().updateFriend(user_id, user_friend_id);
+            if (data) {
+                return res.json(HttpResponse.result(data));
+            } else {
+                return res.json(HttpResponse.fail(HttpResponse.getErrorMessages('dataNotFound')));
+            }
+        } catch (error) {
             console.log(error);
             return res.json(HttpResponse.error(error));
         }
@@ -45,7 +62,7 @@ class CommentController {
     removeFriend = async (req, res, next) => {
         const { user_id, user_friend_id } = req.body;
         console.log(req.body);
-        
+
         try {
             const data = await new FriendService().removeFriend(user_id, user_friend_id);
             if (data) {

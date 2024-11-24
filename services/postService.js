@@ -1,4 +1,5 @@
 const Post = require("../models/postModel");
+const User = require("../models/userModel");
 const Group = require("../models/groupModel");
 const Like = require("../models/likeModel");
 const Comment = require("../models/commentModel");
@@ -7,11 +8,19 @@ const dotenv = require('dotenv');
 const { use } = require("../routes/api");
 dotenv.config();
 const displayedPostIds = new Set(); // Set để lưu trữ ID bài viết đã hiển thị
+const removeVietnameseTones = (str) => {
+    return str
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "") // Loại bỏ dấu
+        .replace(/đ/g, "d")
+        .replace(/Đ/g, "D")
+        .toLowerCase();
+};
 
 class PostService {
     getAllPost = async () => {
         try {
-            const data = await Post.find().populate('user_id').populate('group_id');
+            const data = await Post.find().populate('user_id', 'full_name avatar').populate('group_id');
             // console.log('data: ', data);
             const updatedPosts = await Promise.all(data.map(async (post) => {
                 // Lấy số lượng like cho bài viết
@@ -22,7 +31,10 @@ class PostService {
                 const commentData = await Comment.find({ post_id: post._id });
                 post.comment_count = commentData.length;
 
-                return post;
+                return {
+                    postData: post,
+                    likeData
+                };
             }));
             return HttpResponse.success(updatedPosts, HttpResponse.getErrorMessages('getDataSucces'));
         } catch (error) {
@@ -51,7 +63,7 @@ class PostService {
             }));
 
             const data = {
-                posts: updatedPosts,
+                postData: updatedPosts,
                 totalPages
             };
             return HttpResponse.success(data, HttpResponse.getErrorMessages('getDataSucces'));
@@ -111,6 +123,7 @@ class PostService {
                 data.comment_count = commentData.length;
                 const postData = {
                     postData: data,
+                    likeData,
                     // likeData,
                     commentData
                 }
@@ -126,22 +139,22 @@ class PostService {
             const data = await Post.find({
                 user_id
             }).populate('user_id', 'full_name avatar').populate('group_id');
-            if (data) {
+            // console.log('data: ', data);
+            const updatedPosts = await Promise.all(data.map(async (post) => {
                 // Lấy số lượng like cho bài viết
-                const updatedPosts = await Promise.all(data.map(async (post) => {
-                    // Lấy số lượng like cho bài viết
-                    const likeData = await Like.find({ post_id: post._id });
-                    post.like_count = likeData.length;
-    
-                    // Lấy số lượng comment cho bài viết
-                    const commentData = await Comment.find({ post_id: post._id });
-                    post.comment_count = commentData.length;
-    
-                    return post;
-                }));
-                
-                return HttpResponse.success(updatedPosts, HttpResponse.getErrorMessages('getDataSucces'));
-            }
+                const likeData = await Like.find({ post_id: post._id });
+                post.like_count = likeData.length;
+
+                // Lấy số lượng comment cho bài viết
+                const commentData = await Comment.find({ post_id: post._id });
+                post.comment_count = commentData.length;
+
+                return {
+                    postData: post,
+                    likeData
+                };
+            }));
+            return HttpResponse.success(updatedPosts, HttpResponse.getErrorMessages('getDataSucces'));
         } catch (error) {
             console.log(error);
             return HttpResponse.error(error);
@@ -192,27 +205,101 @@ class PostService {
             return HttpResponse.error(error);
         }
     }
-    deletePost = async (id, user_id) => {
+    deletePost = async (id, user_id, role) => {
         try {
             // Tìm bài viết theo ID
             const post = await Post.findById(id);
-            // console.log(post.user_id.toString(), user_id);
-            if (!post || post.user_id.toString() !== user_id) {
-                return
+            if (!post) {
+                return null; // Trả về null nếu không tìm thấy bài viết
             }
-            // Xóa bài viết
+
+            // Kiểm tra nếu người dùng có quyền xóa
+            if (post.user_id.toString() !== user_id && role !== 'Admin') {
+                console.log("Không phải admin hoặc người dùng không sở hữu bài viết, không cho phép xóa");
+                return; // Nếu không phải admin hoặc người dùng không sở hữu bài viết, không cho phép xóa
+            }
+
+            // Tiến hành xóa bài viết
             const result = await post.deleteOne();
             if (result) {
-                // Xóa like và comment
+                // Xóa like và comment liên quan
                 await Like.deleteMany({ post_id: id });
                 await Comment.deleteMany({ post_id: id });
             }
-            return HttpResponse.success({ result, post }, HttpResponse.getErrorMessages('success'));
+
+            return result; // Trả về kết quả xóa bài viết
         } catch (error) {
             console.log(error);
-            return HttpResponse.error(error);
+            throw error; // Ném lỗi nếu có sự cố xảy ra
         }
     }
+
+    searchPostsAdmin = async (searchTerm) => {
+        try {
+            const normalizedSearchTerm = removeVietnameseTones(searchTerm || "");
+
+            // Tải tất cả bài viết từ database
+            const posts = await Post.find()
+                .populate("user_id") // Lấy thông tin người dùng liên quan
+                .populate("group_id"); // Lấy thông tin nhóm liên quan
+
+            // Lọc bài viết dựa trên tiêu đề hoặc loại bài viết
+            const filteredPosts = posts.filter((post) => {
+                const normalizedTitle = removeVietnameseTones(post.title || "");
+                const normalizedPostType = removeVietnameseTones(post.post_type || "");
+                return (
+                    normalizedTitle.includes(normalizedSearchTerm) ||
+                    normalizedPostType.includes(normalizedSearchTerm)
+                );
+            });
+
+            return filteredPosts; // Trả về danh sách bài viết phù hợp
+        } catch (error) {
+            console.error(error);
+            throw error;
+        }
+    };
+    searchPosts = async (searchTerm) => {
+        try {
+            const normalizedSearchTerm = removeVietnameseTones(searchTerm || "");
+    
+            // Tìm kiếm bài viết
+            const posts = await Post.find()
+                .populate("user_id")  // Lấy thông tin người dùng liên quan
+                .populate("group_id"); // Lấy thông tin nhóm liên quan
+    
+            // Lọc bài viết dựa trên tiêu đề hoặc loại bài viết
+            const filteredPosts = posts.filter((post) => {
+                const normalizedTitle = removeVietnameseTones(post.title || "");
+                const normalizedPostType = removeVietnameseTones(post.post_type || "");
+                return (
+                    normalizedTitle.includes(normalizedSearchTerm) ||
+                    normalizedPostType.includes(normalizedSearchTerm)
+                );
+            });
+    
+            // Tìm kiếm người dùng
+            const users = await User.find();
+    
+            // Lọc người dùng dựa trên tên người dùng
+            const filteredUsers = users.filter((_id) => {
+                const normalizedFullName = removeVietnameseTones(_id.full_name || "");
+                return normalizedFullName.includes(normalizedSearchTerm);
+            });
+    
+            // Trả về kết quả bao gồm cả bài viết và người dùng
+            return {
+                posts: filteredPosts,
+                users: filteredUsers
+            };
+        } catch (error) {
+            console.error(error);
+            throw error;
+        }
+    };
+
+
+
 }
 
 module.exports = PostService;

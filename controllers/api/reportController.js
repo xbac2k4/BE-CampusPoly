@@ -17,19 +17,46 @@ class ReportController {
     //     }
     // };
     addReport = async (req, res, next) => {
-        try {        
+        try {
+            // Log tất cả dữ liệu trong request (bao gồm cả headers và body)
+            console.log("Request Headers:", req.headers);
+            console.log("Raw Body:", req.body);
+    
+            // Kiểm tra nếu body bị trống, log chi tiết hơn
+            if (Object.keys(req.body).length === 0) {
+                console.log("Body is empty, check Content-Type in Postman or the request structure.");
+            }
+    
+            // Lấy các tham số từ req.body
             const { reported_by_user_id, post_id, report_type_id } = req.body;
+    
+            // Log body nhận được để kiểm tra
+            console.log("Received body:", req.body);
+    
+            // Kiểm tra dữ liệu trước khi truyền vào service
+            if (!reported_by_user_id || !post_id || !report_type_id) {
+                return res.status(400).json({ message: "Missing required fields" });
+            }
+    
+            // Log các tham số đã lấy từ body
+            console.log("Reported by user ID:", reported_by_user_id);
+            console.log("Post ID:", post_id);
+            console.log("Report type ID:", report_type_id);
+    
+            // Gọi service với các tham số đã lấy từ req.body
             const createdReport = await new ReportService().addReport(reported_by_user_id, post_id, report_type_id);
+    
+            // Kiểm tra xem báo cáo đã được tạo thành công hay chưa
             if (createdReport) {
                 return res.json(HttpResponse.result(createdReport));
             } else {
                 return res.json(HttpResponse.fail(HttpResponse.getErrorMessages('dataNotFound')));
             }
         } catch (error) {
-            console.log(error);
+            console.log("Error in controller:", error);
             return res.json(HttpResponse.error(error));
         }
-    };
+    };    
 
 
     getReportById = async (req, res,) => {
