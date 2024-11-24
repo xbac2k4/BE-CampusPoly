@@ -38,6 +38,7 @@ const sendNotification = async (title, body, userList) => {
 
         return {
             notification: 'This is a notification',
+            
         };
     } catch (error) {
         console.error('Error sending message:', error);
@@ -68,8 +69,7 @@ const sendOne = async (title, body, userId) => {
                 }
             },
             data: {
-                name: 'Hello',
-                age: '20'
+                userId: userId.toString(),
             },
             token,
         });
