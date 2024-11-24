@@ -428,7 +428,7 @@ class UserService {
             const data = await response.json();
             const birthdayData = data.birthdays;
             const genderData = data.genders;
-            console.log(data);
+            // console.log(data);
 
             // Kiểm tra và lấy ngày sinh
             let birthday;
@@ -462,20 +462,20 @@ class UserService {
                     sex: gender,
                     device_token: user.device_token,
                 });
-                console.log(newUser);
+                // console.log(newUser);
 
 
                 result = await newUser.save();
             }
 
-            console.log(result);
+            // console.log(result);
             if (result.user_status_id.toString() === '67089ccb862f7badead53eba') {
                 console.log('Người dùng bị chặn');
                 return HttpResponse.fail('Bạn đã bị chặn');
             }
 
             if (result) {
-                // await sendNotification('Chào mừng bạn đến với CampusPoly', 'Học tiếng anh đi! 😡', [result]);
+                await sendNotification('Chào mừng bạn đến với CampusPoly', 'Học tiếng anh đi! 😡', [result]);
                 return HttpResponse.success(result, HttpResponse.getErrorMessages('success'));
             } else {
                 return HttpResponse.fail(HttpResponse.getErrorMessages('dataNotFound'));
