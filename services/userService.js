@@ -89,7 +89,6 @@ class UserService {
 
             // Lưu người dùng vào cơ sở dữ liệu
             const result = await newUser.save();
-
             if (result) {
                 // Cấu hình nội dung email xác nhận
                 const mailOptions = {
@@ -439,9 +438,9 @@ class UserService {
 
             const gender = genderData && genderData[0] && genderData[0].value !== 'unspecified' ? genderData[0].value : 'other';
 
-            console.log('Ngày sinh:', birthday);
-            console.log('Giới tính:', gender);
-            console.log('Access Token:', user.accessToken);
+            // console.log('Ngày sinh:', birthday);
+            // console.log('Giới tính:', gender);
+            // console.log('Access Token:', user.accessToken);
 
             const { accessToken, ...userWithoutToken } = user;
             let result;

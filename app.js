@@ -84,7 +84,7 @@ const { initializeNotifySocket } = require('./sockets/notifySocket.js');
 const logOnlineUsers = () => {
   const users = getUsers();
   const userLog = users.map(user => ({ userId: user._id, socketId: user.socketId }));
-  console.log('Current online users:', userLog);
+  // console.log('Current online users:', userLog);
 };
 
 // Handle connection event
@@ -158,7 +158,7 @@ io.on('connection', (socket) => {
           });
 
           // Log danh sách người dùng hiện tại
-          console.log('Current users online:');
+          // console.log('Current users online:');
           logOnlineUsers();
         }
       }, 2000);

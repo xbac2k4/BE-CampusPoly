@@ -16,7 +16,7 @@ const initializeUserSocket = (io, socket) => {
 
     socket.on('get_users_online', () => {
         updateUserList(io);
-        console.log('get_users_online');
+        // console.log('get_users_online');
     });
 
     socket.on('disconnect', () => {
