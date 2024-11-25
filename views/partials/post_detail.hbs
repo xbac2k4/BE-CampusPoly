@@ -36,6 +36,9 @@
                         blandit vel sapien non, tristique tempor nisi. Proin non est in ipsum tincidunt scelerisque. Sed
                         ac justo vel velit ultricies tempor. Aliquam erat volutpat
                     </div>
+                    <div id="post-hashtag" class="hashtag" style="color: #0078D4">
+                       Hashtag
+                    </div>
                     <div id="wrapper-image-post" class="image pt-1 mt-2 d-flex"></div>
                     <div class="post-icons ml-auto pt-2">
                         <span class="icon mr-3">
@@ -63,31 +66,32 @@
                 document.getElementById('name-user-up').textContent = data.data.postData.user_id.full_name;
                 document.getElementById('time-up').textContent = timeAgo(data.data.postData.createdAt);
                 document.getElementById('post-content').textContent = data.data.postData.content;
+                document.getElementById('post-hashtag').textContent = data.data.postData.hashtag?.hashtag_name;
                 document.getElementById('post-avatar').src = data.data.postData.user_id.avatar === "" ? "https://placehold.co/50x50" : data.data.postData.user_id.avatar.replace("10.0.2.2", "localhost");
                 document.getElementById('like-count').textContent = data.data.postData.like_count;
                 document.getElementById('comment-count').textContent = data.data.postData.comment_count;
                 //
                 // Lắng nghe sự kiện click vào nút xóa
-document.getElementById('delete-post-btn').addEventListener('click', () => {
-    if (confirm("Bạn có chắc chắn muốn xóa bài viết này?")) {
-        // Thực hiện gọi API xóa bài viết
-        fetch(`http://localhost:3000/api/v1/posts/delete-post/${postId}?user_id=${data.data.postData.user_id._id}`, {
-            method: 'DELETE', // Cách gọi API xóa, có thể thay đổi thành POST nếu API của bạn sử dụng POST
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-            } else {
-                alert('Bài viết đã được xóa thành công!');
-                window.location.href = "/post";
-            }
-        })
-        .catch(error => {
-            console.error('Lỗi khi xóa bài viết:', error);
-            alert('Đã xảy ra lỗi, vui lòng thử lại!');
-        });
-    }
-});
+                document.getElementById('delete-post-btn').addEventListener('click', () => {
+                    if (confirm("Bạn có chắc chắn muốn xóa bài viết này?")) {
+                        // Thực hiện gọi API xóa bài viết
+                        fetch(`http://localhost:3000/api/v1/posts/delete-post/${postId}?user_id=${data.data.postData.user_id._id}`, {
+                            method: 'DELETE', // Cách gọi API xóa, có thể thay đổi thành POST nếu API của bạn sử dụng POST
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                } else {
+                                    alert('Bài viết đã được xóa thành công!');
+                                    window.location.href = "/post";
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Lỗi khi xóa bài viết:', error);
+                                alert('Đã xảy ra lỗi, vui lòng thử lại!');
+                            });
+                    }
+                });
 
                 // Hiển thị like và comment
                 // Hiển thị hình ảnh nếu có
@@ -132,7 +136,7 @@ document.getElementById('delete-post-btn').addEventListener('click', () => {
                 // Hiện container sau khi đã fetch xong
                 document.getElementById('post-container').classList.remove('hidden');
             });
-        
+
 
         const timeAgo = (date) => {
             const now = new Date();

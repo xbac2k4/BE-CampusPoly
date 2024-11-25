@@ -39,7 +39,7 @@ const loadPostsSearch = async () => {
 
             // Hiển thị bài viết
             data.posts.map(items => {
-                let html = `<card-post post-id="${items._id}" img="${items.user_id.avatar !== "" ? items.user_id.avatar.replace("10.0.2.2", "localhost") : "https://placehold.co/50x50"}" title="${items.title}" content="${items.content}" user="${items.user_id.full_name}" time="${items.createdAt}" likes="${items.like_count}" comments="${items.comment_count}"></card-post>`;
+                let html = `<card-post post-id="${items._id}" img="${items.user_id.avatar !== "" ? items.user_id.avatar.replace("10.0.2.2", "localhost") : "https://placehold.co/50x50"}" title="${items.title}" content="${items.content}" user="${items.user_id.full_name}" time="${items.createdAt}" likes="${items.like_count}" comments="${items.comment_count}"  hashtag="${items.hashtag?.hashtag_name}"></card-post>`;
                 tbody.insertAdjacentHTML('beforeend', html);
             });
 
@@ -69,7 +69,7 @@ const loadPosts = async () => {
         .then(data => {
             data.data.postData.map(items => {
                 // console.log(items.user_id.avatar);
-                let html = `<card-post post-id="${items._id}" img="${items.user_id.avatar !== "" ? items.user_id.avatar.replace("10.0.2.2", "localhost") : "https://placehold.co/50x50"}" title="${items.title}" content="${items.content}" user="${items.user_id.full_name}" time="${items.createdAt}" likes="${items.like_count}" comments="${items.comment_count}"></card-post>`;
+                let html = `<card-post post-id="${items._id}" img="${items.user_id.avatar !== "" ? items.user_id.avatar.replace("10.0.2.2", "localhost") : "https://placehold.co/50x50"}" title="${items.title}" content="${items.content}" user="${items.user_id.full_name}" time="${items.createdAt}" likes="${items.like_count}" comments="${items.comment_count}" hashtag="${items.hashtag?.hashtag_name}"></card-post>`;
                 tbody.insertAdjacentHTML('beforeend', html);
             });
             // preloader.style.display = 'none';

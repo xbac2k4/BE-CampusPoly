@@ -54,6 +54,7 @@ template.innerHTML = `
                     <span style="font-weight: bold;" id="user-name">User</span> đã đăng <span id="time-up">25</span>
                 </span>
                 <span style="font-size: 0.7rem; color: #5b5e62" id="content" class="content-container">Nội dung chính của bài đăng</span>
+                <span style="font-size: 0.7rem; color: #0078D4" id="hashtag" class="content-container">Hashtag</span>
             </div>
         </div>
         <div class="post-icons ml-auto d-flex flex-column">
@@ -69,7 +70,7 @@ template.innerHTML = `
 
 class CardPost extends HTMLElement {
     static get observedAttributes() {
-        return ['title', 'time', 'user', 'content', 'img', 'likes', 'comments']; // Thêm thuộc tính 'likes' và 'comments'
+        return ['title', 'time', 'user', 'content', 'img', 'likes', 'comments', 'hashtag']; // Thêm thuộc tính 'likes' và 'comments'
     }
 
     constructor() {
@@ -78,11 +79,11 @@ class CardPost extends HTMLElement {
         this.attachShadow({ mode: 'open' });
         // Thêm template vào Shadow DOM
         this.shadowRoot.appendChild(template.content.cloneNode(true));
-         // Thêm sự kiện click để điều hướng tới chi tiết bài viết
-         this.shadowRoot.querySelector('.post-container').addEventListener('click', () => {
+        // Thêm sự kiện click để điều hướng tới chi tiết bài viết
+        this.shadowRoot.querySelector('.post-container').addEventListener('click', () => {
             const postId = this.getAttribute('post-id');
             console.log(postId);
-            
+
             if (postId) {
                 window.location.href = `post-detail/${postId}`;
             }
@@ -98,6 +99,7 @@ class CardPost extends HTMLElement {
         const imgElement = this.shadowRoot.getElementById('post-img');
         const likeElement = this.shadowRoot.getElementById('like-count');
         const commentElement = this.shadowRoot.getElementById('comment-count');
+        const hashtagElement = this.shadowRoot.getElementById('hashtag');
 
         // Cập nhật nội dung dựa trên thuộc tính
         switch (name) {
@@ -121,6 +123,15 @@ class CardPost extends HTMLElement {
                 break;
             case 'comments':
                 commentElement.textContent = newValue; // Cập nhật số lượt bình luận
+                break;
+            case 'hashtag':
+                if (!newValue || newValue.trim() === '' || newValue === 'undefined') {
+                    hashtagElement.style.display = 'none'; // Ẩn hashtag nếu không có giá trị
+                    hashtagElement.textContent = ''; // Xóa nội dung cũ
+                } else {
+                    hashtagElement.style.display = 'block'; // Hiển thị hashtag nếu có giá trị
+                    hashtagElement.textContent = `#${newValue.trim()}`; // Thêm dấu "#" trước nội dung hashtag
+                }
                 break;
         }
     }
