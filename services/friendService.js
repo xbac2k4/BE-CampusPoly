@@ -39,13 +39,17 @@ class FriendService {
             // Lọc kết quả nếu populate trả về null do không khớp điều kiện `match`
             const filteredData = data.filter(item => item.status_id !== null);
 
-            return HttpResponse.success(filteredData, HttpResponse.getErrorMessages('getDataSuccess'));
+            // Lấy danh sách user_id thuộc trạng thái "Chấp nhận" và khác với user_id truyền vào
+            const friendList = filteredData.flatMap(item =>
+                item.user_id.filter(friend => friend._id.toString() !== user_id.toString())
+            );
+
+            return HttpResponse.success(friendList, HttpResponse.getErrorMessages('getDataSuccess'));
         } catch (error) {
             console.log(error);
             return HttpResponse.error(error);
         }
     };
-
     // addFriend = async (user_id, user_friend_id, status_id) => {
     //     try {
     //         // Tìm kiếm bản ghi bạn bè theo user_id và user_friend_id
