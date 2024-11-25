@@ -5,5 +5,6 @@ const MessageController = require('../../controllers/api/messageController');
 
 router.get('/get-message-by-conversation/:conversationID', new MessageController().getMessageByConversation);
 router.post('/add-message', new MessageController().addMessage);
+router.put('/update-message', new MessageController().updateMessage);
 
 module.exports = router;

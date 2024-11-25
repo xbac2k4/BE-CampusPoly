@@ -34,6 +34,7 @@ const initializeNotifySocket = (io, socket) => {
                 updatedAt,
                 receiver_id
             });
+            io.to(receiverUser[0]?.socketId).emit('load_conversation');
         } else {
             // Nếu người nhận không còn online, gửi thông báo đẩy
             sendPushNotification(receiver_id, message);

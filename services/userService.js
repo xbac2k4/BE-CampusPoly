@@ -89,7 +89,6 @@ class UserService {
 
             // Lưu người dùng vào cơ sở dữ liệu
             const result = await newUser.save();
-
             if (result) {
                 // Cấu hình nội dung email xác nhận
                 const mailOptions = {
@@ -428,7 +427,7 @@ class UserService {
             const data = await response.json();
             const birthdayData = data.birthdays;
             const genderData = data.genders;
-            console.log(data);
+            // console.log(data);
 
             // Kiểm tra và lấy ngày sinh
             let birthday;
@@ -439,9 +438,9 @@ class UserService {
 
             const gender = genderData && genderData[0] && genderData[0].value !== 'unspecified' ? genderData[0].value : 'other';
 
-            console.log('Ngày sinh:', birthday);
-            console.log('Giới tính:', gender);
-            console.log('Access Token:', user.accessToken);
+            // console.log('Ngày sinh:', birthday);
+            // console.log('Giới tính:', gender);
+            // console.log('Access Token:', user.accessToken);
 
             const { accessToken, ...userWithoutToken } = user;
             let result;
@@ -462,7 +461,7 @@ class UserService {
                     sex: gender,
                     device_token: user.device_token,
                 });
-                console.log(newUser);
+                // console.log(newUser);
 
 
                 result = await newUser.save();

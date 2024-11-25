@@ -13,9 +13,9 @@ const messageModel = new Schema({
     content: {
         type: String,
     },
-    sent_at: {
-        type: Date,
-        default: Date.now,
+    viewed: {
+        type: Boolean,
+        default: false,
     }
 }, {
     timestamps: true // Kích hoạt tính năng tự động tạo createdAt và updatedAt

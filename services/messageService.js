@@ -58,6 +58,21 @@ class MessageService {
             return HttpResponse.error(error);
         }
     }
+    updateMessage = async (conversation_id) => {
+        try {
+            // Cập nhật các tin nhắn chưa xem (viewed: false) trong conversation_id thành true
+            const result = await Message.updateMany(
+                { conversation_id, viewed: false }, // Điều kiện lọc
+                { $set: { viewed: true } }         // Cập nhật trường viewed thành true
+            );
+
+            // Gửi phản hồi sau khi cập nhật
+            return HttpResponse.success(result, HttpResponse.getErrorMessages('success'));
+        } catch (error) {
+            console.error('Error updating messages viewed status:', error);
+            return HttpResponse.error(error);
+        }
+    }
 }
 
 module.exports = MessageService;
