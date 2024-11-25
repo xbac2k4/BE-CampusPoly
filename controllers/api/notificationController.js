@@ -1,4 +1,5 @@
 const { sendOne } = require('../../notification/Notification');
+const Notification = require('../../models/notificationModel');
 
 class NotificationController {
     sendNotificationToUsers = async (req, res) => {
@@ -9,6 +10,40 @@ class NotificationController {
         } catch (error) {
             console.error('Error sending notification:', error);
             return res.status(500).json({ success: false, message: 'Failed to send notification', error });
+        }
+    }
+
+    getNotificationsByUserId = async (req, res) => {
+        const { userId } = req.query;
+        try {
+            const notifications = await Notification.find({ userId });
+            return res.json({ success: true, notifications });
+        } catch (error) {
+            console.error('Error getting notifications:', error);
+            return res.status(500).json({ success: false, message: 'Failed to get notifications', error });
+        }
+    }
+
+    readNotificationById = async (req, res) => {
+        const { notificationId } = req.body;
+        try {
+            await Notification.findByIdAndUpdate(notificationId, { isRead: true });
+            return res.json({ success: true, message: 'Đọc tin nhắn thành công' });
+        }
+        catch (error) {
+            console.error('Error reading notification:', error);
+            return res.status(500).json({ success: false, message: 'Failed to read notification', error });
+        }
+    }
+
+    readAllNotification = async (req, res) => {
+        const { userId } = req.body;
+        try {
+            await Notification.updateMany({ userId }, { isRead: true });
+            return res.json({ success: true, message: 'Đọc tất cả tin nhắn thành công' });
+        } catch (error) {
+            console.error('Error reading all notifications:', error);
+            return res.status(500).json({ success: false, message: 'Failed to read all notifications', error });
         }
     }
 }

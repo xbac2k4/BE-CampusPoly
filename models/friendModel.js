@@ -18,7 +18,3 @@ const friendModel = new Schema({
 });
 
 module.exports = mongoose.model('friend', friendModel);
-// user_friend_id: {
-//     type: Schema.Types.ObjectId,
-//     ref: 'user',
-// },

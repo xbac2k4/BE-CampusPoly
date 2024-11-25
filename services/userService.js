@@ -417,7 +417,6 @@ class UserService {
     loginWithGoogle = async (user) => {
         try {
             // console.log('user: ', user);
-
             // Gọi Google People API để lấy thêm thông tin ngày sinh và giới tính
             const response = await fetch('https://people.googleapis.com/v1/people/me?personFields=genders,birthdays', {
                 headers: {
