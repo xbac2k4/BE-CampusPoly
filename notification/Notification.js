@@ -1,5 +1,6 @@
 var admin = require('./helper');
 const User = require('../models/userModel'); // Import model User
+const NotificationService = require('../services/notificationService');
 
 const sendNotification = async (title, body, userList) => {
     try {
@@ -8,26 +9,33 @@ const sendNotification = async (title, body, userList) => {
         const tokens = users.map(user => user.device_token).filter(token => token); // Lọc ra các token hợp lệ
         const userIds = users.map(user => user._id.toString()); // Lấy danh sách ID của các user
 
+        const imageUrl = 'https://play-lh.googleusercontent.com/DsyWoouXk7psjF7DCG6MJj_rX9RR9-liQskZXoKvcqQIu_ybUm4F5RntxWh1IZAVSLI';
+        const icon = 'ic_campus_poly';
+        const sound = 'default';
+
         const result = await admin.messaging().sendEachForMulticast({
             notification: {
                 title,
                 body,
-                imageUrl: 'https://play-lh.googleusercontent.com/DsyWoouXk7psjF7DCG6MJj_rX9RR9-liQskZXoKvcqQIu_ybUm4F5RntxWh1IZAVSLI',
+                imageUrl
             },
             android: {
                 notification: {
-                    sound: 'default',
-                    icon: 'ic_campus_poly',
+                    sound,
+                    icon,
                     color: '#211d1e',
                 }
             },
-            tokens,
-            data: {
-                userIds: JSON.stringify(userIds) // Chuyển mảng thành chuỗi JSON
-            }
+            tokens
         });
 
         console.log('Successfully sent message:', result);
+
+        // Gọi hàm addNotification để lưu thông báo vào cơ sở dữ liệu cho từng userId
+        for (const userId of userIds) {
+            await NotificationService.addNotification(userId, title, body, imageUrl, new Date(), icon, sound);
+        }
+
         if (result.failureCount > 0) {
             result.responses.forEach((response, idx) => {
                 if (!response.success) {
@@ -55,25 +63,49 @@ const sendOne = async (title, body, userId) => {
         }
         const token = user.device_token;
 
+        const imageUrl = 'https://play-lh.googleusercontent.com/DsyWoouXk7psjF7DCG6MJj_rX9RR9-liQskZXoKvcqQIu_ybUm4F5RntxWh1IZAVSLI';
+        const icon = 'ic_campus_poly';
+        const sound = 'default';
+
         const result = await admin.messaging().send({
             notification: {
                 title,
                 body,
-                imageUrl: 'https://play-lh.googleusercontent.com/DsyWoouXk7psjF7DCG6MJj_rX9RR9-liQskZXoKvcqQIu_ybUm4F5RntxWh1IZAVSLI',
+                imageUrl
             },
             android: {
                 notification: {
-                    sound: 'default',
-                    icon: 'ic_campus_poly',
+                    sound,
+                    icon,
                     color: '#211d1e'
                 }
             },
-            data: {
-                userId: userId.toString(),
-            },
             token,
         });
+
         console.log('Successfully sent message:', result);
+
+        // Gọi hàm addNotification để lưu thông báo vào cơ sở dữ liệu
+        await NotificationService.addNotification(userId, title, body, imageUrl, new Date(), icon, sound);
+
+        // Phát sự kiện socket để gửi thông báo
+        // global.io.to(user.socketId).emit('new_notification', {
+        //     title,
+        //     body,
+        //     imageUrl,
+        //     icon,
+        //     sound
+        // });
+        global.io.emit('new_notification', {
+            userId,
+            title,
+            body,
+            imageUrl,
+            sentTime: new Date(),
+            icon,
+            sound
+        });
+
         return {
             notification: 'This is a notification'
         };
