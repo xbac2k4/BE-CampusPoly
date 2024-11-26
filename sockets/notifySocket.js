@@ -1,5 +1,5 @@
 const { getUsers } = require("../manager/userManager");
-const { messgaeNotify, sendOne, notifyAddFriend } = require("../notification/Notification");
+const { messgaeNotify, sendOne, notifyAddFriend, sendNotification } = require("../notification/Notification");
 
 const initializeNotifySocket = (io, socket) => {
     socket.on('send_message', async (data) => {
@@ -44,6 +44,12 @@ const initializeNotifySocket = (io, socket) => {
         console.log(data);
 
         await sendOne(sender_name, body, receiver_id, sender_id, type, post_id)
+    });
+    socket.on('send_notification_to_multiple', async (data) => {
+        const { list_receiver_id, body, sender_name, sender_id, type, post_id } = data;
+        console.log(data);
+
+        await sendNotification(sender_name, body, list_receiver_id, sender_id, type, post_id)
     });
 };
 

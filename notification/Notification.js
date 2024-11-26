@@ -2,7 +2,7 @@ var admin = require('./helper');
 const User = require('../models/userModel'); // Import model User
 const NotificationService = require('../services/notificationService');
 
-const sendNotification = async (title, body, userList) => {
+const sendNotification = async (title, body, userList, sender_id, type, post_id) => {
     try {
         // Lấy device_token của những người dùng trong danh sách
         const users = await User.find({ _id: { $in: userList } }).select('device_token');
@@ -33,7 +33,7 @@ const sendNotification = async (title, body, userList) => {
 
         // Gọi hàm addNotification để lưu thông báo vào cơ sở dữ liệu cho từng userId
         for (const userId of userIds) {
-            await NotificationService.addNotification(userId, title, body, imageUrl, new Date(), icon, sound);
+            await NotificationService.addNotification(sender_id, userId, title, body, imageUrl, new Date(), icon, sound, type, post_id);
         }
 
         if (result.failureCount > 0) {
