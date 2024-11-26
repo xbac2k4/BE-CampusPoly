@@ -31,7 +31,11 @@ class CommentService {
                 comment_content: comment_content
             });
             await newComment.save();
-            return HttpResponse.success(newComment, HttpResponse.getErrorMessages('success'));
+            const populatedComment = await Comment.findById(newComment._id).populate(
+                'user_id_comment',
+                'full_name avatar' // Chỉ lấy các trường cần thiết từ User
+            );
+            return HttpResponse.success(populatedComment, HttpResponse.getErrorMessages('success'));
         } catch (error) {
             console.log(error);
             return HttpResponse.error(error);
@@ -42,10 +46,10 @@ class CommentService {
             // Kiểm tra xem người dùng đã like bài viết này chưa
             const comment = await Comment.findById(id);
             // console.log(comment);
-            
+
             const existingComment = comment.user_id_comment.toString() === user_id && comment.post_id.toString() === post_id ? true : false;
             console.log(existingComment);
-            
+
             if (!existingComment) {
                 return
             }

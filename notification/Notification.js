@@ -46,7 +46,7 @@ const sendNotification = async (title, body, userList) => {
 
         return {
             notification: 'This is a notification',
-            
+
         };
     } catch (error) {
         console.error('Error sending message:', error);
@@ -54,7 +54,58 @@ const sendNotification = async (title, body, userList) => {
     }
 };
 
-const sendOne = async (title, body, userId) => {
+const sendOne = async (title, body, receiver_id, sender_id, type, post_id) => {
+    try {
+        // Lấy device_token từ userId
+        const user = await User.findById(receiver_id).select('device_token');
+        if (!user || !user.device_token) {
+            throw new Error('User not found or device token is missing');
+        }
+        const token = user.device_token;
+
+        const imageUrl = 'https://play-lh.googleusercontent.com/DsyWoouXk7psjF7DCG6MJj_rX9RR9-liQskZXoKvcqQIu_ybUm4F5RntxWh1IZAVSLI';
+        const icon = 'ic_campus_poly';
+        const sound = 'default';
+
+        const result = await admin.messaging().send({
+            data: {
+                type: String(type), // Giá trị chuỗi
+                // senderId: String(userId), // Ép `userId` sang chuỗi
+                // actions: JSON.stringify([
+                //     { action: 'accept', label: 'Chấp nhận' },
+                //     { action: 'decline', label: 'Hủy' },
+                // ]), // Mảng được chuyển thành chuỗi JSON
+            },
+            notification: {
+                title,
+                body,
+                imageUrl
+            },
+            android: {
+                notification: {
+                    sound,
+                    icon,
+                    color: '#211d1e'
+                }
+            },
+            token,
+        });
+
+        console.log('Successfully sent message:', result);
+
+        // Gọi hàm addNotification để lưu thông báo vào cơ sở dữ liệu
+        await NotificationService.addNotification(sender_id, receiver_id, title, body, imageUrl, new Date(), icon, sound, type, post_id);
+
+        return {
+            notification: 'This is a notification'
+        };
+    } catch (error) {
+        console.error('Error sending message:', error);
+        throw new Error('Failed to send notification');
+    }
+}
+
+const messgaeNotify = async (title, body, userId) => {
     try {
         // Lấy device_token từ userId
         const user = await User.findById(userId).select('device_token');
@@ -85,27 +136,6 @@ const sendOne = async (title, body, userId) => {
 
         console.log('Successfully sent message:', result);
 
-        // Gọi hàm addNotification để lưu thông báo vào cơ sở dữ liệu
-        await NotificationService.addNotification(userId, title, body, imageUrl, new Date(), icon, sound);
-
-        // Phát sự kiện socket để gửi thông báo
-        // global.io.to(user.socketId).emit('new_notification', {
-        //     title,
-        //     body,
-        //     imageUrl,
-        //     icon,
-        //     sound
-        // });
-        global.io.emit('new_notification', {
-            userId,
-            title,
-            body,
-            imageUrl,
-            sentTime: new Date(),
-            icon,
-            sound
-        });
-
         return {
             notification: 'This is a notification'
         };
@@ -115,4 +145,4 @@ const sendOne = async (title, body, userId) => {
     }
 }
 
-module.exports = { sendNotification, sendOne };
+module.exports = { sendNotification, sendOne, messgaeNotify };

@@ -1,11 +1,13 @@
 const { getUsers } = require("../manager/userManager");
+const { messgaeNotify, sendOne, notifyAddFriend } = require("../notification/Notification");
 
 const initializeNotifySocket = (io, socket) => {
-    socket.on('send_message', (data) => {
-        const { _id, conversation_id, sender_id, receiver_id, content, sent_at, createdAt, updatedAt } = data;
+    socket.on('send_message', async (data) => {
+        const { _id, conversation_id, sender_id, receiver_id, content, sent_at, createdAt, updatedAt, sender_name } = data;
         const users = getUsers();
         const receiverUser = users.filter((user) => user._id === receiver_id);
         if (receiverUser) {
+            await messgaeNotify(sender_name, content, receiver_id)
             io.to(receiverUser[0]?.socketId).emit('new_message', {
                 conversation_id,
                 sender_id,
@@ -23,19 +25,25 @@ const initializeNotifySocket = (io, socket) => {
         }
     });
 
-    socket.on('send_notification', (data) => {
-        const { userId, title, body, imageUrl, icon, sound } = data;
-        const users = getUsers();
-        const receiverUser = users.filter((user) => user._id === userId);
-        if (receiverUser) {
-            io.to(receiverUser[0]?.socketId).emit('new_notification', {
-                title,
-                body,
-                imageUrl,
-                icon,
-                sound
-            });
-        }
+    // socket.on('send_notification', (data) => {
+    //     const { userId, title, body, imageUrl, icon, sound } = data;
+    //     const users = getUsers();
+    //     const receiverUser = users.filter((user) => user._id === userId);
+    //     if (receiverUser) {
+    //         io.to(receiverUser[0]?.socketId).emit('new_notification', {
+    //             title,
+    //             body,
+    //             imageUrl,
+    //             icon,
+    //             sound
+    //         });
+    //     }
+    // });
+    socket.on('send_notify', async (data) => {
+        const { receiver_id, body, sender_name, sender_id, type, post_id } = data;
+        console.log(data);
+
+        await sendOne(sender_name, body, receiver_id, sender_id, type, post_id)
     });
 };
 

@@ -15,8 +15,10 @@ class NotificationController {
 
     getNotificationsByUserId = async (req, res) => {
         const { userId } = req.query;
+        console.log(userId);
+        
         try {
-            const notifications = await Notification.find({ userId });
+            const notifications = await Notification.find({ receiver_id: userId });
             return res.json({ success: true, notifications });
         } catch (error) {
             console.error('Error getting notifications:', error);
@@ -27,8 +29,8 @@ class NotificationController {
     readNotificationById = async (req, res) => {
         const { notificationId } = req.body;
         try {
-            await Notification.findByIdAndUpdate(notificationId, { isRead: true });
-            return res.json({ success: true, message: 'Đọc tin nhắn thành công' });
+            const result = await Notification.findByIdAndUpdate(notificationId, { isRead: true });
+            return res.json({ success: true, message: 'Đọc tin nhắn thành công', data: result });
         }
         catch (error) {
             console.error('Error reading notification:', error);

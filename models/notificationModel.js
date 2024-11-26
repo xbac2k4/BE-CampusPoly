@@ -2,9 +2,14 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const notificationModel = new Schema({
-    userId: {
+    sender_id: {
         type: Schema.Types.ObjectId,
-        ref: 'users',
+        ref: 'user',
+        required: true
+    },
+    receiver_id: {
+        type: Schema.Types.ObjectId,
+        ref: 'user',
         required: true
     },
     title: {
@@ -34,6 +39,14 @@ const notificationModel = new Schema({
     sound: {
         type: String,
         default: 'default'
+    },
+    type: {
+        type: String,
+        required: true
+    },
+    post_id: {
+        type: String,
+        default: ''
     }
 });
 

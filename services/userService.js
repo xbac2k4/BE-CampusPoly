@@ -473,7 +473,7 @@ class UserService {
             }
 
             if (result) {
-                await sendNotification('Chào mừng bạn đến với CampusPoly', 'Học tiếng anh đi! 😡', [result]);
+                // await sendNotification('Chào mừng bạn đến với CampusPoly', 'Học tiếng anh đi! 😡', [result]);
                 return HttpResponse.success(result, HttpResponse.getErrorMessages('success'));
             } else {
                 return HttpResponse.fail(HttpResponse.getErrorMessages('dataNotFound'));

@@ -1,18 +1,21 @@
 const Notification = require("../models/notificationModel");
 
-const addNotification = (userId, title, body, imageUrl, sentTime, smallIcon, sound) => {
+const addNotification = (sender_id, receiver_id, title, body, imageUrl, sentTime, smallIcon, sound, type, post_id) => {
     // Add a new notification
     try {
         console.log('adding notification');
-        
+
         const newNotification = new Notification({
-            userId,
+            sender_id,
+            receiver_id,
             title,
             body,
             imageUrl,
             sentTime,
             smallIcon,
-            sound
+            sound,
+            type,
+            post_id,
         });
 
         const notification = newNotification.save();
