@@ -5,6 +5,7 @@ var router = express.Router();
 // Routes
 const userRoutes = require('./userRoutes');
 const postRoutes = require('./postRoutes');
+const hashtagRoutes = require('./hashtagRoutes');
 const reportRoutes = require('./reportRoutes');
 const likeRoutes = require('./likeRoutes');
 const commentRoutes = require('./commentRoutes');
@@ -19,6 +20,7 @@ const notificationRoutes = require('./notificationRoutes');
 //Routes
 router.use('/users', userRoutes);
 router.use('/posts', postRoutes);
+router.use('/hashtags', hashtagRoutes);
 router.use('/reports', reportRoutes);
 router.use('/likes', likeRoutes);
 router.use('/comments', commentRoutes);

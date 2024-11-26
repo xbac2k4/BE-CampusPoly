@@ -24,9 +24,10 @@ const postModel = new Schema({
         type: String,
         required: true
     },
-    post_type: {
-        type: String, 
-        required: true
+    hashtag: {
+        type: Schema.Types.ObjectId, 
+        ref: 'hashtag', // Liên kết với bảng 'hashtags'
+        default: null,
     },
     is_pinned: {
         type: Boolean,

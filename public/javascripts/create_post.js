@@ -85,6 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const postTextarea = document.querySelector("textarea");
     const postTitleInput = document.querySelector("#postTitle"); // Input cho tiêu đề bài viết
+    const postHashtagInput = document.querySelector("#postHashtag"); // Input cho tiêu đề bài viết
     const postButton = document.querySelector(".custom-button");
 
     // Kiểm tra sự tồn tại của các phần tử trước khi thêm sự kiện
@@ -92,6 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
         postButton.addEventListener("click", async () => {
             const postContent = postTextarea ? postTextarea.value.trim() : "";
             const postTitle = postTitleInput ? postTitleInput.value.trim() : "";
+            const postHashtag = postHashtagInput ? postHashtagInput.value.trim() : "";
 
             if (!postContent || !postTitle) {
                 alert("Vui lòng điền đầy đủ thông tin trước khi đăng!");
@@ -103,7 +105,10 @@ document.addEventListener("DOMContentLoaded", () => {
             formData.append("user_id", userId);
             formData.append("title", postTitle);
             formData.append("content", postContent);
-            formData.append("post_type", "0"); // Gửi giá trị cứng "0" cho post_type
+            if (postHashtag) {
+                formData.append("hashtag", postHashtag); // Chỉ gửi nếu có hashtag
+            }
+
 
             const fileInput = document.getElementById('fileInput');
             if (fileInput && fileInput.files.length > 0) {
@@ -146,6 +151,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     // Làm trắng các trường nhập liệu
                     if (postTextarea) postTextarea.value = ""; // Xóa nội dung sau khi đăng
+                    if (postHashtagInput) postHashtagInput.value = ""; // Xóa tiêu đề sau khi đăng
                     if (postTitleInput) postTitleInput.value = ""; // Xóa tiêu đề sau khi đăng
                     const postContentDiv = document.querySelector(".post-content");
                     if (postContentDiv) postContentDiv.innerHTML = ""; // Xóa ảnh đã chọn nếu có

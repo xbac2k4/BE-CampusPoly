@@ -20,7 +20,7 @@ const removeVietnameseTones = (str) => {
 class PostService {
     getAllPost = async () => {
         try {
-            const data = await Post.find().populate('user_id', 'full_name avatar').populate('group_id');
+            const data = await Post.find().populate('user_id', 'full_name avatar').populate('group_id').populate('hashtag','hashtag_name');
             // console.log('data: ', data);
             const updatedPosts = await Promise.all(data.map(async (post) => {
                 // Lấy số lượng like cho bài viết
@@ -45,7 +45,7 @@ class PostService {
     getPostByPage = async (page, limit) => {
         try {
             const skip = (parseInt(page) - 1) * parseInt(limit);
-            const posts = await Post.find().skip(skip).limit(parseInt(limit)).populate('group_id').populate('user_id', 'full_name avatar');
+            const posts = await Post.find().skip(skip).limit(parseInt(limit)).populate('group_id').populate('user_id', 'full_name avatar').populate('hashtag','hashtag_name');
             const total = await Post.countDocuments();
             const totalPages = Math.ceil(total / parseInt(limit));
             // console.log('data: ', data);
@@ -112,7 +112,7 @@ class PostService {
 
     getPostByID = async (id) => {
         try {
-            const data = await Post.findById(id).populate('user_id', 'full_name avatar').populate('group_id');
+            const data = await Post.findById(id).populate('user_id', 'full_name avatar').populate('group_id').populate('hashtag','hashtag_name');
             // console.log('data: ', data);
             if (data) {
                 // Lấy số lượng like cho bài viết
@@ -160,7 +160,7 @@ class PostService {
             return HttpResponse.error(error);
         }
     }
-    addPost = async (user_id, group_id, title, content, post_type, imageArray) => {
+    addPost = async (user_id, group_id, title, content, hashtag, imageArray) => {
         try {
             // Tạo bài viết mới
             const newPost = new Post({
@@ -169,7 +169,7 @@ class PostService {
                 image: imageArray,
                 title: title,
                 content: content,
-                post_type: post_type,
+                hashtag: hashtag,
             });
 
             // Lưu bài viết vào cơ sở dữ liệu
@@ -181,7 +181,7 @@ class PostService {
             return HttpResponse.error(error);
         }
     }
-    updatePost = async (id, user_id, group_id, title, content, post_type, imageArray) => {
+    updatePost = async (id, user_id, group_id, title, content, hashtag, imageArray) => {
         try {
             // Tìm bài viết theo ID
             const post = await Post.findById(id);
@@ -236,70 +236,99 @@ class PostService {
 
     searchPostsAdmin = async (searchTerm) => {
         try {
-            const normalizedSearchTerm = removeVietnameseTones(searchTerm || "");
-
+            // Loại bỏ dấu và chuẩn hóa từ tìm kiếm
+            let normalizedSearchTerm = removeVietnameseTones(searchTerm || "").trim();
+            console.log("Normalized Search Term:", normalizedSearchTerm); // Log normalizedSearchTerm
+        
+            // Kiểm tra xem searchTerm có phải là hashtag không
+            let isHashtagSearch = normalizedSearchTerm[0] === "#";
+            console.log("Is Hashtag Search:", isHashtagSearch); // Log xem có phải hashtag không
+        
+            // Nếu là hashtag, cắt bỏ # và tìm kiếm phần còn lại
+            if (isHashtagSearch) {
+                normalizedSearchTerm = normalizedSearchTerm.substring(1); // Cắt bỏ dấu #
+            }
+        
+            // Chuẩn hóa searchTerm (sau khi cắt bỏ dấu #) để tìm kiếm chính xác
+            normalizedSearchTerm = removeVietnameseTones(normalizedSearchTerm);
+            console.log("Normalized Search Term after removing '#':", normalizedSearchTerm); // Log sau khi chuẩn hóa lại
+        
             // Tải tất cả bài viết từ database
             const posts = await Post.find()
-                .populate("user_id") // Lấy thông tin người dùng liên quan
-                .populate("group_id"); // Lấy thông tin nhóm liên quan
-
-            // Lọc bài viết dựa trên tiêu đề hoặc loại bài viết
+                .populate("user_id")
+                .populate("hashtag") // Giả sử bạn có mối quan hệ với hashtag
+            console.log("All Posts Retrieved:", posts); // Log tất cả bài viết được tải
+        
+            // Lọc bài viết dựa trên tiêu đề hoặc hashtag
             const filteredPosts = posts.filter((post) => {
                 const normalizedTitle = removeVietnameseTones(post.title || "");
-                const normalizedPostType = removeVietnameseTones(post.post_type || "");
+                const normalizedHashtag = post.hashtag ? removeVietnameseTones(post.hashtag.hashtag_name.replace('#', '') || "") : "";
+                console.log("Post Title:", post.title); // Log tiêu đề bài viết
+                console.log("Normalized Post Title:", normalizedTitle); // Log tiêu đề đã chuẩn hóa
+                console.log("Post Hashtag:", post.hashtag?.hashtag_name); // Log hashtag của bài viết
+                console.log("Normalized Hashtag:", normalizedHashtag); // Log hashtag đã chuẩn hóa
+        
+                // Tìm kiếm trong tiêu đề hoặc hashtag (có hoặc không có dấu #)
                 return (
                     normalizedTitle.includes(normalizedSearchTerm) ||
-                    normalizedPostType.includes(normalizedSearchTerm)
+                    normalizedHashtag.includes(normalizedSearchTerm)
                 );
             });
-
+        
+            console.log("Filtered Posts:", filteredPosts); // Log các bài viết đã được lọc
+        
+            // Nếu không tìm thấy bài viết phù hợp
+            if (filteredPosts.length === 0) {
+                throw { status: 400, message: "Data not found" };
+            }
+        
             return filteredPosts; // Trả về danh sách bài viết phù hợp
         } catch (error) {
-            console.error(error);
+            console.error("Error:", error); // Log lỗi nếu có
             throw error;
         }
     };
-    searchPosts = async (searchTerm) => {
-        try {
-            const normalizedSearchTerm = removeVietnameseTones(searchTerm || "");
     
-            // Tìm kiếm bài viết
-            const posts = await Post.find()
-                .populate("user_id")  // Lấy thông tin người dùng liên quan
-                .populate("group_id"); // Lấy thông tin nhóm liên quan
     
-            // Lọc bài viết dựa trên tiêu đề hoặc loại bài viết
-            const filteredPosts = posts.filter((post) => {
-                const normalizedTitle = removeVietnameseTones(post.title || "");
-                const normalizedPostType = removeVietnameseTones(post.post_type || "");
-                return (
-                    normalizedTitle.includes(normalizedSearchTerm) ||
-                    normalizedPostType.includes(normalizedSearchTerm)
-                );
-            });
     
-            // Tìm kiếm người dùng
-            const users = await User.find();
+    // searchPosts = async (searchTerm) => {
+    //     try {
+    //         const normalizedSearchTerm = removeVietnameseTones(searchTerm || "");
     
-            // Lọc người dùng dựa trên tên người dùng
-            const filteredUsers = users.filter((_id) => {
-                const normalizedFullName = removeVietnameseTones(_id.full_name || "");
-                return normalizedFullName.includes(normalizedSearchTerm);
-            });
+    //         // Tìm kiếm bài viết
+    //         const posts = await Post.find()
+    //             .populate("user_id")  // Lấy thông tin người dùng liên quan
+    //             .populate("group_id"); // Lấy thông tin nhóm liên quan
     
-            // Trả về kết quả bao gồm cả bài viết và người dùng
-            return {
-                posts: filteredPosts,
-                users: filteredUsers
-            };
-        } catch (error) {
-            console.error(error);
-            throw error;
-        }
-    };
-
-
-
+    //         // Lọc bài viết dựa trên tiêu đề hoặc loại bài viết
+    //         const filteredPosts = posts.filter((post) => {
+    //             const normalizedTitle = removeVietnameseTones(post.title || "");
+    //             const normalizedPostType = removeVietnameseTones(post.hashtag || "");
+    //             return (
+    //                 normalizedTitle.includes(normalizedSearchTerm) ||
+    //                 normalizedPostType.includes(normalizedSearchTerm)
+    //             );
+    //         });
+    
+    //         // Tìm kiếm người dùng
+    //         const users = await User.find();
+    
+    //         // Lọc người dùng dựa trên tên người dùng
+    //         const filteredUsers = users.filter((_id) => {
+    //             const normalizedFullName = removeVietnameseTones(_id.full_name || "");
+    //             return normalizedFullName.includes(normalizedSearchTerm);
+    //         });
+    
+    //         // Trả về kết quả bao gồm cả bài viết và người dùng
+    //         return {
+    //             posts: filteredPosts,
+    //             users: filteredUsers
+    //         };
+    //     } catch (error) {
+    //         console.error(error);
+    //         throw error;
+    //     }
+    // };
 }
 
 module.exports = PostService;
