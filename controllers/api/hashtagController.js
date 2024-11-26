@@ -62,26 +62,26 @@ class HashtagController {
         }
     };
     
-    // searchHashtag = async (req, res) => {
-    //     try {
-    //         const { searchTerm } = req.query;
+    searchHashtag = async (req, res) => {
+        try {
+            const { searchTerm } = req.query;
+            // Gọi service để thực hiện tìm kiếm
+            const hashtags = await new HashtagService().searchHashtag(searchTerm);
     
-    //         // Gọi service để thực hiện tìm kiếm
-    //         const posts = await new PostService().searchPostsAdmin(searchTerm);
-    
-    //         if (posts.length > 0) {
-    //             return res.json({
-    //                 success: true,
-    //                 posts,
-    //             });
-    //         } else {
-    //             return res.json(HttpResponse.fail(HttpResponse.getErrorMessages('dataNotFound')));
-    //         }
-    //     } catch (error) {
-    //         console.error(error);
-    //         return res.json(HttpResponse.error(error));
-    //     }
-    // };
+        // Kiểm tra xem `hashtags` có phải là một mảng hay không
+        if (Array.isArray(hashtags) && hashtags.length > 0) {
+            return res.json({
+                success: true,
+                hashtags,
+            });
+        } else {
+            return res.json(HttpResponse.fail(HttpResponse.getErrorMessages('dataNotFound')));
+        }
+        } catch (error) {
+            console.error(error);
+            return res.json(HttpResponse.error(error));
+        }
+    };
 
 }
 

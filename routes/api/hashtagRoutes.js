@@ -6,5 +6,5 @@ router.get('/get-all-hashtag', new HashtagController().getAllHashtag);
 router.get('/get-hashtag-by-id/:id', new HashtagController().getHashtagByID);
 router.get('/get-hashtag-by-postID', new HashtagController().getHashtagByPostID);
 router.post('/add-hashtag', new HashtagController().addHashtag);
-// router.get('/admin-search', new HashtagController().searchPostsAdmin);
+router.get('/search-hashtag', new HashtagController().searchHashtag);
 module.exports = router;

@@ -130,7 +130,7 @@ class CardPost extends HTMLElement {
                     hashtagElement.textContent = ''; // Xóa nội dung cũ
                 } else {
                     hashtagElement.style.display = 'block'; // Hiển thị hashtag nếu có giá trị
-                    hashtagElement.textContent = `#${newValue.trim()}`; // Thêm dấu "#" trước nội dung hashtag
+                    hashtagElement.textContent = `${newValue.trim()}`; // Thêm dấu "#" trước nội dung hashtag
                 }
                 break;
         }
