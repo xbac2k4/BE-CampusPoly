@@ -109,16 +109,17 @@ const sendOne = async (title, body, receiver_id, sender_id, type, post_id) => {
     }
 }
 
-const messgaeNotify = async (title, body, userId) => {
+const messgaeNotify = async (title, body, receiver_id, sender_id) => {
     try {
         // Lấy device_token từ userId
-        const user = await User.findById(userId).select('device_token');
+        const user = await User.findById(receiver_id).select('device_token');
+        const userAvatar = await User.findById(sender_id).select('avatar');
         if (!user || !user.device_token) {
             throw new Error('User not found or device token is missing');
         }
         const token = user.device_token;
 
-        const imageUrl = 'https://play-lh.googleusercontent.com/DsyWoouXk7psjF7DCG6MJj_rX9RR9-liQskZXoKvcqQIu_ybUm4F5RntxWh1IZAVSLI';
+        const imageUrl = userAvatar?.avatar;
         const icon = 'ic_campus_poly';
         const sound = 'default';
 

@@ -7,7 +7,7 @@ const initializeNotifySocket = (io, socket) => {
         const users = getUsers();
         const receiverUser = users.filter((user) => user._id === receiver_id);
         if (receiverUser) {
-            await messgaeNotify(sender_name, content, receiver_id)
+            await messgaeNotify(sender_name, content, receiver_id, sender_id)
             io.to(receiverUser[0]?.socketId).emit('new_message', {
                 conversation_id,
                 sender_id,
@@ -45,7 +45,7 @@ const initializeNotifySocket = (io, socket) => {
 
         await sendOne(sender_name, body, receiver_id, sender_id, type, post_id)
         socket.emit('load_notification')
-        console.log('123');   
+        console.log('123');
     });
     socket.on('send_notification_to_multiple', async (data) => {
         const { list_receiver_id, body, sender_name, sender_id, type, post_id } = data;
