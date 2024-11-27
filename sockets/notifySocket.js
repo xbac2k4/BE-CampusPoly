@@ -21,7 +21,7 @@ const initializeNotifySocket = (io, socket) => {
             io.to(receiverUser[0]?.socketId).emit('load_conversation');
         } else {
             // Nếu người nhận không còn online, gửi thông báo đẩy
-            sendPushNotification(receiver_id, message);
+            // sendPushNotification(receiver_id, message);
         }
     });
 
@@ -44,12 +44,15 @@ const initializeNotifySocket = (io, socket) => {
         console.log(data);
 
         await sendOne(sender_name, body, receiver_id, sender_id, type, post_id)
+        socket.emit('load_notification')
+        console.log('123');   
     });
     socket.on('send_notification_to_multiple', async (data) => {
         const { list_receiver_id, body, sender_name, sender_id, type, post_id } = data;
         console.log(data);
 
         await sendNotification(sender_name, body, list_receiver_id, sender_id, type, post_id)
+        socket.emit('load_notification')
     });
 };
 

@@ -24,6 +24,25 @@ const initializeUserSocket = (io, socket) => {
         console.log(`Socket ${socket.id} đã ngắt kết nối.`);
     });
 
+    socket.on('join_post', (postId) => {
+        socket.join(postId);
+    });
+
+    socket.on('user_like_post', (newLike) => {
+        // updateUserList(io);
+        console.log('get_user_like_post');
+        const { postId } = newLike;
+        io.to(postId).emit('get_user_like_post', newLike);
+    });
+
+    socket.on('user_comment_post', (newComment) => {
+        // updateUserList(io);
+        console.log('get_user_comment_post');
+        // console.log(newComment);
+        const { postId } = newComment;
+        io.to(postId).emit('get_user_comment_post', newComment);
+    });
+
     // Hàm để cập nhật danh sách User cho tất cả client
     const updateUserList = (io) => {
         const users = getUsers();

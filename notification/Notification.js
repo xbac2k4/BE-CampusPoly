@@ -8,8 +8,9 @@ const sendNotification = async (title, body, userList, sender_id, type, post_id)
         const users = await User.find({ _id: { $in: userList } }).select('device_token');
         const tokens = users.map(user => user.device_token).filter(token => token); // Lọc ra các token hợp lệ
         const userIds = users.map(user => user._id.toString()); // Lấy danh sách ID của các user
+        const userAvatar = await User.findById(sender_id).select('avatar');
 
-        const imageUrl = 'https://play-lh.googleusercontent.com/DsyWoouXk7psjF7DCG6MJj_rX9RR9-liQskZXoKvcqQIu_ybUm4F5RntxWh1IZAVSLI';
+        const imageUrl = userAvatar?.avatar;
         const icon = 'ic_campus_poly';
         const sound = 'default';
 
@@ -58,12 +59,15 @@ const sendOne = async (title, body, receiver_id, sender_id, type, post_id) => {
     try {
         // Lấy device_token từ userId
         const user = await User.findById(receiver_id).select('device_token');
+        const userAvatar = await User.findById(sender_id).select('avatar');
+        // console.log(user);
+
         if (!user || !user.device_token) {
             throw new Error('User not found or device token is missing');
         }
         const token = user.device_token;
 
-        const imageUrl = 'https://play-lh.googleusercontent.com/DsyWoouXk7psjF7DCG6MJj_rX9RR9-liQskZXoKvcqQIu_ybUm4F5RntxWh1IZAVSLI';
+        const imageUrl = userAvatar?.avatar;
         const icon = 'ic_campus_poly';
         const sound = 'default';
 
