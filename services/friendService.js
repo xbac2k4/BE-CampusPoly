@@ -125,14 +125,18 @@ class FriendService {
     removeFriend = async (user_id, user_friend_id) => {
         try {
             // Tìm kiếm bản ghi bạn bè theo user_id và user_friend_id
-            const existingFriend = await Friend.findOne({ user_id, user_friend_id });
+            const existingFriend = await Friend.findOne({
+                user_id: { $all: [user_id, user_friend_id] }, // user_id phải chứa cả user_id và user_friend_id
+            });
 
             if (!existingFriend) {
                 return
             }
 
             // Nếu đã tìm thấy, xóa bản ghi
-            await Friend.deleteOne({ user_id, user_friend_id });
+            await Friend.deleteOne({
+                user_id: { $all: [user_id, user_friend_id] }, // user_id phải chứa cả user_id và user_friend_id
+            });
 
             return HttpResponse.success(existingFriend, HttpResponse.getErrorMessages('success'));
         } catch (error) {
