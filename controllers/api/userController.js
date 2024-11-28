@@ -137,6 +137,24 @@ class UserController {
             return res.json(HttpResponse.error(error));
         }
     }
+    getUserByName = async (req, res) => {
+        const { searchTerm, page, limit } = req.query;  // Lấy từ query params
+        try {
+            // Gọi phương thức trong service và truyền vào các tham số
+            const data = await new UserService().getUserByName(searchTerm, page, limit);
+            
+            if (data) {
+                return res.json(HttpResponse.result(data));
+            } else {
+                return res.json(HttpResponse.fail(HttpResponse.getErrorMessages('dataNotFound')));
+            }
+        } catch (error) {
+            console.log(error);
+            return res.json(HttpResponse.error(error));
+        }
+    };
+    
+    
 }
 
 module.exports = UserController;

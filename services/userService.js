@@ -12,6 +12,16 @@ const { sendNotification } = require("../notification/Notification");
 dotenv.config();
 const SECRETKEY = process.env.SECRETKEY
 
+const removeVietnameseTones = (str) => {
+    return str
+        .normalize('NFD') // Chuẩn hóa Unicode
+        .replace(/[\u0300-\u036f]/g, '') // Loại bỏ dấu
+        .replace(/đ/g, 'd') // Chuyển đ -> d
+        .replace(/Đ/g, 'D') // Chuyển Đ -> D
+        .replace(/[^\w\s]/gi, '') // Loại bỏ ký tự đặc biệt
+        .toLowerCase(); // Chuyển về chữ thường
+};
+
 class UserService {
     login = async (email, password) => {
         try {
@@ -483,6 +493,88 @@ class UserService {
             return HttpResponse.error(error);
         }
     }
+    getUserByName = async (searchTerm, page, limit) => {
+        try {
+            // Đảm bảo page và limit hợp lệ
+            page = parseInt(page) || 1;
+            limit = parseInt(limit) || 10;
+    
+            const skip = (page - 1) * limit;  // Tính số bản ghi cần bỏ qua (skip)
+    
+            // Chuẩn hóa từ khóa tìm kiếm (loại bỏ dấu tiếng Việt và khoảng trắng thừa)
+            const normalizedSearchTerm = removeVietnameseTones(searchTerm || "").trim();
+            console.log("Normalized Search Term:", normalizedSearchTerm);
+    
+            // Tìm người dùng có tên gần khớp với từ khóa tìm kiếm (bất kỳ vị trí nào trong chuỗi)
+            const users = await Users.find({
+                $or: [
+                    { full_name: { $regex: normalizedSearchTerm, $options: 'i' } },  // Tìm kiếm không dấu
+                    { full_name: { $regex: searchTerm, $options: 'i' } }  // Tìm kiếm có dấu
+                ]
+            })
+                .skip(skip)  // Bỏ qua số lượng bản ghi
+                .limit(limit)  // Giới hạn số lượng bản ghi trả về
+                .populate('user_status_id', '-_id')  // Lấy thông tin trạng thái
+                .populate('role');  // Lấy thông tin role
+    
+            // Tính tổng số bản ghi để tính tổng số trang
+            const totalUsers = await Users.countDocuments({
+                $or: [
+                    { full_name: { $regex: normalizedSearchTerm, $options: 'i' } },  // Tính tổng số người dùng không dấu
+                    { full_name: { $regex: searchTerm, $options: 'i' } }  // Tính tổng số người dùng có dấu
+                ]
+            });
+            const totalPages = Math.ceil(totalUsers / limit);  // Tính tổng số trang
+    
+            // Tạo một mảng để chứa thông tin người dùng và bạn bè của họ
+            const usersWithFriends = await Promise.all(users.map(async (user) => {
+                // Tìm danh sách bạn bè cho từng người dùng
+                const friends = await Friend.find({ user_id: user._id })
+                    .select('user_id status_id')  // Chọn trường user_id và status_id
+                    .populate('status_id', 'status_name -_id') // Chỉ lấy trường status_name
+                    .lean();  // Sử dụng lean() để tránh phải gọi toObject()
+    
+                // Lọc ra danh sách bạn bè có trạng thái là "Chấp nhận"
+                const acceptedFriends = friends.filter(friend => friend.status_id.status_name === 'Chấp nhận')
+                    .map(friend => {
+                        // Lọc ra bạn bè không chứa user_id là người tìm
+                        const otherFriend = friend.user_id.filter(id => id.toString() !== user._id.toString());
+                        return otherFriend[0];  // Chỉ lấy user_id của bạn bè
+                    });
+    
+                // Lấy thông tin chi tiết bạn bè
+                const populatedFriends = await Promise.all(acceptedFriends.map(async (userId) => {
+                    const friendDetails = await Users.findById(userId)
+                        .select('full_name avatar'); // Lấy tên và avatar của người bạn
+                    return {
+                        _id: friendDetails._id,
+                        full_name: friendDetails.full_name,
+                        avatar: friendDetails.avatar,
+                    };
+                }));
+    
+                // Trả về thông tin người dùng kèm bạn bè
+                return {
+                    ...user.toObject(),  // Chuyển đối tượng mongoose thành đối tượng thuần
+                    friends: populatedFriends,  // Thêm danh sách bạn bè vào đối tượng người dùng
+                };
+            }));
+    
+            // Kiểm tra nếu có dữ liệu người dùng
+            if (usersWithFriends.length > 0) {
+                return HttpResponse.success({
+                    users: usersWithFriends,  // Dữ liệu người dùng và bạn bè
+                    totalPages,  // Tổng số trang
+                }, HttpResponse.getErrorMessages('success'));
+            } else {
+                return HttpResponse.fail(HttpResponse.getErrorMessages('dataNotFound'));
+            }
+        } catch (error) {
+            console.log(error);
+            return HttpResponse.error(error);
+        }
+    };
+    
 }
 
 module.exports = UserService;

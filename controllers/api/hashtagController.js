@@ -67,7 +67,6 @@ class HashtagController {
             const { searchTerm } = req.query;
             // Gọi service để thực hiện tìm kiếm
             const hashtags = await new HashtagService().searchHashtag(searchTerm);
-    
         // Kiểm tra xem `hashtags` có phải là một mảng hay không
         if (Array.isArray(hashtags) && hashtags.length > 0) {
             return res.json({

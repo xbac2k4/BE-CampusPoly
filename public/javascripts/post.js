@@ -124,3 +124,15 @@ searchInput.addEventListener('input', () => {
         loadPosts();
     }
 });
+
+document.addEventListener("DOMContentLoaded", () => {
+    // Lấy phần tử "Gần đây" từ DOM
+    const recentFilter = document.getElementById("recent-filter");
+
+    // Thêm sự kiện click vào "Gần đây"
+    recentFilter.addEventListener("click", (event) => {
+        event.preventDefault(); // Ngăn chặn hành động mặc định của liên kết
+        window.location.reload(); // Tải lại trang
+    });
+});
+

@@ -17,6 +17,7 @@ const conversationRoutes = require('./conversationRoutes');
 const messageRoutes = require('./messageRoutes');
 const notificationRoutes = require('./notificationRoutes');
 const userPreferencesRoutes = require('./userPreferencesRoutes');
+const searchplus = require('./searchplusRoutes');
 //====================== Sử dụng ==========================//
 //Routes
 router.use('/users', userRoutes);
@@ -33,5 +34,6 @@ router.use('/conversations', conversationRoutes);
 router.use('/messages', messageRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/userpreferences', userPreferencesRoutes);
+router.use('/searchpluss', searchplus);
 
 module.exports = router;
