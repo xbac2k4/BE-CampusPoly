@@ -89,8 +89,8 @@ class HashtagService {
             const hashtags = await Hashtag.find()
             const filteredHasgtags = hashtags.filter((hashtag) => {
                 const normalizedHashtag = hashtag ? removeVietnameseTones(hashtag?.hashtag_name.replace('#', '') || "") : "";
-                console.log("Post Hashtag:", hashtag?.hashtag_name); // Log hashtag của bài viết
-                console.log("Normalized Hashtag:", normalizedHashtag); // Log hashtag đã chuẩn hóa
+                // console.log("Post Hashtag:", hashtag?.hashtag_name); // Log hashtag của bài viết
+                // console.log("Normalized Hashtag:", normalizedHashtag); // Log hashtag đã chuẩn hóa
                 return (
                     normalizedHashtag.includes(normalizedSearchTerm)
                 );
@@ -106,47 +106,6 @@ class HashtagService {
             throw error;
         }
     };
-    // searchPosts = async (searchTerm) => {
-    //     try {
-    //         const normalizedSearchTerm = removeVietnameseTones(searchTerm || "");
-
-    //         // Tìm kiếm bài viết
-    //         const posts = await Post.find()
-    //             .populate("user_id")  // Lấy thông tin người dùng liên quan
-    //             .populate("group_id"); // Lấy thông tin nhóm liên quan
-
-    //         // Lọc bài viết dựa trên tiêu đề hoặc loại bài viết
-    //         const filteredPosts = posts.filter((post) => {
-    //             const normalizedTitle = removeVietnameseTones(post.title || "");
-    //             const normalizedPostType = removeVietnameseTones(post.post_type || "");
-    //             return (
-    //                 normalizedTitle.includes(normalizedSearchTerm) ||
-    //                 normalizedPostType.includes(normalizedSearchTerm)
-    //             );
-    //         });
-
-    //         // Tìm kiếm người dùng
-    //         const users = await User.find();
-
-    //         // Lọc người dùng dựa trên tên người dùng
-    //         const filteredUsers = users.filter((_id) => {
-    //             const normalizedFullName = removeVietnameseTones(_id.full_name || "");
-    //             return normalizedFullName.includes(normalizedSearchTerm);
-    //         });
-
-    //         // Trả về kết quả bao gồm cả bài viết và người dùng
-    //         return {
-    //             posts: filteredPosts,
-    //             users: filteredUsers
-    //         };
-    //     } catch (error) {
-    //         console.error(error);
-    //         throw error;
-    //     }
-    // };
-
-
-
 }
 
 module.exports = HashtagService;

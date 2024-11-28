@@ -4,7 +4,7 @@ const initializeUserSocket = (io, socket) => {
     // Xử lý sự kiện khi User đăng nhập
     socket.on('user_login', (userInfo) => {
         const { _id: userId } = userInfo; // Giả sử `_id` là định danh duy nhất của user
-        console.log(userId);
+        // console.log(userId);
 
         // Lưu hoặc cập nhật thông tin người dùng với userId và Socket ID mới
         addUser(userId, socket.id, userInfo);
