@@ -49,6 +49,26 @@ class PostController {
             return res.json(HttpResponse.error(error));
         }
     }
+    getPostsByUserInteraction = async (req, res, next) => {
+        try {
+            const { user_id } = req.query;
+            const data = await new PostService().getPostsByUserInteraction(user_id);
+            console.log('data: ', data);
+            if (data) {
+                return res.json({
+                    status: data.status,
+                    message: data.message,
+                    data: data.data,
+                    totalPages: data.totalPages,
+                });
+            } else {
+                return res.json(HttpResponse.fail(HttpResponse.getErrorMessages('dataNotFound')));
+            }
+        } catch (error) {
+            console.log(error);
+            return res.json(HttpResponse.error(error));
+        }
+    }
     getPostByUserID = async (req, res, next) => {
         try {
             const { user_id } = req.query;
@@ -76,19 +96,19 @@ class PostController {
             }
             console.log(imageArray);
 
-                   // Xử lý hashtags (nếu có)
-        let processedHashtags = [];
-        if (hashtag && hashtag.length > 0) {
-            const hashtagArray = Array.isArray(hashtag) ? hashtag : [hashtag];
-            const hashtagService = new HashtagService();
-            for (const tag of hashtagArray) {
-                const result = await hashtagService.addOrUpdateHashtag(tag.trim());
-                processedHashtags.push(result.data._id); // Lưu lại ID của hashtag để sử dụng
+            // Xử lý hashtags (nếu có)
+            let processedHashtags = [];
+            if (hashtag && hashtag.length > 0) {
+                const hashtagArray = Array.isArray(hashtag) ? hashtag : [hashtag];
+                const hashtagService = new HashtagService();
+                for (const tag of hashtagArray) {
+                    const result = await hashtagService.addOrUpdateHashtag(tag.trim());
+                    processedHashtags.push(result.data._id); // Lưu lại ID của hashtag để sử dụng
+                }
+            } else {
+                // Nếu không có hashtag, set processedHashtags là mảng trống hoặc null
+                processedHashtags = null; // Hoặc có thể để processedHashtags = [] nếu cần
             }
-        } else {
-            // Nếu không có hashtag, set processedHashtags là mảng trống hoặc null
-            processedHashtags = null; // Hoặc có thể để processedHashtags = [] nếu cần
-        }
 
             const createdPost = await new PostService().addPost(user_id, group_id, title, content, processedHashtags, imageArray);
             if (createdPost) {

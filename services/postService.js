@@ -6,6 +6,7 @@ const Comment = require("../models/commentModel");
 const HttpResponse = require("../utils/httpResponse");
 const dotenv = require('dotenv');
 const { use } = require("../routes/api");
+const userPreferencesModel = require("../models/userPreferencesModel");
 dotenv.config();
 const displayedPostIds = new Set(); // Set để lưu trữ ID bài viết đã hiển thị
 const removeVietnameseTones = (str) => {
@@ -20,7 +21,7 @@ const removeVietnameseTones = (str) => {
 class PostService {
     getAllPost = async () => {
         try {
-            const data = await Post.find().populate('user_id', 'full_name avatar').populate('group_id').populate('hashtag','hashtag_name');
+            const data = await Post.find().populate('user_id', 'full_name avatar').populate('group_id').populate('hashtag', 'hashtag_name');
             // console.log('data: ', data);
             const updatedPosts = await Promise.all(data.map(async (post) => {
                 // Lấy số lượng like cho bài viết
@@ -45,7 +46,7 @@ class PostService {
     getPostByPage = async (page, limit) => {
         try {
             const skip = (parseInt(page) - 1) * parseInt(limit);
-            const posts = await Post.find().skip(skip).limit(parseInt(limit)).populate('group_id').populate('user_id', 'full_name avatar').populate('hashtag','hashtag_name');
+            const posts = await Post.find().skip(skip).limit(parseInt(limit)).populate('group_id').populate('user_id', 'full_name avatar').populate('hashtag', 'hashtag_name');
             const total = await Post.countDocuments();
             const totalPages = Math.ceil(total / parseInt(limit));
             // console.log('data: ', data);
@@ -72,7 +73,7 @@ class PostService {
             return HttpResponse.error(error);
         }
     }
-
+    // ------------------------------------- //
     // getPostByPage = async (page, limit) => {
     //     try {
     //         // Lấy tất cả bài viết
@@ -109,10 +110,264 @@ class PostService {
     //         return HttpResponse.error(error);
     //     }
     // }
+    getPostsByUserInteraction = async (user_id) => {
+        try {
+            // Lấy danh sách hashtag mà user đã tương tác
+            const userPreferences = await userPreferencesModel.find({ user_id: user_id })
+                .sort({ interaction_score: -1 });
+
+            if (!userPreferences.length) {
+                // Nếu không có dữ liệu tương tác thì không lọc theo hashtag
+                const posts = await Post.find()
+                    .populate('group_id')
+                    .populate('user_id', 'full_name avatar')
+                    .populate('hashtag', 'hashtag_name');
+
+                // Tính điểm cho bài viết không có tương tác (điểm = 0)
+                const scoredPosts = posts.map(post => ({
+                    ...post.toObject(),
+                    interactionScore: 0, // Bài viết không có tương tác, điểm là 0
+                }));
+
+                // Sắp xếp bài viết theo điểm và thời gian tạo
+                scoredPosts.sort((a, b) => {
+                    if (b.interactionScore === a.interactionScore) {
+                        return new Date(b.createdAt) - new Date(a.createdAt); // Bài viết mới hơn sẽ lên trước
+                    }
+                    return b.interactionScore - a.interactionScore; // Sắp xếp theo điểm
+                });
+
+                // Lấy số lượng like và comment cho bài viết
+                const updatedPosts = await Promise.all(scoredPosts.map(async (post) => {
+                    const likeData = await Like.find({ post_id: post._id });
+                    post.like_count = likeData.length;
+
+                    const commentData = await Comment.find({ post_id: post._id });
+                    post.comment_count = commentData.length;
+
+                    return {
+                        postData: post,
+                        likeData,
+                        comment_count: commentData.length,
+                    };
+                }));
+
+                return {
+                    status: 200,
+                    message: 'Get data success',
+                    data: updatedPosts,
+                };
+            }
+
+            // Nếu có dữ liệu tương tác, tiếp tục lọc bài viết theo các hashtag tương tác
+            const hashtagScoreMap = {};
+            userPreferences.forEach(pref => {
+                hashtagScoreMap[pref.hashtag_id.toString()] = pref.interaction_score;
+            });
+
+            const hashtagIds = userPreferences.map(pref => pref.hashtag_id);
+
+            // Lấy tất cả bài viết có các hashtag user đã tương tác
+            const posts = await Post.find({ hashtag: { $in: hashtagIds } })
+                .populate('group_id')
+                .populate('user_id', 'full_name avatar')
+                .populate('hashtag', 'hashtag_name');
+
+            // Tính điểm tương tác cho từng bài viết
+            const scoredPosts = posts.map(post => {
+                const interactionScore = hashtagScoreMap[post.hashtag?._id.toString()] || 0;
+                return {
+                    ...post.toObject(),
+                    interactionScore,
+                };
+            });
+
+            // Lấy các bài viết không có tương tác
+            const otherPosts = await Post.find({ hashtag: { $nin: hashtagIds } })
+                .populate('group_id')
+                .populate('user_id', 'full_name avatar')
+                .populate('hashtag', 'hashtag_name');
+
+            const scoredOtherPosts = otherPosts.map(post => ({
+                ...post.toObject(),
+                interactionScore: 0, // Điểm mặc định cho bài viết không có tương tác
+            }));
+
+            const allPosts = [...scoredPosts, ...scoredOtherPosts];
+
+            // Sắp xếp tất cả bài viết theo điểm và thời gian tạo
+            allPosts.sort((a, b) => {
+                if (b.interactionScore === a.interactionScore) {
+                    return new Date(b.createdAt) - new Date(a.createdAt); // Bài viết mới hơn sẽ lên trước
+                }
+                return b.interactionScore - a.interactionScore; // Sắp xếp theo điểm
+            });
+
+            // Lấy số lượng like và comment cho mỗi bài viết
+            const updatedPosts = await Promise.all(allPosts.map(async (post) => {
+                const likeData = await Like.find({ post_id: post._id });
+                post.like_count = likeData.length;
+
+                const commentData = await Comment.find({ post_id: post._id });
+                post.comment_count = commentData.length;
+
+                return {
+                    postData: post,
+                    likeData,
+                    comment_count: commentData.length,
+                };
+            }));
+
+            return {
+                status: 200,
+                message: 'Get data success',
+                data: updatedPosts,
+            };
+        } catch (error) {
+            console.error(error);
+            return {
+                status: 500,
+                message: 'Internal server error',
+                error: error.message,
+            };
+        }
+    };
+
+    // getPostsByUserInteraction = async (user_id, page, limit) => {
+    //     try {
+    //         const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    //         // Lấy danh sách hashtag mà user đã tương tác
+    //         const userPreferences = await userPreferencesModel.find({ user_id: user_id })
+    //             .sort({ interaction_score: -1 });
+
+    //         if (!userPreferences.length) {
+    //             // Nếu không có dữ liệu tương tác thì không lọc theo hashtag
+    //             const posts = await Post.find()
+    //                 .populate('group_id')
+    //                 .populate('user_id', 'full_name avatar')
+    //                 .populate('hashtag', 'hashtag_name');
+
+    //             // Tính điểm cho bài viết không có tương tác (điểm = 0)
+    //             const scoredPosts = posts.map(post => ({
+    //                 ...post.toObject(),
+    //                 interactionScore: 0, // Bài viết không có tương tác, điểm là 0
+    //             }));
+
+    //             // Sắp xếp bài viết theo điểm từ cao xuống thấp
+    //             scoredPosts.sort((a, b) => b.interactionScore - a.interactionScore);
+
+    //             // Phân trang
+    //             const paginatedPosts = scoredPosts.slice(skip, skip + parseInt(limit));
+    //             const total = scoredPosts.length;
+    //             const totalPages = Math.ceil(total / parseInt(limit));
+
+    //             // Lấy số lượng like và comment cho bài viết
+    //             const updatedPosts = await Promise.all(paginatedPosts.map(async (post) => {
+    //                 // Lấy số lượng like cho bài viết
+    //                 const likeData = await Like.find({ post_id: post._id });
+    //                 post.like_count = likeData.length;
+
+    //                 // Lấy số lượng comment cho bài viết
+    //                 const commentData = await Comment.find({ post_id: post._id });
+    //                 post.comment_count = commentData.length;
+
+    //                 return {
+    //                     postData: post,
+    //                     likeData,  // Dữ liệu like nếu cần
+    //                     commentData, // Dữ liệu comment nếu cần
+    //                 };
+    //             }));
+
+    //             const data = {
+    //                 updatedPosts,
+    //                 totalPages,
+    //             };
+
+    //             return HttpResponse.success(data, HttpResponse.getErrorMessages('getDataSuccess'));
+    //         }
+
+    //         // Nếu có dữ liệu tương tác, tiếp tục lọc bài viết theo các hashtag tương tác
+    //         const hashtagScoreMap = {};
+    //         userPreferences.forEach(pref => {
+    //             hashtagScoreMap[pref.hashtag_id.toString()] = pref.interaction_score;
+    //         });
+
+    //         const hashtagIds = userPreferences.map(pref => pref.hashtag_id);
+
+    //         // Lấy tất cả bài viết có các hashtag user đã tương tác
+    //         const posts = await Post.find({ hashtag: { $in: hashtagIds } })
+    //             .populate('group_id')
+    //             .populate('user_id', 'full_name avatar')
+    //             .populate('hashtag', 'hashtag_name');
+
+    //         // Tính điểm tương tác cho từng bài viết
+    //         const scoredPosts = posts.map(post => {
+    //             const interactionScore = hashtagScoreMap[post.hashtag?._id.toString()] || 0;
+    //             return {
+    //                 ...post.toObject(),
+    //                 interactionScore,
+    //             };
+    //         });
+
+    //         // Lấy các bài viết không có tương tác (không có hashtag trong danh sách)
+    //         const otherPosts = await Post.find({ hashtag: { $nin: hashtagIds } })
+    //             .populate('group_id')
+    //             .populate('user_id', 'full_name avatar')
+    //             .populate('hashtag', 'hashtag_name');
+
+    //         // Đặt điểm tương tác = 0 cho các bài viết không có tương tác
+    //         const scoredOtherPosts = otherPosts.map(post => ({
+    //             ...post.toObject(),
+    //             interactionScore: 0, // Điểm mặc định cho bài viết không có tương tác
+    //         }));
+
+    //         // Ghép danh sách bài viết có tương tác và bài viết không có tương tác
+    //         const allPosts = [...scoredPosts, ...scoredOtherPosts];
+
+    //         // Sắp xếp tất cả bài viết theo điểm từ cao xuống thấp
+    //         allPosts.sort((a, b) => b.interactionScore - a.interactionScore);
+
+    //         // Phân trang
+    //         const paginatedPosts = allPosts.slice(skip, skip + parseInt(limit));
+    //         const total = allPosts.length;
+    //         const totalPages = Math.ceil(total / parseInt(limit));
+
+    //         // Lấy số lượng like và comment cho mỗi bài viết
+    //         const updatedPosts = await Promise.all(paginatedPosts.map(async (post) => {
+    //             // Lấy số lượng like cho bài viết
+    //             const likeData = await Like.find({ post_id: post._id });
+    //             post.like_count = likeData.length;
+
+    //             // Lấy số lượng comment cho bài viết
+    //             const commentData = await Comment.find({ post_id: post._id });
+    //             post.comment_count = commentData.length;
+
+    //             return {
+    //                 postData: post,
+    //                 likeData,  // Dữ liệu like nếu cần
+    //                 // commentData, // Dữ liệu comment nếu cần
+    //             };
+    //         }));
+
+    //         const data = updatedPosts;
+    //         // totalPages,
+
+    //         return {
+    //             status: 200,
+    //             message: 'Get data success',
+    //             totalPages,
+    //             data
+    //         };
+    //     } catch (error) {
+    //         console.error(error);
+    //         return HttpResponse.error(error);
+    //     }
+    // };
 
     getPostByID = async (id) => {
         try {
-            const data = await Post.findById(id).populate('user_id', 'full_name avatar').populate('group_id').populate('hashtag','hashtag_name');
+            const data = await Post.findById(id).populate('user_id', 'full_name avatar').populate('group_id').populate('hashtag', 'hashtag_name');
             // console.log('data: ', data);
             if (data) {
                 // Lấy số lượng like cho bài viết
@@ -239,26 +494,26 @@ class PostService {
             // Loại bỏ dấu và chuẩn hóa từ tìm kiếm
             let normalizedSearchTerm = removeVietnameseTones(searchTerm || "").trim();
             console.log("Normalized Search Term:", normalizedSearchTerm); // Log normalizedSearchTerm
-        
+
             // Kiểm tra xem searchTerm có phải là hashtag không
             let isHashtagSearch = normalizedSearchTerm[0] === "#";
             console.log("Is Hashtag Search:", isHashtagSearch); // Log xem có phải hashtag không
-        
+
             // Nếu là hashtag, cắt bỏ # và tìm kiếm phần còn lại
             if (isHashtagSearch) {
                 normalizedSearchTerm = normalizedSearchTerm.substring(1); // Cắt bỏ dấu #
             }
-        
+
             // Chuẩn hóa searchTerm (sau khi cắt bỏ dấu #) để tìm kiếm chính xác
             normalizedSearchTerm = removeVietnameseTones(normalizedSearchTerm);
             console.log("Normalized Search Term after removing '#':", normalizedSearchTerm); // Log sau khi chuẩn hóa lại
-        
+
             // Tải tất cả bài viết từ database
             const posts = await Post.find()
                 .populate("user_id")
                 .populate("hashtag") // Giả sử bạn có mối quan hệ với hashtag
             console.log("All Posts Retrieved:", posts); // Log tất cả bài viết được tải
-        
+
             // Lọc bài viết dựa trên tiêu đề hoặc hashtag
             const filteredPosts = posts.filter((post) => {
                 const normalizedTitle = removeVietnameseTones(post.title || "");
@@ -267,39 +522,39 @@ class PostService {
                 console.log("Normalized Post Title:", normalizedTitle); // Log tiêu đề đã chuẩn hóa
                 console.log("Post Hashtag:", post.hashtag?.hashtag_name); // Log hashtag của bài viết
                 console.log("Normalized Hashtag:", normalizedHashtag); // Log hashtag đã chuẩn hóa
-        
+
                 // Tìm kiếm trong tiêu đề hoặc hashtag (có hoặc không có dấu #)
                 return (
                     normalizedTitle.includes(normalizedSearchTerm) ||
                     normalizedHashtag.includes(normalizedSearchTerm)
                 );
             });
-        
+
             console.log("Filtered Posts:", filteredPosts); // Log các bài viết đã được lọc
-        
+
             // Nếu không tìm thấy bài viết phù hợp
             if (filteredPosts.length === 0) {
                 throw { status: 400, message: "Data not found" };
             }
-        
+
             return filteredPosts; // Trả về danh sách bài viết phù hợp
         } catch (error) {
             console.error("Error:", error); // Log lỗi nếu có
             throw error;
         }
     };
-    
-    
-    
+
+
+
     // searchPosts = async (searchTerm) => {
     //     try {
     //         const normalizedSearchTerm = removeVietnameseTones(searchTerm || "");
-    
+
     //         // Tìm kiếm bài viết
     //         const posts = await Post.find()
     //             .populate("user_id")  // Lấy thông tin người dùng liên quan
     //             .populate("group_id"); // Lấy thông tin nhóm liên quan
-    
+
     //         // Lọc bài viết dựa trên tiêu đề hoặc loại bài viết
     //         const filteredPosts = posts.filter((post) => {
     //             const normalizedTitle = removeVietnameseTones(post.title || "");
@@ -309,16 +564,16 @@ class PostService {
     //                 normalizedPostType.includes(normalizedSearchTerm)
     //             );
     //         });
-    
+
     //         // Tìm kiếm người dùng
     //         const users = await User.find();
-    
+
     //         // Lọc người dùng dựa trên tên người dùng
     //         const filteredUsers = users.filter((_id) => {
     //             const normalizedFullName = removeVietnameseTones(_id.full_name || "");
     //             return normalizedFullName.includes(normalizedSearchTerm);
     //         });
-    
+
     //         // Trả về kết quả bao gồm cả bài viết và người dùng
     //         return {
     //             posts: filteredPosts,
