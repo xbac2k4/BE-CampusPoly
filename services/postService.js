@@ -451,7 +451,7 @@ class PostService {
                 post.image = imageArray.length > 0 ? imageArray : post.image;
                 post.title = title ?? post.title;
                 post.content = content ?? post.content;
-                post.post_type = post_type ?? post.post_type;
+                post.hashtag = hashtag ?? post.hashtag;
                 result = await post.save();
             }
             return HttpResponse.success(result, HttpResponse.getErrorMessages('success'));
