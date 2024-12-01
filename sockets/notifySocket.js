@@ -49,7 +49,7 @@ const initializeNotifySocket = (io, socket) => {
     });
     socket.on('send_notification_to_multiple', async (data) => {
         const { list_receiver_id, body, sender_name, sender_id, type, post_id } = data;
-        console.log(data);
+        // console.log(data);
         if (!list_receiver_id || list_receiver_id.length === 0) {
             return console.log('không có bạn bè');
         }

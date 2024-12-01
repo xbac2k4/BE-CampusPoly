@@ -30,7 +30,7 @@ class HashtagService {
     getHashtagByID = async (id) => {
         try {
             const data = await Hashtag.findById(id);
-            console.log('data: ', data);
+            // console.log('data: ', data);
             return HttpResponse.success(data, HttpResponse.getErrorMessages('getDataSucces'));
         } catch (error) {
             console.log(error);
@@ -42,7 +42,7 @@ class HashtagService {
             const data = await Post.find({
                 id
             }).populate('user_id', 'full_name').populate('_id', 'title').populate('hashtag');
-            console.log('data: ', data);
+            // console.log('data: ', data);
             return HttpResponse.success(data, HttpResponse.getErrorMessages('getDataSucces'));
         } catch (error) {
             console.log(error);

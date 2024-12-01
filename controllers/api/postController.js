@@ -94,7 +94,7 @@ class PostController {
                     return `${req.protocol}://${req.get("host")}/uploads/${file.filename}`;
                 });
             }
-            console.log(imageArray);
+            // console.log(imageArray);
 
             // Xử lý hashtags (nếu có)
             let processedHashtags = [];

@@ -46,7 +46,7 @@ class PostService {
     getPostByPage = async (page, limit) => {
         try {
             const skip = (parseInt(page) - 1) * parseInt(limit);
-            const posts = await Post.find().sort({ createdAt: -1 }).skip(skip).limit(parseInt(limit)).populate('group_id').populate('user_id', 'full_name avatar').populate('hashtag','hashtag_name');
+            const posts = await Post.find().sort({ createdAt: -1 }).skip(skip).limit(parseInt(limit)).populate('group_id').populate('user_id', 'full_name avatar').populate('hashtag', 'hashtag_name');
             const total = await Post.countDocuments();
             const totalPages = Math.ceil(total / parseInt(limit));
             // console.log('data: ', data);
@@ -418,17 +418,19 @@ class PostService {
     addPost = async (user_id, group_id, title, content, hashtag, imageArray) => {
         try {
             // Tạo bài viết mới
+            // console.log(hashtag[0]);
             const newPost = new Post({
                 user_id: user_id,
                 group_id: group_id || null,
                 image: imageArray,
                 title: title,
                 content: content,
-                hashtag: hashtag,
+                hashtag: hashtag[0],
             });
 
             // Lưu bài viết vào cơ sở dữ liệu
             const result = await newPost.save();
+            console.log(result);
 
             return HttpResponse.success(result, HttpResponse.getErrorMessages('success'));
         } catch (error) {
