@@ -7,6 +7,7 @@ const HttpResponse = require("../utils/httpResponse");
 const dotenv = require('dotenv');
 const { use } = require("../routes/api");
 const userPreferencesModel = require("../models/userPreferencesModel");
+const friendModel = require("../models/friendModel");
 dotenv.config();
 const displayedPostIds = new Set(); // Set để lưu trữ ID bài viết đã hiển thị
 const removeVietnameseTones = (str) => {
@@ -384,6 +385,61 @@ class PostService {
                 }
                 return HttpResponse.success(postData, HttpResponse.getErrorMessages('getDataSucces'));
             }
+        } catch (error) {
+            console.log(error);
+            return HttpResponse.error(error);
+        }
+    }
+    getPostByFriends = async (user_id) => {
+        try {
+            const dataFriend = await friendModel.find({
+                user_id: user_id
+            })
+                .populate({
+                    path: 'status_id',
+                    match: { status_name: 'Chấp nhận' }, // Chỉ lấy các bản ghi có status_name là "Chấp nhận"
+                    select: 'status_name'
+                })
+                .populate('user_id', 'full_name avatar'); // Lấy thông tin user_id
+
+            // Lọc kết quả nếu populate trả về null do không khớp điều kiện `match`
+            const filteredData = dataFriend.filter(item => item.status_id !== null);
+
+            // Lấy danh sách user_id thuộc trạng thái "Chấp nhận" và khác với user_id truyền vào
+            const friendList = filteredData.flatMap(item =>
+                item.user_id.filter(friend => friend._id.toString() !== user_id.toString())
+            );
+            // console.log(friendList);
+
+            const friendIds = friendList.map(item => item._id);
+            console.log(friendIds);
+
+
+            // Tìm bài viết của bạn bè
+            const posts = await Post.find({ user_id: { $in: friendIds } })
+                .sort({ createdAt: -1 }) // Sắp xếp theo `createdAt` giảm dần
+                .populate('user_id', 'full_name avatar') // Populate thông tin người tạo bài viết
+                .populate('group_id', 'group_name') // Populate thông tin nhóm (nếu cần)
+                .populate('hashtag', 'hashtag_name'); // Populate hashtag (nếu cần)
+
+            // Thêm thông tin like_count và comment_count cho từng bài viết
+            const postData = await Promise.all(
+                posts.map(async (post) => {
+                    const likeData = await Like.find({ post_id: post._id });
+                    post.like_count = likeData.length;
+
+                    const commentData = await Comment.find({ post_id: post._id });
+                    post.comment_count = commentData.length;
+
+                    return {
+                        postData: post,
+                        likeData,
+                        comment_count: commentData.length
+                    };
+                })
+            );
+
+            return HttpResponse.success(postData, HttpResponse.getErrorMessages('getDataSucces'));
         } catch (error) {
             console.log(error);
             return HttpResponse.error(error);

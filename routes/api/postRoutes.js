@@ -12,4 +12,5 @@ router.put('/update-post/:id', upload.array('image'), new PostController().updat
 router.delete('/delete-post/:id', new PostController().deletePost);
 router.get('/admin-search', new PostController().searchPostsAdmin);
 router.get('/get-posts-by-user-interaction', new PostController().getPostsByUserInteraction);
+router.get('/get-posts-by-friends', new PostController().getPostByFriends);
 module.exports = router;
