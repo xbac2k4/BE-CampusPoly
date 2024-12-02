@@ -79,12 +79,19 @@ class SearchplusService {
             console.log("Normalized Search Term after removing '#':", normalizedSearchTerm); // Log sau khi chuẩn hóa lại
             // Tải tất cả bài viết từ database
             const posts = await Post.find()
-                .populate("user_id", 'full_name avatar').populate('group_id').populate('hashtag', 'hashtag_name')// Giả sử bạn có mối quan hệ với hashtag
+                .populate({
+                    path: 'user_id',
+                    select: 'full_name avatar role', // Chọn các trường của `user`
+                    populate: {
+                        path: 'role', // Populate thêm `role` bên trong `user_id`
+                        select: 'role_name permissions' // Các trường bạn muốn lấy từ `role`
+                    }
+                }).populate('group_id').populate('hashtag', 'hashtag_name')// Giả sử bạn có mối quan hệ với hashtag
 
-          
-            const filteredPosts = posts.filter((post)  => { 
+
+            const filteredPosts = posts.filter((post) => {
                 const normalizedHashtag = post?.hashtag ? removeVietnameseTones(post?.hashtag?.hashtag_name.replace('#', '') || "") : "";
-              
+
                 return (
                     normalizedHashtag.includes(normalizedSearchTerm)
                 );
@@ -103,8 +110,8 @@ class SearchplusService {
                     likeData,
                     commentData
                 };
-            }));               
-             console.log("Updated Posts:", updatedPosts); // Log các bài viết đã được cập nhật
+            }));
+            console.log("Updated Posts:", updatedPosts); // Log các bài viết đã được cập nhật
             // console.log("Filtered Posts:", filteredPosts); // Log các bài viết đã được lọc
             // Nếu không tìm thấy bài viết phù hợp
             // if (filteredPosts.length === 0) {

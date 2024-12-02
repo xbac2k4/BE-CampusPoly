@@ -22,7 +22,14 @@ const removeVietnameseTones = (str) => {
 class PostService {
     getAllPost = async () => {
         try {
-            const data = await Post.find().populate('user_id', 'full_name avatar').populate('group_id').populate('hashtag', 'hashtag_name');
+            const data = await Post.find().populate({
+                path: 'user_id',
+                select: 'full_name avatar role', // Chọn các trường của `user`
+                populate: {
+                    path: 'role', // Populate thêm `role` bên trong `user_id`
+                    select: 'role_name permissions' // Các trường bạn muốn lấy từ `role`
+                }
+            }).populate('group_id').populate('hashtag', 'hashtag_name');
             // console.log('data: ', data);
             const updatedPosts = await Promise.all(data.map(async (post) => {
                 // Lấy số lượng like cho bài viết
@@ -121,7 +128,14 @@ class PostService {
                 // Nếu không có dữ liệu tương tác thì không lọc theo hashtag
                 const posts = await Post.find()
                     .populate('group_id')
-                    .populate('user_id', 'full_name avatar')
+                    .populate({
+                        path: 'user_id',
+                        select: 'full_name avatar role', // Chọn các trường của `user`
+                        populate: {
+                            path: 'role', // Populate thêm `role` bên trong `user_id`
+                            select: 'role_name permissions' // Các trường bạn muốn lấy từ `role`
+                        }
+                    })
                     .populate('hashtag', 'hashtag_name');
 
                 // Tính điểm cho bài viết không có tương tác (điểm = 0)
@@ -171,7 +185,14 @@ class PostService {
             // Lấy tất cả bài viết có các hashtag user đã tương tác
             const posts = await Post.find({ hashtag: { $in: hashtagIds } })
                 .populate('group_id')
-                .populate('user_id', 'full_name avatar')
+                .populate({
+                    path: 'user_id',
+                    select: 'full_name avatar role', // Chọn các trường của `user`
+                    populate: {
+                        path: 'role', // Populate thêm `role` bên trong `user_id`
+                        select: 'role_name permissions' // Các trường bạn muốn lấy từ `role`
+                    }
+                })
                 .populate('hashtag', 'hashtag_name');
 
             // Tính điểm tương tác cho từng bài viết
@@ -186,8 +207,14 @@ class PostService {
             // Lấy các bài viết không có tương tác
             const otherPosts = await Post.find({ hashtag: { $nin: hashtagIds } })
                 .populate('group_id')
-                .populate('user_id', 'full_name avatar')
-                .populate('hashtag', 'hashtag_name');
+                .populate({
+                    path: 'user_id',
+                    select: 'full_name avatar role', // Chọn các trường của `user`
+                    populate: {
+                        path: 'role', // Populate thêm `role` bên trong `user_id`
+                        select: 'role_name permissions' // Các trường bạn muốn lấy từ `role`
+                    }
+                }).populate('hashtag', 'hashtag_name');
 
             const scoredOtherPosts = otherPosts.map(post => ({
                 ...post.toObject(),
@@ -368,7 +395,14 @@ class PostService {
 
     getPostByID = async (id) => {
         try {
-            const data = await Post.findById(id).populate('user_id', 'full_name avatar').populate('group_id').populate('hashtag', 'hashtag_name');
+            const data = await Post.findById(id).populate({
+                path: 'user_id',
+                select: 'full_name avatar role', // Chọn các trường của `user`
+                populate: {
+                    path: 'role', // Populate thêm `role` bên trong `user_id`
+                    select: 'role_name permissions' // Các trường bạn muốn lấy từ `role`
+                }
+            }).populate('group_id').populate('hashtag', 'hashtag_name');
             // console.log('data: ', data);
             if (data) {
                 // Lấy số lượng like cho bài viết
@@ -418,7 +452,14 @@ class PostService {
             // Tìm bài viết của bạn bè
             const posts = await Post.find({ user_id: { $in: friendIds } })
                 .sort({ createdAt: -1 }) // Sắp xếp theo `createdAt` giảm dần
-                .populate('user_id', 'full_name avatar') // Populate thông tin người tạo bài viết
+                .populate({
+                    path: 'user_id',
+                    select: 'full_name avatar role', // Chọn các trường của `user`
+                    populate: {
+                        path: 'role', // Populate thêm `role` bên trong `user_id`
+                        select: 'role_name permissions' // Các trường bạn muốn lấy từ `role`
+                    }
+                })
                 .populate('group_id', 'group_name') // Populate thông tin nhóm (nếu cần)
                 .populate('hashtag', 'hashtag_name'); // Populate hashtag (nếu cần)
 
@@ -449,7 +490,14 @@ class PostService {
         try {
             const data = await Post.find({
                 user_id
-            }).populate('user_id', 'full_name avatar').populate('group_id');
+            }).populate({
+                path: 'user_id',
+                select: 'full_name avatar role', // Chọn các trường của `user`
+                populate: {
+                    path: 'role', // Populate thêm `role` bên trong `user_id`
+                    select: 'role_name permissions' // Các trường bạn muốn lấy từ `role`
+                }
+            }).populate('group_id');
             // console.log('data: ', data);
             const updatedPosts = await Promise.all(data.map(async (post) => {
                 // Lấy số lượng like cho bài viết
