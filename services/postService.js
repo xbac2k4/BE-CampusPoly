@@ -546,21 +546,29 @@ class PostService {
         try {
             // Tìm bài viết theo ID
             const post = await Post.findById(id);
+            if (!post) {
+                return HttpResponse.fail(HttpResponse.getErrorMessages('dataNotFound'));
+            }
+
+            // Kiểm tra quyền người dùng (chỉ người sở hữu bài viết mới có thể sửa)
             if (post.user_id.toString() !== user_id) {
-                return
+                return HttpResponse.fail(HttpResponse.getErrorMessages('unauthorized'));
             }
-            let result
-            if (post) {
-                // Cập nhật thông tin bài viết
-                post.user_id = user_id ?? post.user_id;
-                post.group_id = group_id ?? post.group_id;
-                post.image = imageArray.length > 0 ? imageArray : post.image;
-                post.title = title ?? post.title;
-                post.content = content ?? post.content;
-                post.hashtag = hashtag ?? post.hashtag;
-                result = await post.save();
-            }
+
+            // Cập nhật thông tin bài viết
+            post.user_id = user_id ?? post.user_id;
+            post.group_id = group_id ?? post.group_id;
+            post.title = title ?? post.title;
+            post.content = content ?? post.content;
+            post.hashtag = hashtag ?? post.hashtag;
+
+            // Kiểm tra và cập nhật ảnh: nếu không có ảnh mới, set thành mảng rỗng
+            post.image = imageArray.length > 0 ? imageArray : [];
+
+            // Lưu bài viết đã cập nhật
+            const result = await post.save();
             return HttpResponse.success(result, HttpResponse.getErrorMessages('success'));
+
         } catch (error) {
             console.log(error);
             return HttpResponse.error(error);

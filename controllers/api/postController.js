@@ -142,6 +142,7 @@ class PostController {
             const { id } = req.params;
             const { user_id } = req.query;
             const { group_id, title, content, hashtag } = req.body;
+
             // Xử lý hình ảnh (nếu có)
             let imageArray = [];
             if (req.files && req.files.length > 0) {
@@ -149,12 +150,17 @@ class PostController {
                     return `${req.protocol}://${req.get("host")}/uploads/${file.filename}`;
                 });
             }
+
+            // Gọi dịch vụ để cập nhật bài viết
             const updatedPost = await new PostService().updatePost(id, user_id, group_id, title, content, hashtag, imageArray);
+
+            // Trả về phản hồi phù hợp
             if (updatedPost) {
                 return res.json(HttpResponse.result(updatedPost));
             } else {
                 return res.json(HttpResponse.fail(HttpResponse.getErrorMessages('dataNotFound')));
             }
+
         } catch (error) {
             console.log(error);
             return res.json(HttpResponse.error(error));
