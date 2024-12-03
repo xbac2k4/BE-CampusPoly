@@ -23,7 +23,7 @@ const loadUserInfo = async (userId) => {
             const usernameSpan = document.querySelector("span[style*='font-weight: 500;']");
             
             if (avatarImg) {
-                const avatarUrl = data.data.avatar;
+                const avatarUrl = data.data?.avatar;
                 avatarImg.src = avatarUrl && avatarUrl.startsWith("http") ? avatarUrl : DOMAIN + avatarUrl;
             }
             if (usernameSpan) {

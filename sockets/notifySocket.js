@@ -1,5 +1,6 @@
 const { getUsers } = require("../manager/userManager");
 const { messgaeNotify, sendOne, notifyAddFriend, sendNotification } = require("../notification/Notification");
+const User = require('../models/userModel');
 
 const initializeNotifySocket = (io, socket) => {
     socket.on('send_message', async (data) => {
@@ -43,6 +44,11 @@ const initializeNotifySocket = (io, socket) => {
         const { receiver_id, body, sender_name, sender_id, type, post_id } = data;
         console.log(data);
 
+        // nếu không có device_token thì không gửi thông báo
+        const user = await User.findById(receiver_id)
+        if (user.device_token == '') {
+            return
+        }
         await sendOne(sender_name, body, receiver_id, sender_id, type, post_id)
         socket.emit('load_notification')
         console.log('123');
@@ -53,7 +59,7 @@ const initializeNotifySocket = (io, socket) => {
         if (!list_receiver_id || list_receiver_id.length === 0) {
             return console.log('không có bạn bè');
         }
-        
+
         await sendNotification(sender_name, body, list_receiver_id, sender_id, type, post_id)
         socket.emit('load_notification')
     });
