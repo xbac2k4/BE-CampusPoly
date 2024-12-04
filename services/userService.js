@@ -466,6 +466,7 @@ class UserService {
             } else {
                 const newUser = new Users({
                     ...userWithoutToken,
+                    avatar: userWithoutToken.avatar || "https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3485.jpg",
                     birthday, // Sử dụng giá trị Date hợp lệ cho birthday
                     sex: gender,
                     device_token: user.device_token,
