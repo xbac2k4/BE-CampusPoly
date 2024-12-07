@@ -6,7 +6,7 @@ const { isAuthenticated } = require('../middlewares/authMiddleware');
 const managerRouter = require('./managerRouter');
 const UserController = require('../controllers/userController');
 //====================== Sử dụng ==========================//
-router.get('/login', function(req, res, next) {
+router.get('/login', function (req, res, next) {
   res.render('login', { title: 'LOGIN' });
 });
 // router.post('/login', new UserController().userLogin);

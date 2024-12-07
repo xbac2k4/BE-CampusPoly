@@ -1,20 +1,36 @@
 const buttonLogout = document.getElementById('buttonLogout');
 
 buttonLogout.addEventListener('click', async () => {
-    // Xóa các biến đã lưu trong sessionStorage
-    sessionStorage.removeItem('userId');
-    sessionStorage.removeItem('isLoggedIn');
+    try {
+        // Gửi yêu cầu logout tới server
+        const response = await fetch(`${DOMAIN}logout`, {
+            method: 'GET',
+            credentials: 'include', // Đảm bảo gửi kèm cookie
+        });
 
-    // Đẩy trạng thái mới vào lịch sử trình duyệt, không lưu lại trang trước đó   
-    history.pushState(null, null, window.location.href = '/login');
-    window.addEventListener('load', () => {
-        // Lắng nghe sự kiện "popstate" xảy ra khi người dùng nhấn nút "Back"
-        window.onpopstate = function () {
-            // Đẩy lại trạng thái để giữ người dùng trên trang hiện tại
-            history.go(1);
-        };
-    });
+        if (response.ok) {
+            // Xóa các biến đã lưu trong sessionStorage
+            sessionStorage.removeItem('userId');
+            sessionStorage.removeItem('isLoggedIn');
+
+            // Đẩy trạng thái mới vào lịch sử trình duyệt, không lưu lại trang trước đó   
+            history.pushState(null, null, window.location.href = '/login');
+            window.addEventListener('load', () => {
+                // Lắng nghe sự kiện "popstate" xảy ra khi người dùng nhấn nút "Back"
+                window.onpopstate = function () {
+                    // Đẩy lại trạng thái để giữ người dùng trên trang hiện tại
+                    history.go(1);
+                };
+            });
+        } else {
+            const result = await response.json();
+            console.error('Lỗi logout:', result.message);
+        }
+    } catch (error) {
+        console.error('Có lỗi khi logout:', error);
+    }
 });
+
 
 document.addEventListener('DOMContentLoaded', () => {
     // Lấy tất cả các phần tử nav-item
