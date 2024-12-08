@@ -75,9 +75,19 @@ managerRouter.use("/post-detail/:id", function (req, res, next) {
 managerRouter.get('/', (req, res) => {
     const admin = req.session.admin;
     console.log(admin);
-    const content = renderPartial('post'); // Giả sử bạn có hàm renderPartial để tạo nội dung
+    const content = renderPartial('dashboard'); // Giả sử bạn có hàm renderPartial để tạo nội dung
     res.render('main', {
         title: 'Bài viết',
+        body: content,
+        admin, // Gửi ID người dùng tới view nếu cần
+    });
+});
+managerRouter.get('/dashboard', (req, res) => {
+    const admin = req.session.admin;
+    console.log(admin);
+    const content = renderPartial('dashboard'); // Giả sử bạn có hàm renderPartial để tạo nội dung
+    res.render('main', {
+        title: 'Bảng điều khiển',
         body: content,
         admin, // Gửi ID người dùng tới view nếu cần
     });

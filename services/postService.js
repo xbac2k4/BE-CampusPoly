@@ -519,6 +519,49 @@ class PostService {
             return HttpResponse.error(error);
         }
     }
+    getTopPost = async () => {
+        try {
+            const data = await Post.find().populate({
+                path: 'user_id',
+                select: 'full_name avatar role', // Chọn các trường của `user`
+                populate: {
+                    path: 'role', // Populate thêm `role` bên trong `user_id`
+                    select: 'role_name permissions' // Các trường bạn muốn lấy từ `role`
+                }
+            }).populate('group_id').populate('hashtag', 'hashtag_name');
+
+            const updatedPosts = await Promise.all(data.map(async (post) => {
+                // Lấy số lượng like cho bài viết
+                const likeData = await Like.find({ post_id: post._id });
+                post.like_count = likeData.length;
+
+                // Lấy số lượng comment cho bài viết
+                const commentData = await Comment.find({ post_id: post._id });
+                post.comment_count = commentData.length;
+
+                // Tính điểm tương tác
+                const interactionScore = (post.comment_count * 2) + (post.like_count * 1);
+
+                return {
+                    postData: post,
+                    // likeData,
+                    interactionScore // Thêm điểm tương tác vào dữ liệu trả về
+                };
+            }));
+
+            // Sắp xếp bài viết theo điểm tương tác từ cao đến thấp
+            updatedPosts.sort((a, b) => b.interactionScore - a.interactionScore);
+
+            // Lấy 5 bài viết có điểm cao nhất
+            const topPosts = updatedPosts.slice(0, 3);
+
+            return HttpResponse.success(topPosts, HttpResponse.getErrorMessages('getDataSucces'));
+        } catch (error) {
+            console.log(error);
+            return HttpResponse.error(error);
+        }
+    }
+
     addPost = async (user_id, group_id, title, content, hashtag, imageArray) => {
         try {
             // Tạo bài viết mới

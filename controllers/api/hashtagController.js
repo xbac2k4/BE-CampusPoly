@@ -81,7 +81,20 @@ class HashtagController {
             return res.json(HttpResponse.error(error));
         }
     };
-
+    getTopHashtags = async (req, res) => {
+        try {
+            const data = await new HashtagService().getTopHashtags();
+            // console.log('data: ', data);
+            if (data) {
+                return res.json(HttpResponse.result(data));
+            } else {
+                return res.json(HttpResponse.fail(HttpResponse.getErrorMessages('dataNotFound')));
+            }
+        } catch (error) {
+            console.log(error);
+            return res.json(HttpResponse.error(error));
+        }
+    }
 }
 
 module.exports = HashtagController;
