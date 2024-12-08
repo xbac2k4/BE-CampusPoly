@@ -11,26 +11,43 @@ const itemsPerPage = 10; // Số lượng mục mỗi trang
 let userIdToDelete; // Biến để lưu ID của người dùng cần xóa
 let userID;
 let listUserOnline = [];
+let users = [];
+let filterUsers = [];
 
-const fetchDataForPage = async (page) => {
+const fetchDataForPage = async (page, roleFilter = null, statusFilter = null) => {
     try {
         const response = await fetch(`${DOMAIN}users/get-user-by-page?page=${page}&limit=${itemsPerPage}`);
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
         const data = await response.json();
-        // console.log(data);
 
-        // Cập nhật dữ liệu
-        totalPages = data.data.totalPages; // Giả sử totalPages là thuộc tính của response
-        const users = data.data.users; // Lấy danh sách người dùng
-        renderTable(users); // Gọi hàm renderTable để hiển thị dữ liệu
-        renderPagination(); // Gọi hàm renderPagination để cập nhật phân trang
+        // Cập nhật dữ liệu phân trang
+        totalPages = data.data.totalPages;
+        let users = data.data.users;
+        console.log(roleFilter);
+        console.log(statusFilter);
+
+
+        // Áp dụng bộ lọc nếu có
+        if (roleFilter) {
+            users = users.filter(user =>
+                user.role.some(role => role.role_name.toLowerCase() === roleFilter.toLowerCase())
+            );
+        }
+
+        if (statusFilter) {
+            users = users.filter(user => user.user_status_id?.status_name === statusFilter);
+        }
+
+        renderTable(users); // Hiển thị danh sách người dùng
+        renderPagination(); // Cập nhật giao diện phân trang
 
         // Cập nhật hiển thị số mục
         const userAll = await fetch(`${DOMAIN}users/get-all-user`);
         const dataAll = await userAll.json();
-        const totalItems = dataAll.data.length
+        const totalItems = dataAll.data.length;
+
         const startItem = (currentPage - 1) * itemsPerPage + 1; // Mục bắt đầu
         const endItem = Math.min(startItem + users.length - 1, totalItems); // Mục kết thúc
 
@@ -41,6 +58,7 @@ const fetchDataForPage = async (page) => {
         console.error('There was a problem with the fetch operation:', error);
     }
 };
+
 
 const handleUserOnline = async () => {
     return new Promise((resolve, reject) => {
@@ -329,10 +347,38 @@ function addRole() {
 }
 
 // Xóa vai trò khỏi container và cập nhật CSDL
-function removeRole(button, roleId) {
-    button.parentElement.remove();
-    initialUserData = initialUserData.filter(role => role._id !== roleId);
-    updateUser({ role: initialUserData });
+async function removeRole(button, roleId) {
+    try {
+        // Gửi yêu cầu lấy tất cả người dùng
+        const response = await fetch(`${DOMAIN}users/get-all-user`);
+        const data = await response.json();
+
+        if (!data || !data.data) {
+            throw new Error("Dữ liệu không hợp lệ!");
+        }
+
+        // Lọc ra các vai trò "Admin"
+        const adminRoles = data.data
+            .flatMap(user => user.role)
+            .filter(role => role.role_name === "Admin");
+
+        // Kiểm tra nếu chỉ còn 1 vai trò "Admin" và vai trò này đang được yêu cầu xóa
+        if (adminRoles.length === 1 && adminRoles[0]._id === roleId) {
+            alert("Không thể xóa vai trò Admin cuối cùng!");
+            return; // Dừng không xóa
+        }
+
+        // Xóa vai trò khỏi giao diện
+        button.parentElement.remove();
+
+        // Cập nhật danh sách vai trò trong bộ nhớ
+        initialUserData = initialUserData.filter(role => role._id !== roleId);
+
+        // Gửi yêu cầu cập nhật lại danh sách vai trò của người dùng
+        await updateUser({ role: initialUserData });
+    } catch (error) {
+        console.error("Lỗi khi xóa vai trò:", error);
+    }
 }
 
 const updateUser = async (user) => {
@@ -431,3 +477,52 @@ const showFriendList = (userData) => {
     $(modal).modal('show');
 };
 
+const searchInput = document.getElementById('searchInput');
+
+const fetchAllUsers = () => {
+    fetch(`${DOMAIN}users/get-all-user`)
+        .then(response => response.json())
+        .then(data => {
+            users = data.data;
+        })
+        .catch(error => console.error('Error:', error));
+}
+searchInput.addEventListener('input', async (e) => {
+    const searchValue = e.target.value.toLowerCase();
+    fetchAllUsers();
+    const filteredUsers = users.filter(user => {
+        return user.full_name.toLowerCase().includes(searchValue) ||
+            user.email.toLowerCase().includes(searchValue);
+    });
+
+    renderTable(filteredUsers);
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+    let selectedRole = null; // Vai trò được chọn
+    let selectedStatus = null; // Trạng thái được chọn
+
+    // Bắt sự kiện chọn vai trò
+    document.querySelectorAll('.role-filter').forEach(item => {
+        item.addEventListener('click', (event) => {
+            event.preventDefault(); // Ngăn chặn tải lại trang
+            selectedRole = event.target.getAttribute('data-role'); // Lấy giá trị vai trò
+            console.log('Vai trò đã chọn:', selectedRole);
+
+            // Gọi hàm fetch với vai trò được chọn
+            fetchDataForPage(1, selectedRole, selectedStatus = null);
+        });
+    });
+
+    // Bắt sự kiện chọn trạng thái
+    document.querySelectorAll('.status-filter').forEach(item => {
+        item.addEventListener('click', (event) => {
+            event.preventDefault(); // Ngăn chặn tải lại trang
+            selectedStatus = event.target.getAttribute('data-status'); // Lấy giá trị trạng thái
+            console.log('Trạng thái đã chọn:', selectedStatus);
+
+            // Gọi hàm fetch với trạng thái được chọn
+            fetchDataForPage(1, selectedRole = null, selectedStatus);
+        });
+    });
+});

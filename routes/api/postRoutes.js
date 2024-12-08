@@ -7,6 +7,7 @@ router.get('/get-all-post', new PostController().getAllPost);
 router.get('/get-post-by-page', new PostController().getPostByPage);
 router.get('/get-post-by-id/:id', new PostController().getPostByID);
 router.get('/get-post-by-userID', new PostController().getPostByUserID);
+router.get('/get-top-post', new PostController().getTopPost);
 router.post('/add-post', upload.array('image'), new PostController().addPost);
 router.put('/update-post/:id', upload.array('image'), new PostController().updatePost);
 router.delete('/delete-post/:id', new PostController().deletePost);
