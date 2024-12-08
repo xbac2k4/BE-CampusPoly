@@ -14,4 +14,7 @@ router.delete('/delete-post/:id', new PostController().deletePost);
 router.get('/admin-search', new PostController().searchPostsAdmin);
 router.get('/get-posts-by-user-interaction', new PostController().getPostsByUserInteraction);
 router.get('/get-posts-by-friends', new PostController().getPostByFriends);
+router.get('/visible-posts', new PostController().getVisiblePosts);
+router.put('/update-block-post/:id', new PostController().updateBlockPost);
+
 module.exports = router;

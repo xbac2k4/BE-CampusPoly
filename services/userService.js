@@ -297,7 +297,7 @@ class UserService {
         }
     }
 
-    putUser = async (id, email, password, full_name, sex, role, user_status_id, avatar, background, bio, last_login, birthday, isVerified) => {
+    putUser = async (id, email, password, full_name, sex, role, user_status_id, avatar, background, bio, last_login, birthday, isVerified, block_reason, block_count) => {
         try {
             const newUpdate = await Users.findById(id);
 
@@ -315,6 +315,8 @@ class UserService {
                     newUpdate.last_login = last_login ?? newUpdate.last_login,
                     newUpdate.birthday = birthday ?? newUpdate.birthday,
                     newUpdate.isVerified = isVerified ?? newUpdate.isVerified;
+                    newUpdate.block_reason = block_reason ?? newUpdate.block_reason;
+                    newUpdate.block_count = block_count ?? newUpdate.block_count;
 
                 result = await newUpdate.save();
             }
@@ -466,6 +468,7 @@ class UserService {
             } else {
                 const newUser = new Users({
                     ...userWithoutToken,
+                    background: userWithoutToken.background || "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRWCNUmgIXmb9DdD1k4GURmooIHJ0j-YSRACQ&s",
                     avatar: userWithoutToken.avatar || "https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3485.jpg",
                     birthday, // Sử dụng giá trị Date hợp lệ cho birthday
                     sex: gender,
@@ -575,7 +578,82 @@ class UserService {
             return HttpResponse.error(error);
         }
     };
+
+    updateUserStatus = async (userId, reason = 'violation') => {
+        try {
+            // Tìm người dùng trước
+            const user = await Users.findById(userId);
+            if (!user) {
+                console.error(`User with ID ${userId} not found.`);
+                return false;
+            }
+            // Tăng giá trị block_count
+            const updatedBlockCount = (user.block_count || 0) + 1;
+            // Cập nhật trạng thái và thông tin block của người dùng
+            const updatedUser = await Users.findByIdAndUpdate(
+                userId,
+                {
+                    user_status_id: { _id: '67089ccb862f7badead53eba' }, // Trạng thái block
+                    blocked_at: Date.now(), // Thời gian bị chặn
+                    block_reason: reason, // Lý do bị chặn
+                    block_count: updatedBlockCount, // Cập nhật số lần bị chặn
+                },
+                { new: true } // Trả về bản ghi đã được cập nhật
+            );
+            if (!updatedUser) {
+                console.error(`Failed to update user with ID ${userId}.`);
+                return false;
+            }
+            console.log(
+                `User with ID ${userId} updated with new user_status_id, block reason, and block count (${updatedBlockCount}).`
+            );
+            return true;
+        } catch (error) {
+            console.error(`Error updating user status for user with ID ${userId}:`, error);
+            throw new Error('Error updating user status.');
+        }
+    };
+    
+    checkAndUnblockUser = async (userId) => {
+        // console.log(`Processing user with ID: ${userId}`);
+        try {
+            const user = await Users.findById(userId);
+            if (!user) {
+                console.error(`User with ID ${userId} not found.`);
+                return false;
+            }
+            // console.log(`User details - is_blocked: ${user.user_status_id}, block_reason: ${user.block_reason}, blocked_at: ${user.blocked_at}`);
+            // Chỉ mở khóa nếu lý do bị chặn là 'violation'
+            if (
+                user.user_status_id &&
+                user.user_status_id.toString() === '67089ccb862f7badead53eba' &&
+                user.block_reason === 'violation'
+            )  {
+                const currentDate = new Date();
+                const blockDuration = currentDate - new Date(user.blocked_at); // Đảm bảo sử dụng new Date()
+                const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000; // 7 ngày tính theo mili giây
+                // console.log(`blockDuration: ${blockDuration}, Threshold: ${fiveSecondsInMs}`);
+                if (blockDuration >= fiveSecondsInMs) {
+                    user.blocked_at = null;
+                    user.user_status_id = { _id: '67089cc2862f7badead53eb9' };
+    
+                    await user.save();
+                    console.log(`User with ID ${userId} is now unblocked.`);
+                    return true;
+                }
+            }
+            // console.log(`User with ID ${userId} is not eligible for unblocking.`);
+            return false;
+        } catch (error) {
+            console.error(`Error checking and unblocking user with ID ${userId}:`, error);
+            throw new Error('Error checking and unblocking user.');
+        }
+    };
+    
+    
+         
     
 }
+
 
 module.exports = UserService;

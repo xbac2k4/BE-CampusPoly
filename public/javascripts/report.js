@@ -1,91 +1,104 @@
 const DOMAIN = window.APP_CONFIG.API_URL;
 
-// Fetch API
+// DOM Elements
 const tbody = document.querySelector('tbody');
-const loadMore = document.getElementById('load-more');
-const loading = document.getElementById('spinner');
+const pagesContainer = document.getElementById("pages");
+const hintText = document.querySelector('.hint-text');
+const itemsPerPage = 10; // Số lượng mục mỗi trang
 let currentPage = 1;
 let totalPages;
-const itemsPerPage = 10; // Số lượng mục mỗi trang
-let reportIdToDelete; // Biến để lưu ID của người dùng cần xóa
-let reportID;
 
+// Fetch API and render data
 const fetchDataForPage = async (page) => {
     try {
-        const response = await fetch(`${DOMAIN}reports/get-report-by-page?page=${page}&limit=${itemsPerPage}`);
+        const response = await fetch(`${DOMAIN}reportedposts/get-report-by-page?page=${page}&limit=${itemsPerPage}`);
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
         const data = await response.json();
+        console.log("Data from API:", data); // Log dữ liệu từ API
+
+        // Kiểm tra nếu dữ liệu trả về có đúng cấu trúc
+        if (!data || !data.data || !Array.isArray(data.data.data.reports)) {
+            throw new Error('Dữ liệu không đúng định dạng hoặc không có báo cáo');
+        }
 
         // Cập nhật dữ liệu
-        totalPages = data.data.totalPages; // Giả sử totalPages là thuộc tính của response
-        const reports = data.data.reports; // Lấy danh sách người dùng
+        totalPages = data.data.data.totalPages; // totalPages từ data.data
+        const reports = data.data.data.reports; // Lấy danh sách báo cáo
+
+        // Kiểm tra nếu reports là một mảng hợp lệ
+        if (!Array.isArray(reports) || reports.length === 0) {
+            throw new Error('Không có báo cáo nào');
+        }
+
         renderTable(reports); // Gọi hàm renderTable để hiển thị dữ liệu
         renderPagination(); // Gọi hàm renderPagination để cập nhật phân trang
 
-        // Cập nhật hiển thị số mục
-        const reportAll = await fetch(`${DOMAIN}reports/get-all-report`); 
-        const dataAll = await reportAll.json();
-        const totalItems = dataAll.data.length         
+        // Cập nhật thông tin mục hiển thị
+        const userAll = await fetch(`${DOMAIN}reportedposts/all-reports`);
+        const dataAll = await userAll.json();
+        const totalItems = dataAll.data.data.reports.length         
         const startItem = (currentPage - 1) * itemsPerPage + 1; // Mục bắt đầu
         const endItem = Math.min(startItem + reports.length - 1, totalItems); // Mục kết thúc
-
         const hintText = document.querySelector('.hint-text');
         hintText.innerHTML = `Hiển thị <b>${startItem}</b> đến <b>${endItem}</b> trên tổng số <b>${totalItems}</b> báo cáo`;
 
+
     } catch (error) {
-        console.error('There was a problem with the fetch operation:', error);
+        console.error('Error fetching data:', error);
     }
 };
 
-// Hàm để hiển thị dữ liệu trong bảng
+// Render table rows
 const renderTable = (reports) => {
-    const html = reports.map((report, index) => {
-        const stt = (currentPage - 1) * itemsPerPage + index + 1;
-        console.log('Reported by User ID:', report.reported_by_user_id?._id);
-        console.log('Post User ID:', report.post_id?.user_id);
+
+    const html = reports.map((reportedpost, index) => {
+        const stt = (currentPage - 1) * itemsPerPage + index + 1; // Số thứ tự
         return `
-            <tr data-report='${JSON.stringify(report)}'>
+            <tr data-reportedpost='${JSON.stringify(reportedpost)}'>
                 <td>${stt}</td>
-                <td>${report.reported_by_user_id.full_name}</td>
-                <td>${report.post_id?.user_id.full_name}</td> 
-                <td>${report.report_type_id.report_name}</td>
-                <td>${formatDateTime(report.createdAt)}</td>
                 <td>
-                    <div style="cursor: pointer;" class="badge border-0 text-light ${report.report_status_id.status_name === 'Đã xử lý' ? 'badge-success' : 'bg-danger'} p-2"
-                         onclick="toggleReportStatus('${report._id}', '${report.report_status_id._id}', this)">
-                        <span id="status-${report._id}">${report.report_status_id.status_name}</span>
-                    </div>
+                    <span 
+                        style="cursor: pointer; color: blue;" 
+                        onclick="showUserDetailsModal('${reportedpost.post_id?.user_id?._id}')">
+                        ${reportedpost.post_id?.user_id?.full_name}
+                    </span>
                 </td>
                 <td>
-                    <a href="#" class="view" title="View" data-toggle="tooltip" onclick="goToPostDetailPage('${report.post_id?._id}')">
-                        <i class="material-icons">visibility</i>
-                    </a>
-                    <a href="#" class="delete" title="Delete" data-toggle="tooltip" onclick="confirmDelete('${report._id}')"><i class="material-icons">&#xE872;</i></a>
+                     <a href="#" class="view" title="View" data-toggle="tooltip" onclick="goToPostDetailPage('${reportedpost.post_id?._id}')">
+                        <span style="cursor: pointer; transform: none; box-shadow: none;">
+                           Xem bài viết
+                        </span>
+                     </a>
+                </td>
+                <td>
+                    <button 
+                        onclick='showReportersList(${JSON.stringify(reportedpost.reporters)})'
+                        class="badge border-0 bg-secondary p-2 text-light">
+                        <span>${reportedpost.reporters.length}</span>
+                    </button>
+                </td>
+                <td>${formatDateTime(reportedpost.createdAt)}</td>
+                <td>${reportedpost.violation_point}</td>
+                <td>${reportedpost.total_reports}</td>
+                <td>
+                    <div  class="badge border-0 text-light bg-info ${reportedpost.report_status_id.status_name === 'Đang xử lý' ? 'badge-success' : 'bg-danger'} p-2">
+                        ${reportedpost.report_status_id.status_name}
+                    </div>
                 </td>
             </tr>
         `;
     }).join('');
     tbody.innerHTML = html;
-}
-// Khi trang tải lần đầu, gọi API để hiển thị 10 người dùng đầu tiên
-window.addEventListener('DOMContentLoaded', (event) => {
-    fetchDataForPage(currentPage);
-});
+};
 
-document.addEventListener('DOMContentLoaded', () => {
-    fetchDataForPage(currentPage);
-});
-
-// Số lượng trang tối đa hiển thị
-const maxPagesToShow = 5;
-
-// Hàm chuyển hướng đến trang chi tiết bài đăng (post_detail)
 function goToPostDetailPage(postId) {
     window.location.href = `/post-detail/${postId}`;
 }
 
+// Số lượng trang tối đa hiển thị
+const maxPagesToShow = 5;
 
 const renderPagination = async () => {
     const pagesContainer = document.getElementById("pages");
@@ -156,126 +169,117 @@ document.getElementById("next").onclick = function () {
         fetchDataForPage(currentPage);
     }
 };
-
-// Hiển thị modal xác nhận xóa
-function confirmDelete(reportId) {
-    reportIdToDelete = reportId; // Lưu ID báo cáo cần xóa
-    $('#confirmDeleteModal').modal('show'); // Hiển thị modal
-}
-// Xử lý sự kiện xóa
-document.getElementById('confirmDeleteBtn').addEventListener('click', async function () {
-    await deleteReport(reportIdToDelete); // Gọi hàm xóa báo cáo
-    $('#confirmDeleteModal').modal('hide'); // Ẩn modal
-});
-
-
-// Gán sự kiện cho nút "Close"
-// Lấy tất cả các phần tử có class 'close'
-const closeButtons = document.querySelectorAll('.close');
-// Lặp qua từng nút và thêm sự kiện click
-closeButtons.forEach(button => {
-    button.addEventListener('click', function () {
-        // Đóng modal
-        $('#confirmDeleteModal').modal('hide'); // Ẩn modal xác nhận
-        $('#editUserModal').modal('hide'); // Ẩn modal chỉnh sửa
-    });
-});
-
-// Gán sự kiện cho nút "Hủy"
-document.querySelector('.btn-secondary').addEventListener('click', function () {
-    // Đóng modal
-    $('#confirmDeleteModal').modal('hide'); // Ẩn modal
-});
-
-// Hàm xóa người dùng
-async function deleteReport(reportId) {
+// Hàm hiển thị modal thông tin người dùng
+const showUserDetailsModal = async (userId) => {
     try {
-        const response = await fetch(`${DOMAIN}reports/delete-report/${reportId}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
+        // Gọi API để lấy thông tin người dùng theo userId
+        const response = await fetch(`${DOMAIN}users/get-user-by-id/${userId}`);
         if (!response.ok) {
-            throw new Error('Network response was not ok');
+            throw new Error('Failed to fetch user data');
         }
-        // Gọi lại API để tải lại dữ liệu sau khi xóa
-        fetchDataForPage(currentPage);
+
+        const data = await response.json();
+        const user = data.data;
+
+        // Tạo modal
+        const modal = document.createElement('div');
+        modal.classList.add('modal', 'fade');
+        modal.setAttribute('id', 'userDetailsModal');
+        modal.setAttribute('tabindex', '-1');
+        modal.setAttribute('role', 'dialog');
+        modal.style.height = '100vh';
+        modal.style.overflow = 'hidden';
+
+        // Nội dung modal hiển thị thông tin người dùng
+        modal.innerHTML = `
+            <div class="modal-dialog modal-dialog-centered" role="document" style="width: 50%;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title d-flex align-items-center">
+                            <img src="${user.avatar}" class="rounded-circle" width="40" height="40" style="margin-right: 10px;">
+                            ${user.full_name}
+                        </h5>
+                    </div>
+                    <div class="modal-body">
+                        <ul class="list-group">
+    
+                            <li class="list-group-item"><strong>Email:</strong> ${user.email}</li>
+                            <li class="list-group-item"><strong>Trạng thái:</strong> ${user.user_status_id.status_name}</li>
+                            <li class="list-group-item"><strong>Vai trò:</strong> ${user.role.map(role => role.role_name).join(', ')}</li>
+                            <li class="list-group-item"><strong>Số lần bị chặn:</strong> ${user.block_count}</li>
+                            <li class="list-group-item"><strong>Lý do bị chặn:</strong> ${user.block_reason || 'Hiện tại chưa bị chặn'}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Thêm modal vào body và hiển thị
+        document.body.appendChild(modal);
+        $(modal).modal('show');
+        $(modal).on('hidden.bs.modal', () => modal.remove());
+
     } catch (error) {
-        console.error('There was a problem with the delete operation:', error);
+        console.error('Error fetching user details:', error);
     }
-}
+};
 
-function formatDateTime(dateTimeString) {
+
+// Show reporters list modal
+const showReportersList = (reporters) => {
+    const modal = document.createElement('div');
+    modal.classList.add('modal', 'fade');
+    modal.setAttribute('id', 'reportersListModal');
+    modal.setAttribute('tabindex', '-1');
+    modal.setAttribute('role', 'dialog');
+    modal.style.height = '100vh';
+    modal.style.overflow = 'hidden';
+
+    const reportersHtml = reporters.length > 0
+        ? reporters.map(reporter => `
+            <li class="list-group-item d-flex align-items-center">
+                <img src="${reporter.user.avatar}" alt="${reporter.user.full_name}" class="rounded-circle" width="40" height="40" style="margin-right: 10px;">
+                <div>
+                    <strong>${reporter.user.full_name}</strong>
+                    <p class="mb-0 text-muted">${reporter.report_type}</p>
+                    <small class="text-muted">${formatDateTime(reporter.reported_at)}</small>
+                </div>
+            </li>
+        `).join('')
+        : '<li class="list-group-item">Không có thông tin người báo cáo.</li>';
+
+    modal.innerHTML = `
+        <div class="modal-dialog modal-dialog-centered" role="document" style="width: 50%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Danh sách người báo cáo: ${reporters.length} người</h5>
+                </div>
+                <div class="modal-body" style="max-height: calc(5 * 56px); overflow-y: auto;">
+                    <ul class="list-group">${reportersHtml}</ul>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+    $(modal).modal('show');
+    $(modal).on('hidden.bs.modal', () => modal.remove());
+};
+
+
+// Format datetime
+const formatDateTime = (dateTimeString) => {
     const date = new Date(dateTimeString);
-
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
     const seconds = String(date.getSeconds()).padStart(2, '0');
-
     const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // Tháng 0-11
+    const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
-
     return `${hours}:${minutes}:${seconds} ${day}/${month}/${year}`;
-}
+};
 
-async function toggleReportStatus(reportID, currentStatusId, badgeElement) {
-    console.log("Report ID:", reportID);
-    console.log("Current Status ID:", currentStatusId);
-
-    const statusIds = {
-        "Đang xử lý": "671b72a85b9c34320966d25b",
-        "Đã xử lý": "671b72d45b9c34320966d260"
-    };
-
-    // Xác định ID trạng thái mới dựa trên trạng thái hiện tại
-    const newStatusId = currentStatusId === statusIds["Đang xử lý"] ? statusIds["Đã xử lý"] : statusIds["Đang xử lý"];
-
-    // Gửi yêu cầu cập nhật trạng thái lên server
-    try {
-        const response = await fetch(`${DOMAIN}reports/update-report-status/${reportID}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ report_status_id: newStatusId })
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-
-            if (data.success) {
-                // Cập nhật giao diện ngay lập tức nếu cần
-                const newStatusText = newStatusId === statusIds["Đã xử lý"] ? "Đã xử lý" : "Đang xử lý";
-                const newClass = newStatusId === statusIds["Đã xử lý"] ? 'badge-success' : 'bg-danger';
-
-                badgeElement.querySelector('span').textContent = newStatusText;
-                badgeElement.className = `badge border-0 text-light ${newClass} p-2`;
-
-                
-            } else {
-                console.error('Failed to update status:', data.message);
-            }
-        } else {
-            console.error('Failed to fetch from server, status code:', response.status);
-        }
-    } catch (error) {
-        console.error('There was a problem with the update operation:', error);
-    }
-    // Gọi lại API để làm mới dữ liệu
+// Initial fetch on page load
+window.addEventListener("DOMContentLoaded", () => {
     fetchDataForPage(currentPage);
-}
-
-let initialUserData = {}; // Biến để lưu trữ thông tin người dùng ban đầu
-
-
-
-
-
-
-
-
-
-
-
+});

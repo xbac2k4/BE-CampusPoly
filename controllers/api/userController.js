@@ -86,7 +86,7 @@ class UserController {
     putUser = async (req, res) => {
         const file = req.file;
         const { id } = req.params;
-        const { email, password, full_name, sex, role, user_status_id, bio, last_login, birthday, isVerified } = req.body;
+        const { email, password, full_name, sex, role, user_status_id, bio, last_login, birthday, isVerified, block_reason, block_count } = req.body;
         // console.log(file.filename);
         let avatar;
         let background;
@@ -98,7 +98,7 @@ class UserController {
         }
 
         try {
-            const data = await new UserService().putUser(id, email, password, full_name, sex, role, user_status_id, avatar, background, bio, last_login, birthday, isVerified);
+            const data = await new UserService().putUser(id, email, password, full_name, sex, role, user_status_id, avatar, background, bio, last_login, birthday, isVerified, block_reason, block_count);
             if (data) {
                 return res.json(HttpResponse.result(data));
             } else {
