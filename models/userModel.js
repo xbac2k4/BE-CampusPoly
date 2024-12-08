@@ -57,9 +57,21 @@ const userModel = new Schema({
         type: Boolean,
         default: false
     },
-    device_token:{
+    device_token: {
         type: String,
         default: ""
+    },
+    blocked_at: { 
+        type: Date, 
+        default: null 
+    },     // Thời gian bị chặn
+    block_reason: { 
+        type: String, 
+        enum: ['admin', 'violation',''], 
+        default: '' }, // Lý do bị chặn
+    block_count: {
+        type: Number,
+        default: 0
     }
 }, {
     timestamps: true // Kích hoạt tính năng tự động tạo createdAt và updatedAt

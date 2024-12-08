@@ -23,7 +23,7 @@ app.set('view engine', 'hbs');
 
 app.use(logger('dev'));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/components', express.static(path.join(__dirname, 'components')));
@@ -66,6 +66,29 @@ app.use(function (err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+const cron = require('node-cron');
+const Users = require('./models/userModel');
+const UserService = require('./services/userService');
+
+// cron.schedule('* * * * * *', async () => {
+cron.schedule('0 0 * * *', async () => {  // Chạy vào 00:00 mỗi ngày
+    try {
+        const users = await Users.find({
+            user_status_id: '67089ccb862f7badead53eba',
+            block_reason: 'violation',
+        });
+        for (let user of users) {
+            await new UserService().checkAndUnblockUser(user._id); // Gọi hàm kiểm tra và mở khóa người dùng
+        }
+        // console.log('Cron job completed: Checked and unblocked users.');
+    } catch (error) {
+        console.error('Error running cron job:', error);
+    }
+});
+
+
+
 
 // socket.js or the main server file
 const socketIo = require('socket.io');

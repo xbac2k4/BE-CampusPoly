@@ -102,6 +102,8 @@ const renderTable = (users) => {
                     </div>
                 </td>
                 <td>${user.bio}</td>
+                <td>${user.block_reason}</td>
+                <td>${user.block_count}</td>
                 <td>${formatDateTime(user.last_login)}</td>
                 <td>
                     <a href="#" class="block ${user.user_status_id.status_name === 'Bị chặn' ? 'text-danger' : ''}" title="Block User" data-toggle="tooltip" onclick="confirmDeleteBtn(this.closest('tr').dataset.user)">
@@ -197,28 +199,35 @@ document.getElementById("next").onclick = function () {
 
 // Hiển thị modal xác nhận xóa
 let blockUser;
+let block_count = 0;
 function confirmDeleteBtn(userData) {
     const user = JSON.parse(userData); // Phân tích cú pháp JSON
     console.log(user);
 
     userID = user._id;
     if (user.user_status_id.status_name === 'Bị chặn') {
+        console.log('User is blocked, preparing to unblock'); 
         document.getElementById('confirmDeleteModalLabel').innerText = 'BỎ CHẶN TÀI KHOẢN';
         document.getElementById('confirmDeleteModalBody').innerText = 'Bạn có chắc muốn bỏ chặn tài khoản này không? Hành động này không thể được hoàn tác.';
         document.getElementById('confirmDeleteBtn').innerText = 'Bỏ chặn';
         blockUser = {
             user_status_id: {
                 _id: '67089cc2862f7badead53eb9',
-            }
+            },
+            block_reason: '',
         }
     } else {
         document.getElementById('confirmDeleteModalLabel').innerText = 'CHẶN TÀI KHOẢN';
         document.getElementById('confirmDeleteModalBody').innerText = 'Bạn có chắc muốn chặn tài khoản này không? Hành động này không thể được hoàn tác.';
         document.getElementById('confirmDeleteBtn').innerText = 'Chặn';
+        block_count = user.block_count + 1;
+        console.log('New Block Count:', block_count);  
         blockUser = {
             user_status_id: {
                 _id: '67089ccb862f7badead53eba',
-            }
+            },
+            block_reason: 'admin', // Lý do bị chặn là do admin
+            block_count: block_count, // Cập nhật block_count sau khi tăng
         }
     }
     $('#confirmDeleteModal').modal('show'); // Hiển thị modal

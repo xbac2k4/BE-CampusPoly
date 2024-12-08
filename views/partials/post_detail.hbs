@@ -24,6 +24,9 @@
                                 <p id="time-up" class="time-up m-0 p-0">11 hours ago</p>
                             </span>
                         </div>
+                       <span id="block-post-btn" class="position-absolute" style="top: 10px; right: 50px;" data-is-blocked="false">
+                            <i class="bi bi-slash-circle-fill"></i>
+                        </span>
                         <!-- Thêm nút xóa bài viết -->
                         <span id="delete-post-btn" class="position-absolute" style="top: 10px; right: 10px;">
                             <i class="bi bi-trash-fill"></i>
@@ -71,6 +74,42 @@
                 document.getElementById('like-count').textContent = data.data.postData.like_count;
                 document.getElementById('comment-count').textContent = data.data.postData.comment_count;
                 //
+                // Lắng nghe sự kiện click cho nút toggle trạng thái block
+                document.getElementById('block-post-btn').addEventListener('click', () => {
+                    const blockButton = document.getElementById('block-post-btn');
+                    const isBlocked = blockButton.getAttribute('data-is-blocked') === 'true';
+                    const newState = !isBlocked;
+
+                    fetch(`http://localhost:3000/api/v1/posts/update-block-post/${postId}`, {
+                        method: 'PUT', // Phương thức PUT để cập nhật dữ liệu
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ is_blocked: newState }), // Gửi trạng thái mới
+                    })
+                        .then((response) => response.json())
+                        .then((data) => {
+                            if (data.success) {
+                                blockButton.setAttribute('data-is-blocked', newState);
+                                const icon = blockButton.querySelector('i');
+                                if (newState) {
+                                    icon.classList.remove('bi-slash-circle');
+                                    icon.classList.add('bi-slash-circle-fill');
+                                } else {
+                                    icon.classList.remove('bi-slash-circle-fill');
+                                    icon.classList.add('bi-slash-circle');
+                                }
+                                alert('Cập nhật trạng thái bài viết thành công!');
+                            } else {
+                                alert('Không thể thay đổi trạng thái bài viết. Vui lòng thử lại.');
+                            }
+                        })
+                        .catch((error) => {
+                            console.error('Lỗi khi gọi API:', error);
+                            alert('Có lỗi xảy ra. Vui lòng thử lại.');
+                        });
+                });
+
                 // Lắng nghe sự kiện click vào nút xóa
                 document.getElementById('delete-post-btn').addEventListener('click', () => {
                     if (confirm("Bạn có chắc chắn muốn xóa bài viết này?")) {

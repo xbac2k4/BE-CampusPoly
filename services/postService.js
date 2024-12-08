@@ -3,6 +3,7 @@ const User = require("../models/userModel");
 const Group = require("../models/groupModel");
 const Like = require("../models/likeModel");
 const Comment = require("../models/commentModel");
+const UserService = require("./userService");
 const HttpResponse = require("../utils/httpResponse");
 const dotenv = require('dotenv');
 const { use } = require("../routes/api");
@@ -54,8 +55,8 @@ class PostService {
     getPostByPage = async (page, limit) => {
         try {
             const skip = (parseInt(page) - 1) * parseInt(limit);
-            const posts = await Post.find().sort({ createdAt: -1 }).skip(skip).limit(parseInt(limit)).populate('group_id').populate('user_id', 'full_name avatar').populate('hashtag', 'hashtag_name');
-            const total = await Post.countDocuments();
+            const posts = await Post.find({ is_blocked: false }).sort({ createdAt: -1 }).skip(skip).limit(parseInt(limit)).populate('group_id').populate('user_id', 'full_name avatar').populate('hashtag', 'hashtag_name');
+            const total = await Post.countDocuments({ is_blocked: false });
             const totalPages = Math.ceil(total / parseInt(limit));
             // console.log('data: ', data);
             // Cập nhật like_count và comment_count cho từng bài viết
@@ -126,7 +127,7 @@ class PostService {
 
             if (!userPreferences.length) {
                 // Nếu không có dữ liệu tương tác thì không lọc theo hashtag
-                const posts = await Post.find()
+                const posts = await Post.find({ is_blocked: false })
                     .populate('group_id')
                     .populate({
                         path: 'user_id',
@@ -183,7 +184,7 @@ class PostService {
             const hashtagIds = userPreferences.map(pref => pref.hashtag_id);
 
             // Lấy tất cả bài viết có các hashtag user đã tương tác
-            const posts = await Post.find({ hashtag: { $in: hashtagIds } })
+            const posts = await Post.find({ hashtag: { $in: hashtagIds }, is_blocked: false })
                 .populate('group_id')
                 .populate({
                     path: 'user_id',
@@ -205,7 +206,7 @@ class PostService {
             });
 
             // Lấy các bài viết không có tương tác
-            const otherPosts = await Post.find({ hashtag: { $nin: hashtagIds } })
+            const otherPosts = await Post.find({ hashtag: { $nin: hashtagIds }, is_blocked: false })
                 .populate('group_id')
                 .populate({
                     path: 'user_id',
@@ -519,7 +520,7 @@ class PostService {
             return HttpResponse.error(error);
         }
     }
-    addPost = async (user_id, group_id, title, content, hashtag, imageArray) => {
+    addPost = async (user_id, group_id, title, content, hashtag, imageArray, is_blocked) => {
         try {
             // Tạo bài viết mới
             // console.log(hashtag[0]);
@@ -530,6 +531,7 @@ class PostService {
                 title: title,
                 content: content,
                 hashtag: hashtag[0],
+                is_blocked: is_blocked
             });
 
             // Lưu bài viết vào cơ sở dữ liệu
@@ -645,6 +647,94 @@ class PostService {
             throw error;
         }
     };
+
+    getVisiblePosts = async () => {
+        try {
+            const data = await Post.find({ is_blocked: false }) // Lọc bài viết không bị block
+                .populate({
+                    path: 'user_id',
+                    select: 'full_name avatar role',
+                    populate: {
+                        path: 'role',
+                        select: 'role_name permissions'
+                    }
+                })
+                .populate('group_id')
+                .populate('hashtag', 'hashtag_name');
+
+            const updatedPosts = await Promise.all(data.map(async (post) => {
+                // Tương tự cập nhật like và comment
+                const likeData = await Like.find({ post_id: post._id });
+                post.like_count = likeData.length;
+
+                const commentData = await Comment.find({ post_id: post._id });
+                post.comment_count = commentData.length;
+
+                return {
+                    postData: post,
+                    like_count: post.like_count,
+                    comment_count: post.comment_count,
+                    violation_point: post.violation_point,
+                    is_blocked: post.is_blocked
+                };
+            }));
+
+            return HttpResponse.success(updatedPosts, HttpResponse.getErrorMessages('getDataSuccess'));
+        } catch (error) {
+            console.log(error);
+            return HttpResponse.error(error);
+        }
+    };
+
+    blockPost = async (postId) => {
+        try {
+            const post = await Post.findById(postId);
+            if (!post) {
+                console.error(`Post with ID ${postId} not found.`);
+                return false;
+            }
+            // Đảm bảo bài viết được khóa
+            post.is_blocked = true;
+            await post.save();
+            console.log(`Post with ID ${postId} is now blocked.`);
+            // Kiểm tra số lượng bài viết bị chặn của người dùng
+            const userId = post.user_id;  // Lấy ID người dùng từ bài viết
+            const blockedPostsCount = await Post.countDocuments({ user_id: userId, is_blocked: true });
+            // Nếu số lượng bài viết bị chặn >= 5, cập nhật user_status_id
+            if (blockedPostsCount >= 5) {
+                const userStatusUpdated = await new UserService().updateUserStatus(userId);
+                if (userStatusUpdated) {
+                    console.log(`User with ID ${userId} now has user_status_id set to blocked.`);
+                } else {
+                    console.error(`Failed to update user status for user with ID ${userId}.`);
+                }
+            }
+            return true;
+        } catch (error) {
+            console.error(`Error blocking post with ID ${postId}:`, error);
+            throw new Error('Error blocking post.');
+        }
+    };
+    
+    updateBlockPost = async (id,is_blocked) => {
+        try {
+            // Tìm bài viết theo ID
+            const post = await Post.findById(id);
+            if (!post) {
+                return HttpResponse.fail(HttpResponse.getErrorMessages('dataNotFound'));
+            }
+            // Cập nhật thông tin bài viết
+            post.is_blocked = is_blocked ?? post.is_blocked;
+            // Lưu bài viết đã cập nhật
+            const result = await post.save();
+            await new this().blockPost(id);
+            return HttpResponse.success(result, HttpResponse.getErrorMessages('success'));
+        } catch (error) {
+            console.log(error);
+            return HttpResponse.error(error);
+        }
+    }
+    
 }
 
 module.exports = PostService;

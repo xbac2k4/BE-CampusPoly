@@ -83,8 +83,9 @@ function handleLoginSuccess(data) {
     // console.log(data);
 
     // Lưu thông tin đăng nhập vào sessionStorage
-    sessionStorage.setItem('userId', data._id);
-    sessionStorage.setItem('isLoggedIn', 'true');
+    localStorage.setItem('userId', data._id);
+    // sessionStorage.setItem('userId', data._id);
+    // sessionStorage.setItem('isLoggedIn', 'true');
 }
 
 function displayErrorMessage(message) {

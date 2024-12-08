@@ -166,6 +166,35 @@ class PostController {
             return res.json(HttpResponse.error(error));
         }
     }
+
+    updateViolationPoint = async (postId) => {
+        try {
+            // Lấy tất cả các báo cáo của bài viết
+            const reports = await ReportedPost.find({ post_id: postId });
+
+            // Tính tổng điểm vi phạm
+            const totalViolationPoint = reports.reduce((sum, report) => sum + (report.violation_point || 0), 0);
+
+            // Cập nhật bài viết với điểm vi phạm mới
+            const updateData = {
+                violation_point: totalViolationPoint
+            };
+
+            // Kiểm tra xem có cần chặn bài viết không
+            const BLOCK_THRESHOLD = 10; // Ngưỡng chặn bài viết
+            if (totalViolationPoint > BLOCK_THRESHOLD) {
+                updateData.is_blocked = true;
+                updateData.block_reason = "Điểm vi phạm vượt ngưỡng cho phép.";
+            }
+
+            // Cập nhật bài viết trong cơ sở dữ liệu
+            await Post.findByIdAndUpdate(postId, updateData);
+        } catch (err) {
+            console.error("Error updating violation point:", err);
+            throw err;
+        }
+    }
+
     deletePost = async (req, res, next) => {
         try {
             const { id } = req.params; // Lấy ID bài viết từ URL params
@@ -208,6 +237,41 @@ class PostController {
             return res.json(HttpResponse.error(error));
         }
     };
+
+    getVisiblePosts = async (req, res) => {
+        try {
+            // Gọi hàm getVisiblePosts từ PostService
+            const data = await new PostService().getVisiblePosts();
+    
+            // Kiểm tra và trả về kết quả
+            if (data) {
+                return res.json(HttpResponse.result(data));
+            } else {
+                return res.json(HttpResponse.fail(HttpResponse.getErrorMessages('dataNotFound')));
+            }
+        } catch (error) {
+            console.error("Error in getVisiblePosts:", error);
+            return res.json(HttpResponse.error(error));
+        }
+    };
+    
+    updateBlockPost = async (req, res, next) => {
+        try {
+            const { id } = req.params;
+            const { is_blocked } = req.body;
+            // Gọi dịch vụ để cập nhật bài viết
+            const updateBlockPost = await new PostService().updateBlockPost(id, is_blocked);
+            // Trả về phản hồi phù hợp
+            if (updateBlockPost) {
+                return res.json(HttpResponse.result(updateBlockPost));
+            } else {
+                return res.json(HttpResponse.fail(HttpResponse.getErrorMessages('dataNotFound')));
+            }
+        } catch (error) {
+            console.log(error);
+            return res.json(HttpResponse.error(error));
+        }
+    }
 
 }
 

@@ -40,6 +40,14 @@ const postModel = new Schema({
     comment_count: {
         type: Number,
         default: 0
+    },
+    is_blocked: {
+        type: Boolean,
+        default: false // Trạng thái bài viết bị chặn
+    },
+    block_reason: {
+        type: String,
+        default: null // Lý do chặn bài viết (nếu có)
     }
 }, {
     timestamps: true // Kích hoạt tính năng tự động tạo createdAt và updatedAt
