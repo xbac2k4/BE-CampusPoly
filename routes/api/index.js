@@ -36,4 +36,14 @@ router.use('/notifications', notificationRoutes);
 router.use('/userpreferences', userPreferencesRoutes);
 router.use('/searchpluss', searchplus);
 
+router.get('/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            console.error('Lỗi khi xóa session:', err);
+            return res.status(500).json({ message: 'Lỗi logout' });
+        }
+        res.status(200).json({ message: 'Đã logout' });
+    });
+});
+
 module.exports = router;

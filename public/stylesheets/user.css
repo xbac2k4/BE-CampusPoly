@@ -12,32 +12,36 @@ main {
     background-color: white;
     padding: 5vh 15vh 10vh 10vh;
 }
- 
+
 ::-webkit-scrollbar {
     height: 6px;
 }
+
 ::-webkit-scrollbar-button {
-    display: none; 
+    display: none;
 }
 
 ::-webkit-scrollbar-thumb {
-    background-color: #b0b0b4; 
-    border-radius: 20px; 
+    background-color: #b0b0b4;
+    border-radius: 20px;
 }
 
 
 ::-webkit-scrollbar-track {
-    background-color: transparent; 
+    background-color: transparent;
 }
 
 
 .table-container {
     overflow: hidden;
 }
+
 .table-wrapper {
-    width: 100%; /* Đặt 100% để bảng có thể mở rộng */
+    width: 100%;
+    /* Đặt 100% để bảng có thể mở rộng */
     height: calc(68vh);
-    overflow-x: auto; /* Đảm bảo cuộn ngang khi có quá nhiều cột */
+    overflow-x: auto;
+    /* Đảm bảo cuộn ngang khi có quá nhiều cột */
     overflow-y: hidden;
     border: 1px solid #777777;
     margin-bottom: 10px;
@@ -45,17 +49,21 @@ main {
 
 table.table {
     width: 100%;
-    min-width: 800px; /* Đảm bảo bảng có kích thước tối thiểu */
-    border-collapse: collapse; /* Đảm bảo các viền bảng được ghép lại */
+    min-width: 800px;
+    /* Đảm bảo bảng có kích thước tối thiểu */
+    border-collapse: collapse;
+    /* Đảm bảo các viền bảng được ghép lại */
     position: relative;
 }
 
-table.table th, table.table td {
+table.table th,
+table.table td {
     padding: 8px;
     text-align: left;
     border-color: #e9e9e9;
     font-size: 14px;
-    white-space: nowrap; /* Đảm bảo nội dung không bị xuống dòng */
+    white-space: nowrap;
+    /* Đảm bảo nội dung không bị xuống dòng */
 }
 
 table.table th:first-child,
@@ -66,18 +74,20 @@ table.table td:first-child {
     text-align: center;
     min-width: 50px;
 }
+
 table.table th:last-child,
 table.table td:last-child {
     position: sticky;
     right: 0;
     background-color: #ffffff;
     z-index: 3;
-    min-width: 120px; /* Đặt chiều rộng tối thiểu để tránh co lại */
+    min-width: 120px;
+    /* Đặt chiều rộng tối thiểu để tránh co lại */
     border-left: 1px solid black;
 }
 
 /* Đảm bảo các cột khác không bị co */
-table.table th.resizable-col, 
+table.table th.resizable-col,
 table.table td.resizable-col {
     min-width: 120px;
     /* border-right: 1px solid black; */
@@ -86,10 +96,12 @@ table.table td.resizable-col {
 table.table div {
     border: 1px solid black;
 }
+
 /* Các thuộc tính khác */
 table.table-striped tbody tr:nth-of-type(odd) {
     background-color: #fcfcfc;
 }
+
 table.table-striped.table-hover tbody tr:hover {
     background: #f5f5f5;
 }
@@ -99,22 +111,28 @@ table.table td a {
     display: inline-block;
     margin: 0 5px;
 }
+
 table.table td a.view {
     color: #03A9F4;
 }
+
 table.table td a.edit {
     color: #FFC107;
 }
+
 table.table td a.delete {
     color: #E34724;
 }
+
 table.table td i {
     font-size: 19px;
-}    
+}
+
 .pagination {
     float: right;
     margin: 0 0 5px;
 }
+
 .pagination li a {
     border: none;
     font-size: 95%;
@@ -127,24 +145,108 @@ table.table td i {
     text-align: center;
     padding: 0;
 }
+
 .pagination li a:hover {
     color: #666;
-}	
+}
+
 .pagination li.active a {
     background: #03A9F4;
 }
-.pagination li.active a:hover {        
+
+.pagination li.active a:hover {
     background: #0397d6;
 }
+
 .pagination li.disabled i {
     color: #ccc;
 }
+
 .pagination li i {
     font-size: 16px;
     padding-top: 6px
 }
+
 .hint-text {
     float: left;
     margin-top: 6px;
     font-size: 95%;
-}    
+}
+
+/* Dropdown chính */
+.header>.dropdown {
+    background-color: #e4ebf6;
+    border-radius: 2vh;
+    transition: 0.3s ease;
+}
+
+.header>.dropdown:hover {
+    background-color: #f2f5fa;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+/* Dropdown menu chính */
+.main-dropdown {
+    display: none;
+    /* Ẩn menu khi chưa hover */
+    position: absolute;
+    top: 100%;
+    /* Hiển thị menu ngay dưới mục cha */
+    left: 0;
+    min-width: 150px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+}
+
+/* Hiển thị dropdown khi hover vào mục chính */
+.dropdown:hover .main-dropdown {
+    display: block;
+}
+
+/* Submenu nằm ngang (ở bên phải) */
+.dropdown-submenu {
+    position: relative;
+}
+
+/* Submenu ẩn mặc định */
+.submenu {
+    display: none;
+    /* Ẩn submenu khi chưa hover */
+    position: absolute;
+    top: 0;
+    left: 100%;
+    /* Đẩy submenu sang bên phải */
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1001;
+}
+
+/* Hiển thị submenu khi hover vào mục con */
+.dropdown-submenu:hover .submenu {
+    display: block;
+}
+
+/* Định dạng các mục trong dropdown */
+.dropdown-item {
+    display: block;
+    padding: 10px 15px;
+    color: #333;
+    text-decoration: none;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+
+.submenu-item:hover {
+    cursor: pointer;
+}

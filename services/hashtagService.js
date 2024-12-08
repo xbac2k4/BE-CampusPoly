@@ -106,6 +106,17 @@ class HashtagService {
             throw error;
         }
     };
+    getTopHashtags = async (limit = 5) => {
+        try {
+            const hashtags = await Hashtag.find()
+                .sort({ hashtag_count: -1 })
+                .limit(limit);
+            return HttpResponse.success(hashtags, HttpResponse.getErrorMessages('success'));
+        } catch (error) {
+            console.error("Error:", error); // Log l��i nếu có
+            throw error;
+        }
+    }
 }
 
 module.exports = HashtagService;

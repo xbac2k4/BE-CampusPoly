@@ -99,6 +99,20 @@ class PostController {
             return res.json(HttpResponse.error(error));
         }
     }
+    getTopPost = async (req, res, next) => {
+        try {
+            const data = await new PostService().getTopPost();
+            // console.log('data: ', data);
+            if (data) {
+                return res.json(HttpResponse.result(data));
+            } else {
+                return res.json(HttpResponse.fail(HttpResponse.getErrorMessages('dataNotFound')));
+            }
+        } catch (error) {
+            console.log(error);
+            return res.json(HttpResponse.error(error));
+        }
+    }
     addPost = async (req, res, next) => {
         try {
             const { user_id, group_id, title, content, hashtag } = req.body;
