@@ -1,6 +1,7 @@
 const PostReporter = require("../models/postReporterModel");
 const ReportedPost = require("../models/reportedPostModel");
 const ReportType = require("../models/reportTypeModel");
+const Post = require("../models/postModel");
 const PostService = require("./postService");
 const HttpResponse = require("../utils/httpResponse");
 
@@ -24,7 +25,6 @@ class ReportedPostService {
             if (!post_id) {
                 return HttpResponse.fail('Báo cáo bài viết không hợp lệ.');
             }
-            
             const reportType = await ReportType.findById(report_type_id);
             const violationPoint = reportType.violation_point;
             console.log("Violation point:", violationPoint);
@@ -40,23 +40,19 @@ class ReportedPostService {
 
             // Kiểm tra hoặc tạo mới ReportedPost
             let reportedPost = await ReportedPost.findOne({ post_id });
-           
             if (!reportedPost) {
                 // Nếu không có ReportedPost, tạo mới
                 reportedPost = new ReportedPost({
                     post_id,
                     post_reporter_id: [newReport._id], // Lưu mảng các ID người báo cáo
                     violation_point: violationPoint,
-                    total_reports: 1,
+                    total_reports: 0,
                 });
             } else {
                 // Nếu có ReportedPost, tăng số báo cáo và điểm vi phạm
                 reportedPost.post_reporter_id.push(newReport._id);
-                reportedPost.total_reports++;
-
                 // Chỉ tăng violation_point khi vi phạm thực sự xảy ra
                 reportedPost.violation_point += violationPoint;
-
                 // Kiểm tra nếu violation_point >= 10 thì thay đổi trạng thái
                 if (reportedPost.violation_point >= 20) {
                     // ID của trạng thái mới
@@ -64,15 +60,30 @@ class ReportedPostService {
                     reportedPost.report_status_id = newStatusId;
                     // Gọi PostService để cập nhật trạng thái is_blocked
                     await new PostService().blockPost(post_id);
-                    console.log(`Post with ID ${post_id} is now blocked.`);
+                    console.log(`Post with ID ${post_id} is now blocked.`); 
+                    reportedPost.total_reports++;
+                    // if( reportedPost.total_reports >= 2){
+                    //     const post = await Post.findById(post_id); // Lấy thông tin bài viết
+                    //     if (post) {
+                    //         // Gọi hàm deletePost từ PostService để xóa bài viết
+                    //         await new PostService().deletePost(post_id, post.user_id, 'Admin');
+                    //         console.log(`Post is now deleted due to multiple reports.`);
+                    //     }
+                    // }
                 }
             }
 
             // Lưu lại cập nhật
             await reportedPost.save();
-
             console.log("Updated reported post:", reportedPost);
-
+            if( reportedPost.total_reports >= 2){
+                const post = await Post.findById(post_id); // Lấy thông tin bài viết
+                if (post) {
+                    // Gọi hàm deletePost từ PostService để xóa bài viết
+                    await new PostService().deletePost(post_id, post.user_id, 'Admin');
+                    console.log(`Post is now deleted due to multiple reports.`);
+                }
+            }
             return HttpResponse.success('Report submitted successfully.', {
                 report_id: newReport._id,
                 post_id,
@@ -208,6 +219,25 @@ class ReportedPostService {
             );
         }
     };
+    // Hàm xóa báo cáo
+    deleteReport = async (report_id) => {
+        try {
+            // Tìm và xóa báo cáo trong bảng ReportedPost
+            const reportedPost = await ReportedPost.findById(report_id);
+            if (!reportedPost) {
+                return HttpResponse.fail('Report not found.');
+            }
+            // Xóa tất cả bản ghi trong PostReporter liên quan đến report này
+            await PostReporter.deleteMany({ report_post_id: reportedPost.post_id });
+            // Xóa báo cáo trong ReportedPost
+            await ReportedPost.findByIdAndDelete(report_id);
+            return HttpResponse.success(null, 'Report and related records deleted successfully.');
+        } catch (error) {
+            console.error('Error deleting report:', error);
+            return HttpResponse.error('Error deleting report.', error.message);
+        }
+    };
+
 }
 
 module.exports = ReportedPostService;

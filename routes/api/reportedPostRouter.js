@@ -6,5 +6,6 @@ router.post('/create-report', new ReportedPostController().createReport);
 router.get('/all-reports', new ReportedPostController().getAllReports);
 router.get('/report/:report_id', new ReportedPostController().getReportByID);
 router.get('/get-report-by-page', new ReportedPostController().getReportsByPage);
+router.delete('/delete-reports/:report_id', new ReportedPostController().deleteReport);
 
 module.exports = router;

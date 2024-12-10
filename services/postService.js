@@ -3,6 +3,8 @@ const User = require("../models/userModel");
 const Group = require("../models/groupModel");
 const Like = require("../models/likeModel");
 const Comment = require("../models/commentModel");
+const ReportedPost = require("../models/reportedPostModel");
+const PostReporter = require("../models/postReporterModel");
 const UserService = require("./userService");
 const HttpResponse = require("../utils/httpResponse");
 const dotenv = require('dotenv');
@@ -714,6 +716,9 @@ class PostService {
                 console.log("Không phải admin hoặc người dùng không sở hữu bài viết, không cho phép xóa");
                 return; // Nếu không phải admin hoặc người dùng không sở hữu bài viết, không cho phép xóa
             }
+            // Tiến hành xóa báo cáo liên quan đến bài viết
+            await PostReporter.deleteMany({ report_post_id: id });
+            await ReportedPost.deleteMany({ post_id: id });
             // Tiến hành xóa bài viết
             const result = await post.deleteOne();
             if (result) {
@@ -853,7 +858,43 @@ class PostService {
             post.is_blocked = is_blocked ?? post.is_blocked;
             // Lưu bài viết đã cập nhật
             const result = await post.save();
-            await new this().blockPost(id);
+            // Kiểm tra nếu bài viết bị chặn
+            if (post.is_blocked === true) {
+                // Tìm các báo cáo liên quan đến bài viết
+                const reportedPosts = await ReportedPost.find({ post_id: id });
+    
+                // Cập nhật trạng thái báo cáo của tất cả các báo cáo liên quan
+                if (reportedPosts.length > 0) {
+                    for (const reportedPost of reportedPosts) {
+                        reportedPost.report_status_id = '675437f55efa7f0643e94b29'; // Trạng thái báo cáo đã bị chặn
+                        reportedPost.total_reports++; // Tăng số lượng báo cáo
+                        await reportedPost.save(); // Lưu thay đổi
+                    }
+                }
+            } else {
+                // Trường hợp bài viết không bị chặn (is_blocked = false)
+                const reportedPosts = await ReportedPost.find({ post_id: id });
+    
+                // Cập nhật trạng thái báo cáo và reset điểm vi phạm
+                if (reportedPosts.length > 0) {
+                    for (const reportedPost of reportedPosts) {
+                        reportedPost.report_status_id = '67571c815a8315a938d40c97'; // Trạng thái báo cáo đã được xử lý
+                        reportedPost.violation_point = 0; // Reset điểm vi phạm về 0
+                        await reportedPost.save(); // Lưu thay đổi
+                    }
+                }
+            }
+            const userId = post.user_id;  // Lấy ID người dùng từ bài viết
+            const blockedPostsCount = await Post.countDocuments({ user_id: userId, is_blocked: true });
+            // Nếu số lượng bài viết bị chặn >= 5, cập nhật user_status_id
+            if (blockedPostsCount >= 5) {
+                const userStatusUpdated = await new UserService().updateUserStatus(userId);
+                if (userStatusUpdated) {
+                    console.log(`User with ID ${userId} now has user_status_id set to blocked.`);
+                } else {
+                    console.error(`Failed to update user status for user with ID ${userId}.`);
+                }
+            }
             return HttpResponse.success(result, HttpResponse.getErrorMessages('success'));
         } catch (error) {
             console.log(error);
