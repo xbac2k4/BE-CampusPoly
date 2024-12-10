@@ -25,11 +25,11 @@
                                 <p id="time-up" class="time-up m-0 p-0">11 hours ago</p>
                             </span>
                         </div>
-                        <span id="block-post-btn" class="position-absolute" style="top: 10px; right: 50px;">
+                        <span id="block-post-btn" class="position-absolute" style="top: 10px; right: 50px;" title="Chặn bài viết">
                               <i class="fa fa-lock"></i> <!-- Icon mặc định là bài viết đã bị chặn -->
                         </span>
                         <!-- Thêm nút xóa bài viết -->
-                        <span id="delete-post-btn" class="position-absolute">
+                        <span id="delete-post-btn" class="position-absolute"  title="Xóa bài viết">
                             <i class="bi bi-trash-fill"></i>
                         </span>
 
@@ -78,10 +78,10 @@
                 const icon = document.getElementById('block-post-btn').getElementsByTagName('i')[0]; // Lấy phần tử <i> bên trong nút block
                 if (data.data.postData?.is_blocked === true) {  // Kiểm tra dưới dạng boolean
                     icon.classList.replace('fa-unlock', 'fa-lock'); 
-                  
+                    document.getElementById('block-post-btn').setAttribute('title', 'Bỏ chặn bài viết');
                 } else {
                     icon.classList.replace('fa-lock', 'fa-unlock'); // Icon unblocked
-                  
+                     document.getElementById('block-post-btn').setAttribute('title', 'Chặn bài viết');
                 }
                 // Lắng nghe sự kiện click vào nút block
                 document.getElementById('block-post-btn').addEventListener('click', () => {
@@ -100,10 +100,10 @@
                         .then(updateData => {
                             if (currentState) {
                                 icon.classList.replace('fa-lock', 'fa-unlock');
-                           
+                                document.getElementById('block-post-btn').setAttribute('title', 'Bỏ chặn bài viết');
                             } else {
                                 icon.classList.replace('fa-unlock', 'fa-lock');
-                               
+                                document.getElementById('block-post-btn').setAttribute('title', 'Chặn bài viết');
                             }
                             alert(`Bài viết đã được ${newState ? 'chặn' : 'mở khóa'} thành công.`);
                             data.data.postData.is_blocked = newState;

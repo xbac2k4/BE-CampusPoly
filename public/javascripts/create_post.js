@@ -93,7 +93,9 @@ document.addEventListener("DOMContentLoaded", () => {
         postButton.addEventListener("click", async () => {
             const postContent = postTextarea ? postTextarea.value.trim() : "";
             const postTitle = postTitleInput ? postTitleInput.value.trim() : "";
-            const postHashtag = postHashtagInput ? postHashtagInput.value.trim() : "";
+            const postHashtag = postHashtagInput ? 
+            (postHashtagInput.value.trim().startsWith("#") ? postHashtagInput.value.trim() : `#${postHashtagInput.value.trim()}`) 
+            : "";
 
             if (!postContent || !postTitle) {
                 alert("Vui lòng điền đầy đủ thông tin trước khi đăng!");

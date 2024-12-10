@@ -648,8 +648,21 @@ class PostService {
     };
 
 
-    addPost = async (user_id, group_id, title, content, hashtag, imageArray, is_blocked) => {
+    addPost = async (user_id, group_id, title, content, hashtag, imageArray, is_blocked, is_pinned) => {
         try {
+        // Lấy thông tin người dùng và populate trường role để lấy tên role
+        const user = await User.findById(user_id).populate('role');
+        console.log(user.role); // Kiểm tra dữ liệu đã được populate chưa
+
+        // Kiểm tra xem người dùng có phải là Admin không
+        const adminRole = user.role.find(role => role.role_name === "Admin");
+        console.log(adminRole); // In thông tin của adminRole để kiểm tra
+
+        // Nếu người dùng có vai trò Admin, set is_pinned = true
+        if (adminRole) {
+            is_pinned = true;
+            console.log('is_pinned đã được set thành true do là Admin');
+        }
             // Tạo bài viết mới
             // console.log(hashtag[0]);
             const newPost = new Post({
@@ -659,7 +672,8 @@ class PostService {
                 title: title,
                 content: content,
                 hashtag: hashtag[0],
-                is_blocked: is_blocked
+                is_blocked: is_blocked,
+                is_pinned: is_pinned
             });
 
             // Lưu bài viết vào cơ sở dữ liệu
