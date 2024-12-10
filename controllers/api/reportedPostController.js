@@ -87,6 +87,35 @@ class ReportedPostController {
             return res.json(HttpResponse.error(error));
         }
     };
+
+    deleteReport = async (req, res) => {
+        const { report_id } = req.params; // Lấy report_id từ URL params
+
+        if (!report_id) {
+            return res
+                .status(400)
+                .json(HttpResponse.fail('Report ID is required.'));
+        }
+
+        try {
+            const result = await new ReportedPostService().deleteReport(report_id);
+
+            if (result.success) {
+                return res
+                    .status(200)
+                    .json(HttpResponse.success(result.data, 'Report deleted successfully.'));
+            } else {
+                return res
+                    .status(404)
+                    .json(HttpResponse.fail(result.message || 'Report not found.'));
+            }
+        } catch (error) {
+            console.error('Error in deleteReport:', error);
+            return res
+                .status(500)
+                .json(HttpResponse.error('Internal server error.', error.message));
+        }
+    };
 }
 
 module.exports = ReportedPostController;

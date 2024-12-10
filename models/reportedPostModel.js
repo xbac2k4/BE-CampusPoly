@@ -15,7 +15,7 @@ const reportedPostModel = new Schema({
     report_status_id: {
         type: Schema.Types.ObjectId, ref: 'status',
         required: true,
-        default: "671b72d45b9c34320966d260"
+        default: "67571c815a8315a938d40c97"
     },
     violation_point:{
         type: Number,

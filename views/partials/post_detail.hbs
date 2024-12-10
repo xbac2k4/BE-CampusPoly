@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel='stylesheet' href='/stylesheets/post_detail.css' />
     <script src="javascripts/domain.js"></script>
     <title>{{title}}</title>
@@ -24,11 +25,11 @@
                                 <p id="time-up" class="time-up m-0 p-0">11 hours ago</p>
                             </span>
                         </div>
-                       <span id="block-post-btn" class="position-absolute" style="top: 10px; right: 50px;" data-is-blocked="false">
-                            <i class="bi bi-slash-circle-fill"></i>
+                        <span id="block-post-btn" class="position-absolute" style="top: 10px; right: 50px;">
+                              <i class="fa fa-lock"></i> <!-- Icon mặc định là bài viết đã bị chặn -->
                         </span>
                         <!-- Thêm nút xóa bài viết -->
-                        <span id="delete-post-btn" class="position-absolute" style="top: 10px; right: 10px;">
+                        <span id="delete-post-btn" class="position-absolute">
                             <i class="bi bi-trash-fill"></i>
                         </span>
 
@@ -40,7 +41,7 @@
                         ac justo vel velit ultricies tempor. Aliquam erat volutpat
                     </div>
                     <div id="post-hashtag" class="hashtag" style="color: #0078D4">
-                       Hashtag
+                        Hashtag
                     </div>
                     <div id="wrapper-image-post" class="image pt-1 mt-2 d-flex"></div>
                     <div class="post-icons ml-auto pt-2">
@@ -73,38 +74,44 @@
                 document.getElementById('post-avatar').src = data.data.postData.user_id.avatar === "" ? "https://placehold.co/50x50" : data.data.postData.user_id.avatar.replace("10.0.2.2", "localhost");
                 document.getElementById('like-count').textContent = data.data.postData.like_count;
                 document.getElementById('comment-count').textContent = data.data.postData.comment_count;
-                //
-                // Lắng nghe sự kiện click cho nút toggle trạng thái block
+                // Cập nhật trạng thái ban đầu của nút block
+                const icon = document.getElementById('block-post-btn').getElementsByTagName('i')[0]; // Lấy phần tử <i> bên trong nút block
+                if (data.data.postData?.is_blocked === true) {  // Kiểm tra dưới dạng boolean
+                    icon.classList.replace('fa-unlock', 'fa-lock'); 
+                  
+                } else {
+                    icon.classList.replace('fa-lock', 'fa-unlock'); // Icon unblocked
+                  
+                }
+                // Lắng nghe sự kiện click vào nút block
                 document.getElementById('block-post-btn').addEventListener('click', () => {
-                    const blockButton = document.getElementById('block-post-btn');
-                    const isBlocked = blockButton.getAttribute('data-is-blocked') === 'true';
-                    const newState = !isBlocked;
-
+                    const icon = document.getElementById('block-post-btn').getElementsByTagName('i')[0]; // Lấy phần tử <i> bên trong nút block
+                    const currentState = data.data.postData?.is_blocked; // Lấy trạng thái ban đầu từ dữ liệu API
+                    const newState = !currentState; // Đảo trạng thái
+                    // Gửi yêu cầu tới API để cập nhật trạng thái
                     fetch(`http://localhost:3000/api/v1/posts/update-block-post/${postId}`, {
-                        method: 'PUT', // Phương thức PUT để cập nhật dữ liệu
+                        method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({ is_blocked: newState }), // Gửi trạng thái mới
                     })
-                        .then((response) => response.json())
-                        .then((data) => {
-                            if (data.success) {
-                                blockButton.setAttribute('data-is-blocked', newState);
-                                const icon = blockButton.querySelector('i');
-                                if (newState) {
-                                    icon.classList.remove('bi-slash-circle');
-                                    icon.classList.add('bi-slash-circle-fill');
-                                } else {
-                                    icon.classList.remove('bi-slash-circle-fill');
-                                    icon.classList.add('bi-slash-circle');
-                                }
-                                alert('Cập nhật trạng thái bài viết thành công!');
+                        .then(response => response.json())
+                        .then(updateData => {
+                            if (currentState) {
+                                icon.classList.replace('fa-lock', 'fa-unlock');
+                           
                             } else {
-                                alert('Không thể thay đổi trạng thái bài viết. Vui lòng thử lại.');
+                                icon.classList.replace('fa-unlock', 'fa-lock');
+                               
                             }
+                            alert(`Bài viết đã được ${newState ? 'chặn' : 'mở khóa'} thành công.`);
+                            data.data.postData.is_blocked = newState;
+                            {{!-- window.location.href = `/post-detail/${postId}`; --}}
+
                         })
-                        .catch((error) => {
+                        .catch(error => {
+                            // Xử lý lỗi nếu có
                             console.error('Lỗi khi gọi API:', error);
                             alert('Có lỗi xảy ra. Vui lòng thử lại.');
                         });
@@ -159,13 +166,15 @@
                     comments.forEach(comment => {
                         const commentHTML = `
                             <div class="d-flex mb-2">
-                                <img src="${comment.user_id_comment.avatar === "" ? "https://placehold.co/50x50" : comment.user_id_comment.avatar.replace("10.0.2.2", "localhost")}" id="user-avatar" alt="" width="40" height="40" class="rounded-circle mr-3">
+                                <img src="${comment.user_id_comment.avatar === "" ? " https://placehold.co/50x50" :
+                                                        comment.user_id_comment.avatar.replace("10.0.2.2", "localhost")}" id="user-avatar" alt="" width="40"
+                                    height="40" class="rounded-circle mr-3">
                                 <div class="comment-content rounded p-2 d-flex flex-column">
                                     <span id="user-name">${comment.user_id_comment.full_name}</span>
                                     <span id="comment-content">${comment.comment_content}</span>
                                 </div>
                             </div>
-                        `;
+                            `;
                         wrapperComment.innerHTML += commentHTML; // Thêm từng bình luận vào phần tử
                     });
                 } else {
@@ -182,15 +191,10 @@
             const postDate = new Date(date);
             const diff = Math.floor((now - postDate) / 1000); // Chênh lệch thời gian tính bằng giây
 
-            if (diff < 60) return `${diff} seconds ago`;
-            const minutes = Math.floor(diff / 60);
-            if (minutes < 60) return `${minutes} minutes ago`;
-            const hours = Math.floor(minutes / 60);
-            if (hours < 24) return `${hours} hours ago`;
-            const days = Math.floor(hours / 24);
-            return `${days} days ago`;
-        }
-    </script>
+            if (diff < 60) return `${diff} seconds ago`; const minutes = Math.floor(diff / 60); if (minutes < 60) return
+            `${minutes} minutes ago`; const hours = Math.floor(minutes / 60); if (hours < 24) return `${hours} hours ago`;
+            const days = Math.floor(hours / 24); return `${days} days ago`;
+        } </script>
 </body>
 
 </html>

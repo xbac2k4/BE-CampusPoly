@@ -83,7 +83,7 @@ const renderTable = (reports) => {
                 <td>${reportedpost.violation_point}</td>
                 <td>${reportedpost.total_reports}</td>
                 <td>
-                    <div  class="badge border-0 text-light bg-info ${reportedpost.report_status_id.status_name === 'Đang xử lý' ? 'badge-success' : 'bg-danger'} p-2">
+                    <div  class="badge border-0 text-light bg-info ${reportedpost.report_status_id.status_name === 'Chưa xác định vi phạm' ? 'badge-success' : 'bg-danger'} p-2">
                         ${reportedpost.report_status_id.status_name}
                     </div>
                 </td>
