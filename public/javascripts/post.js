@@ -11,13 +11,15 @@ let totalPages;
 let searchTerm = ""; // Lưu trữ từ khóa tìm kiếm
 let isSearching = false; // Trạng thái tìm kiếm
 let searchTimeout;
+let isBlocked = false;
+let isPopular = false;
 
 // Hàm load bài viết
 const loadPostsSearch = async () => {
     // Xây dựng URL API tùy theo trạng thái tìm kiếm
     const apiUrl = isSearching
         ? `${DOMAIN}posts/admin-search?searchTerm=${encodeURIComponent(searchTerm)}`
-        : `${DOMAIN}posts/get-post-by-page?page=${currentPage}&limit=5`;
+        : `${DOMAIN}posts/get-post-by-page?page=${currentPage}&limit=5&isBlocked=${isBlocked}&isPopular=${isPopular}`;
 
     await fetch(apiUrl)
         .then(response => {
@@ -29,6 +31,7 @@ const loadPostsSearch = async () => {
         .then(data => {
             if (!data.success || !data.posts || data.posts.length === 0) {
                 console.log("No posts found");
+                loadMore.style.display = 'none';
                 if (isSearching) {
                     tbody.innerHTML = "<p>Không tìm thấy bài viết phù hợp.</p>";
                 }
@@ -59,7 +62,14 @@ const loadPostsSearch = async () => {
 };
 
 const loadPosts = async () => {
-    await fetch(`${DOMAIN}posts/get-post-by-page?page=${currentPage}&limit=5`)
+    // console.log("loadPosts is called");
+    // console.log('isPopular:', isPopular, 'isBlocked:', isBlocked);
+    await fetch(`${DOMAIN}posts/get-post-by-page?page=${currentPage}&limit=5&isBlocked=${isBlocked}&isPopular=${isPopular}`, {
+        method: 'GET',
+        headers: {
+            'Cache-Control': 'no-cache',  // Vô hiệu hóa cache
+        }
+    })
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -67,6 +77,12 @@ const loadPosts = async () => {
             return response.json();
         })
         .then(data => {
+            if (!data.data.postData || data.data.postData.length === 0) {
+                console.log("No posts found");
+                loadMore.style.display = 'none';
+                tbody.innerHTML = "<p>Không tìm thấy bài viết phù hợp.</p>";
+                return;
+            }
             data.data.postData.map(items => {
                 // console.log(items.user_id.avatar);
                 let html = `<card-post post-id="${items._id}" img="${items.user_id.avatar !== "" ? items.user_id.avatar.replace("10.0.2.2", "localhost") : "https://placehold.co/50x50"}" title="${items.title}" content="${items.content}" user="${items.user_id.full_name}" time="${items.createdAt}" likes="${items.like_count}" comments="${items.comment_count}" hashtag="${items.hashtag?.hashtag_name}"></card-post>`;
@@ -108,7 +124,7 @@ searchInput.addEventListener('input', () => {
     const value = searchInput.value.trim();
     searchTerm = value || ""; // Gán giá trị tìm kiếm
     clearTimeout(searchTimeout);
-   
+
 
     // Cập nhật trạng thái tìm kiếm
     if (searchTerm !== "") {
@@ -125,14 +141,40 @@ searchInput.addEventListener('input', () => {
     }
 });
 
-document.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", () => {
     // Lấy phần tử "Gần đây" từ DOM
     const recentFilter = document.getElementById("recent-filter");
+    const blockedFilter = document.getElementById("isblock-filter");
+    const hotFilter = document.getElementById("ispopular-filter");
 
     // Thêm sự kiện click vào "Gần đây"
     recentFilter.addEventListener("click", (event) => {
         event.preventDefault(); // Ngăn chặn hành động mặc định của liên kết
         window.location.reload(); // Tải lại trang
+    });
+
+    hotFilter.addEventListener("click", (event) => {
+        event.preventDefault();
+        // Gửi thông tin lọc "Phổ biến"
+        isPopular = true;
+        isBlocked = false;
+        currentPage = 1;
+        tbody.innerHTML = '';
+        loadPosts();
+        console.log('123');
+
+    });
+
+    // Xử lý click "Các bài viết bị ẩn"
+    blockedFilter.addEventListener("click", (event) => {
+        event.preventDefault();
+        // Gửi thông tin lọc "Các bài viết bị ẩn"
+        isPopular = false;
+        isBlocked = true;
+        currentPage = 1;
+        tbody.innerHTML = '';
+        loadPosts();
+        console.log('456');
     });
 });
 

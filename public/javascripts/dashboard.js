@@ -274,9 +274,7 @@ const fetchTopPost = async () => {
         const response = await fetch(`${DOMAIN}posts/get-top-post`);
         const data = await response.json();
 
-        // Duyệt qua từng bài viết và render HTML
         data.data.forEach(post => {
-            // Lấy thông tin bài viết
             const postData = post?.postData;
             const user = postData?.user_id;
             const postTitle = postData?.title;
@@ -286,12 +284,12 @@ const fetchTopPost = async () => {
             const avatar = user?.avatar;
             const fullName = user?.full_name;
 
-            // Tạo HTML cho từng bài viết
             const postElement = document.createElement('div');
             postElement.classList.add('post-item', 'mb-1', 'border', 'p-1', 'px-3', 'rounded');
+            postElement.dataset.post = JSON.stringify(post);
 
             postElement.innerHTML = `
-               <div class="d-flex flex-column justify-content-between">
+                <div class="d-flex flex-column justify-content-between" onclick="showDetailPost(this.closest('.post-item').dataset.post)">
                     <div class="post-footer d-flex justify-content-between w-100">
                         <div class="d-flex flex-column w-50">
                             <h6 class="m-0 text-container">${postTitle}</h6>
@@ -302,9 +300,7 @@ const fetchTopPost = async () => {
                             <span class="m-0"><i class="fa fa-comment"></i> ${commentCount}</span>
                         </div>
                     </div>
-
                     <div class="post-header d-flex align-items-center justify-content-between">
-                        <!-- User Info Section -->
                         <div class="d-flex align-items-center">
                             <img src="${avatar}" alt="${fullName}" class="avatar rounded-circle mr-2" width="20" height="20">
                             <span class="m-0">${fullName}</span>
@@ -313,12 +309,24 @@ const fetchTopPost = async () => {
                     </div>
                 </div>
             `;
-            // Thêm bài viết vào container
+
             topPostContainer.appendChild(postElement);
         });
-
     } catch (e) {
         console.log(e);
+    }
+};
+
+const showDetailPost = (postData) => {
+    try {
+        const post = JSON.parse(postData);
+        if (post?.postData?._id) {
+            window.location.href = `post-detail/${post?.postData?._id}`;
+        } else {
+            console.error('Post ID not found:', post);
+        }
+    } catch (e) {
+        console.error('Invalid post data:', postData, e);
     }
 };
 

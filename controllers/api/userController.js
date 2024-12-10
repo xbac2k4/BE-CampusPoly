@@ -56,9 +56,9 @@ class UserController {
         }
     }
     getUserByPage = async (req, res) => {
-        const { page, limit } = req.query;
+        const { page, limit, roleId, status } = req.query;
         try {
-            const data = await new UserService().getUserByPage(page, limit);
+            const data = await new UserService().getUserByPage(page, limit, roleId, status);
             if (data) {
                 return res.json(HttpResponse.result(data));
             } else {
@@ -142,7 +142,7 @@ class UserController {
         try {
             // Gọi phương thức trong service và truyền vào các tham số
             const data = await new UserService().getUserByName(searchTerm, page, limit);
-            
+
             if (data) {
                 return res.json(HttpResponse.result(data));
             } else {
@@ -153,8 +153,8 @@ class UserController {
             return res.json(HttpResponse.error(error));
         }
     };
-    
-    
+
+
 }
 
 module.exports = UserController;

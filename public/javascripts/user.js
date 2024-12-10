@@ -13,10 +13,12 @@ let userID;
 let listUserOnline = [];
 let users = [];
 let filterUsers = [];
+let selectedRole = ''; // Vai trò được chọn
+let selectedStatus = ''; // Trạng thái được chọn
 
-const fetchDataForPage = async (page, roleFilter = null, statusFilter = null) => {
+const fetchDataForPage = async (page, roleFilter = selectedRole, statusFilter = selectedStatus) => {
     try {
-        const response = await fetch(`${DOMAIN}users/get-user-by-page?page=${page}&limit=${itemsPerPage}`);
+        const response = await fetch(`${DOMAIN}users/get-user-by-page?page=${page}&limit=${itemsPerPage}&roleId=${roleFilter}&status=${statusFilter}`);
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
@@ -25,20 +27,20 @@ const fetchDataForPage = async (page, roleFilter = null, statusFilter = null) =>
         // Cập nhật dữ liệu phân trang
         totalPages = data.data.totalPages;
         let users = data.data.users;
-        console.log(roleFilter);
-        console.log(statusFilter);
+        // console.log(roleFilter);
+        // console.log(statusFilter);
 
 
         // Áp dụng bộ lọc nếu có
-        if (roleFilter) {
-            users = users.filter(user =>
-                user.role.some(role => role.role_name.toLowerCase() === roleFilter.toLowerCase())
-            );
-        }
+        // if (roleFilter) {
+        //     users = users.filter(user =>
+        //         user.role.some(role => role.role_name.toLowerCase() === roleFilter.toLowerCase())
+        //     );
+        // }
 
-        if (statusFilter) {
-            users = users.filter(user => user.user_status_id?.status_name === statusFilter);
-        }
+        // if (statusFilter) {
+        //     users = users.filter(user => user.user_status_id?.status_name === statusFilter);
+        // }
 
         renderTable(users); // Hiển thị danh sách người dùng
         renderPagination(); // Cập nhật giao diện phân trang
@@ -203,7 +205,7 @@ const renderPagination = async () => {
 document.getElementById("prev").onclick = function () {
     if (currentPage > 1) {
         currentPage--;
-        fetchDataForPage(currentPage);
+        fetchDataForPage(currentPage,);
     }
 };
 
@@ -224,7 +226,7 @@ function confirmDeleteBtn(userData) {
 
     userID = user._id;
     if (user.user_status_id.status_name === 'Bị chặn') {
-        console.log('User is blocked, preparing to unblock'); 
+        console.log('User is blocked, preparing to unblock');
         document.getElementById('confirmDeleteModalLabel').innerText = 'BỎ CHẶN TÀI KHOẢN';
         document.getElementById('confirmDeleteModalBody').innerText = 'Bạn có chắc muốn bỏ chặn tài khoản này không? Hành động này không thể được hoàn tác.';
         document.getElementById('confirmDeleteBtn').innerText = 'Bỏ chặn';
@@ -239,7 +241,7 @@ function confirmDeleteBtn(userData) {
         document.getElementById('confirmDeleteModalBody').innerText = 'Bạn có chắc muốn chặn tài khoản này không? Hành động này không thể được hoàn tác.';
         document.getElementById('confirmDeleteBtn').innerText = 'Chặn';
         block_count = user.block_count + 1;
-        console.log('New Block Count:', block_count);  
+        console.log('New Block Count:', block_count);
         blockUser = {
             user_status_id: {
                 _id: '67089ccb862f7badead53eba',
@@ -508,18 +510,16 @@ searchInput.addEventListener('input', async (e) => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-    let selectedRole = null; // Vai trò được chọn
-    let selectedStatus = null; // Trạng thái được chọn
-
     // Bắt sự kiện chọn vai trò
     document.querySelectorAll('.role-filter').forEach(item => {
         item.addEventListener('click', (event) => {
             event.preventDefault(); // Ngăn chặn tải lại trang
             selectedRole = event.target.getAttribute('data-role'); // Lấy giá trị vai trò
             console.log('Vai trò đã chọn:', selectedRole);
+            selectedStatus = '';
 
             // Gọi hàm fetch với vai trò được chọn
-            fetchDataForPage(1, selectedRole, selectedStatus = null);
+            fetchDataForPage(currentPage);
         });
     });
 
@@ -529,9 +529,10 @@ document.addEventListener("DOMContentLoaded", () => {
             event.preventDefault(); // Ngăn chặn tải lại trang
             selectedStatus = event.target.getAttribute('data-status'); // Lấy giá trị trạng thái
             console.log('Trạng thái đã chọn:', selectedStatus);
+            selectedRole = '';
 
             // Gọi hàm fetch với trạng thái được chọn
-            fetchDataForPage(1, selectedRole = null, selectedStatus);
+            fetchDataForPage(currentPage);
         });
     });
 });

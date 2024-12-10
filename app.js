@@ -126,10 +126,10 @@ io.on('connection', (socket) => {
     console.log(`${userData.full_name} is now online with socket ID: ${socket.id} and user ID: ${userId}`);
 
     // Notify all clients about the user login
-    io.emit('user-login-notification', {
-      message: `${userData.full_name} has logged in.`,
-      userId,
-    });
+    // io.emit('user-login-notification', {
+    //   message: `${userData.full_name} has logged in.`,
+    //   userId,
+    // });
 
     // Log danh sách người dùng hiện tại
     console.log('Danh sách online sau khi admin đã đăng nhập:');

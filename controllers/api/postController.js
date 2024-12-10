@@ -21,9 +21,9 @@ class PostController {
         }
     }
     getPostByPage = async (req, res, next) => {
-        const { page, limit } = req.query;
+        const { page, limit, isBlocked, isPopular } = req.query;
         try {
-            const data = await new PostService().getPostByPage(page, limit);
+            const data = await new PostService().getPostByPage(page, limit, isBlocked, isPopular);
             if (data) {
                 return res.json(HttpResponse.result(data));
             } else {
@@ -256,7 +256,7 @@ class PostController {
         try {
             // Gọi hàm getVisiblePosts từ PostService
             const data = await new PostService().getVisiblePosts();
-    
+
             // Kiểm tra và trả về kết quả
             if (data) {
                 return res.json(HttpResponse.result(data));
@@ -268,7 +268,7 @@ class PostController {
             return res.json(HttpResponse.error(error));
         }
     };
-    
+
     updateBlockPost = async (req, res, next) => {
         try {
             const { id } = req.params;

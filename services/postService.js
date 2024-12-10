@@ -52,14 +52,77 @@ class PostService {
             return HttpResponse.error(error);
         }
     }
-    getPostByPage = async (page, limit) => {
+    getPostByPage = async (page, limit, isBlocked, isPopular) => {
         try {
             const skip = (parseInt(page) - 1) * parseInt(limit);
-            const posts = await Post.find({ is_blocked: false }).sort({ createdAt: -1 }).skip(skip).limit(parseInt(limit)).populate('group_id').populate('user_id', 'full_name avatar').populate('hashtag', 'hashtag_name');
-            const total = await Post.countDocuments({ is_blocked: false });
+            const query = {};
+
+            // Lọc bài viết nếu cần
+            if (isBlocked) {
+                query.is_blocked = isBlocked === 'true'; // Chuyển thành boolean
+            }
+            if (isPopular) {
+                isPopular = isPopular === 'true'; // Chuyển thành boolean nếu là string
+            }
+            // console.log(query);
+            // console.log(isPopular);
+            // Xây dựng pipeline cho Aggregation
+            const pipeline = [
+                { $match: query }, // Áp dụng bộ lọc
+                {
+                    $lookup: {
+                        from: 'hashtags', // Bảng liên kết
+                        localField: 'hashtag', // Trường liên kết trong Post
+                        foreignField: '_id', // Trường liên kết trong Hashtag
+                        as: 'hashtag',
+                    },
+                },
+                { $unwind: { path: '$hashtag', preserveNullAndEmptyArrays: true } }, // Bóc tách hashtag
+                {
+                    $addFields: {
+                        hashtag_count: '$hashtag.hashtag_count', // Thêm hashtag_count để dễ truy cập
+                    },
+                },
+                !isPopular
+                    ? { $sort: { createdAt: -1 } } // Sắp xếp theo hashtag_count nếu isPopular === true
+                    : { $sort: { hashtag_count: -1 } }, // Sắp xếp mặc định
+                { $skip: skip }, // Bỏ qua số lượng bài viết
+                { $limit: parseInt(limit) }, // Giới hạn số bài viết
+                {
+                    $lookup: {
+                        from: 'users', // Bảng liên kết User
+                        localField: 'user_id',
+                        foreignField: '_id',
+                        as: 'user_id',
+                    },
+                },
+                { $unwind: { path: '$user_id', preserveNullAndEmptyArrays: true } },
+                {
+                    $project: {
+                        is_blocked: 1,
+                        block_reason: 1,
+                        title: 1,
+                        content: 1,
+                        image: 1,
+                        createdAt: 1,
+                        updatedAt: 1,
+                        'user_id._id': 1,
+                        'user_id.full_name': 1,
+                        'user_id.avatar': 1,
+                        'hashtag._id': 1,
+                        'hashtag.hashtag_name': 1,
+                        'hashtag.hashtag_count': 1,
+                    },
+                },
+            ];
+
+            // Thực hiện Aggregation
+            const posts = await Post.aggregate(pipeline);
+
+            // Tính tổng số lượng bài viết
+            const total = await Post.countDocuments(query);
             const totalPages = Math.ceil(total / parseInt(limit));
-            // console.log('data: ', data);
-            // Cập nhật like_count và comment_count cho từng bài viết
+
             const updatedPosts = await Promise.all(posts.map(async (post) => {
                 // Lấy số lượng like cho bài viết
                 const likeData = await Like.find({ post_id: post._id });
@@ -76,12 +139,18 @@ class PostService {
                 postData: updatedPosts,
                 totalPages
             };
+
+            // const data = {
+            //     postData: posts,
+            //     totalPages,
+            // };
+
             return HttpResponse.success(data, HttpResponse.getErrorMessages('getDataSucces'));
         } catch (error) {
-            console.log(error);
+            console.error(error);
             return HttpResponse.error(error);
         }
-    }
+    };
     // ------------------------------------- //
     // getPostByPage = async (page, limit) => {
     //     try {
@@ -523,6 +592,11 @@ class PostService {
 
     getTopPost = async () => {
         try {
+            // Lấy tháng và năm hiện tại
+            const currentMonth = new Date().getMonth(); // Tháng hiện tại (0-11)
+            const currentYear = new Date().getFullYear(); // Năm hiện tại
+
+            // Lấy tất cả các bài viết và populate các trường liên quan
             const data = await Post.find().populate({
                 path: 'user_id',
                 select: 'full_name avatar role', // Chọn các trường của `user`
@@ -532,7 +606,14 @@ class PostService {
                 }
             }).populate('group_id').populate('hashtag', 'hashtag_name');
 
-            const updatedPosts = await Promise.all(data.map(async (post) => {
+            // Lọc bài viết theo tháng và năm hiện tại
+            const filteredPosts = data.filter(post => {
+                const createdDate = new Date(post.createdAt);
+                return createdDate.getMonth() === currentMonth && createdDate.getFullYear() === currentYear;
+            });
+
+            // Tính toán và cập nhật điểm tương tác cho từng bài viết
+            const updatedPosts = await Promise.all(filteredPosts.map(async (post) => {
                 // Lấy số lượng like cho bài viết
                 const likeData = await Like.find({ post_id: post._id });
                 post.like_count = likeData.length;
@@ -546,7 +627,6 @@ class PostService {
 
                 return {
                     postData: post,
-                    // likeData,
                     interactionScore // Thêm điểm tương tác vào dữ liệu trả về
                 };
             }));
@@ -554,15 +634,17 @@ class PostService {
             // Sắp xếp bài viết theo điểm tương tác từ cao đến thấp
             updatedPosts.sort((a, b) => b.interactionScore - a.interactionScore);
 
-            // Lấy 5 bài viết có điểm cao nhất
+            // Lấy 3 bài viết có điểm cao nhất
             const topPosts = updatedPosts.slice(0, 3);
 
+            // Trả về danh sách bài viết
             return HttpResponse.success(topPosts, HttpResponse.getErrorMessages('getDataSucces'));
         } catch (error) {
             console.log(error);
             return HttpResponse.error(error);
         }
-    }
+    };
+
 
     addPost = async (user_id, group_id, title, content, hashtag, imageArray, is_blocked) => {
         try {
@@ -759,8 +841,8 @@ class PostService {
             throw new Error('Error blocking post.');
         }
     };
-    
-    updateBlockPost = async (id,is_blocked) => {
+
+    updateBlockPost = async (id, is_blocked) => {
         try {
             // Tìm bài viết theo ID
             const post = await Post.findById(id);
@@ -778,7 +860,7 @@ class PostService {
             return HttpResponse.error(error);
         }
     }
-    
+
 }
 
 module.exports = PostService;
