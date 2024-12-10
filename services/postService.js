@@ -11,6 +11,7 @@ const dotenv = require('dotenv');
 const { use } = require("../routes/api");
 const userPreferencesModel = require("../models/userPreferencesModel");
 const friendModel = require("../models/friendModel");
+const { sendOne } = require("../notification/Notification");
 dotenv.config();
 const displayedPostIds = new Set(); // Set để lưu trữ ID bài viết đã hiển thị
 const removeVietnameseTones = (str) => {
@@ -650,19 +651,19 @@ class PostService {
 
     addPost = async (user_id, group_id, title, content, hashtag, imageArray, is_blocked, is_pinned) => {
         try {
-        // Lấy thông tin người dùng và populate trường role để lấy tên role
-        const user = await User.findById(user_id).populate('role');
-        console.log(user.role); // Kiểm tra dữ liệu đã được populate chưa
+            // Lấy thông tin người dùng và populate trường role để lấy tên role
+            const user = await User.findById(user_id).populate('role');
+            console.log(user.role); // Kiểm tra dữ liệu đã được populate chưa
 
-        // Kiểm tra xem người dùng có phải là Admin không
-        const adminRole = user.role.find(role => role.role_name === "Admin");
-        console.log(adminRole); // In thông tin của adminRole để kiểm tra
+            // Kiểm tra xem người dùng có phải là Admin không
+            const adminRole = user.role.find(role => role.role_name === "Admin");
+            console.log(adminRole); // In thông tin của adminRole để kiểm tra
 
-        // Nếu người dùng có vai trò Admin, set is_pinned = true
-        if (adminRole) {
-            is_pinned = true;
-            console.log('is_pinned đã được set thành true do là Admin');
-        }
+            // Nếu người dùng có vai trò Admin, set is_pinned = true
+            if (adminRole) {
+                is_pinned = true;
+                console.log('is_pinned đã được set thành true do là Admin');
+            }
             // Tạo bài viết mới
             // console.log(hashtag[0]);
             const newPost = new Post({
@@ -718,7 +719,7 @@ class PostService {
             return HttpResponse.error(error);
         }
     }
-    deletePost = async (id, user_id, role) => {
+    deletePost = async (id, user_id, user) => {
         try {
             // Tìm bài viết theo ID
             const post = await Post.findById(id);
@@ -727,6 +728,43 @@ class PostService {
             }
             // Kiểm tra nếu người dùng có quyền xóa
             if (post.user_id.toString() !== user_id && role !== 'Admin') {
+                console.log("Không phải admin hoặc người dùng không sở hữu bài viết, không cho phép xóa");
+                return; // Nếu không phải admin hoặc người dùng không sở hữu bài viết, không cho phép xóa
+            }
+            // Tiến hành xóa báo cáo liên quan đến bài viết
+            await PostReporter.deleteMany({ report_post_id: id });
+            await ReportedPost.deleteMany({ post_id: id });
+            // Tiến hành xóa bài viết
+            const result = await post.deleteOne();
+            await sendOne(
+                'Bài viết của bạn đã bị xóa',
+                'Bài viết của bạn đã bị xóa vì vi phạm quy định của chúng tôi',
+                user_id,
+                '670ca3898cfc1be4b41b183b',
+                'admin_delete',
+                id
+            )
+            if (result) {
+                // Xóa like và comment liên quan
+                await Like.deleteMany({ post_id: id });
+                await Comment.deleteMany({ post_id: id });
+            }
+            return result; // Trả về kết quả xóa bài viết
+        } catch (error) {
+            console.log(error);
+            throw error; // Ném lỗi nếu có sự cố xảy ra
+        }
+    }
+    
+    deletePostByUser = async (id, user_id) => {
+        try {
+            // Tìm bài viết theo ID
+            const post = await Post.findById(id);
+            if (!post) {
+                return null; // Trả về null nếu không tìm thấy bài viết
+            }
+            // Kiểm tra nếu người dùng có quyền xóa
+            if (post.user_id.toString() !== user_id) {
                 console.log("Không phải admin hoặc người dùng không sở hữu bài viết, không cho phép xóa");
                 return; // Nếu không phải admin hoặc người dùng không sở hữu bài viết, không cho phép xóa
             }
@@ -876,7 +914,7 @@ class PostService {
             if (post.is_blocked === true) {
                 // Tìm các báo cáo liên quan đến bài viết
                 const reportedPosts = await ReportedPost.find({ post_id: id });
-    
+
                 // Cập nhật trạng thái báo cáo của tất cả các báo cáo liên quan
                 if (reportedPosts.length > 0) {
                     for (const reportedPost of reportedPosts) {
@@ -888,7 +926,7 @@ class PostService {
             } else {
                 // Trường hợp bài viết không bị chặn (is_blocked = false)
                 const reportedPosts = await ReportedPost.find({ post_id: id });
-    
+
                 // Cập nhật trạng thái báo cáo và reset điểm vi phạm
                 if (reportedPosts.length > 0) {
                     for (const reportedPost of reportedPosts) {

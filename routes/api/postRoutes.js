@@ -11,6 +11,8 @@ router.get('/get-top-post', new PostController().getTopPost);
 router.post('/add-post', upload.array('image'), new PostController().addPost);
 router.put('/update-post/:id', upload.array('image'), new PostController().updatePost);
 router.delete('/delete-post/:id', new PostController().deletePost);
+router.delete('/delete-post-by-user/:id', new PostController().deletePostByUser);
+
 router.get('/admin-search', new PostController().searchPostsAdmin);
 router.get('/get-posts-by-user-interaction', new PostController().getPostsByUserInteraction);
 router.get('/get-posts-by-friends', new PostController().getPostByFriends);
