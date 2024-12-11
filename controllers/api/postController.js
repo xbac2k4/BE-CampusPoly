@@ -309,6 +309,27 @@ class PostController {
         }
     }
 
+    checkPost = async (req, res) => {
+        try {
+            const { _id } = req.body;
+            const post = await Post.findById(_id);
+            console.log("post: ", post);
+
+            if (!post) {
+                return res.json({ success: false, message: 'Bài viết không tồn tại' });
+            }
+
+            if (post.is_blocked) {
+                return res.json({ success: false, message: 'Bài viết đã bị chặn', isBlocked: true });
+            }
+
+            return res.json({ success: true });
+        } catch (error) {
+            console.log(error);
+            return res.json(HttpResponse.error(error));
+        }
+    }
+
 }
 
 module.exports = PostController;

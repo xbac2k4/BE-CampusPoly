@@ -50,6 +50,17 @@ class NotificationController {
             return res.status(500).json({ success: false, message: 'Failed to read all notifications', error });
         }
     }
+
+    deleteNotificationById = async (req, res) => {
+        const { notificationId } = req.body;
+        try {
+            const result = await Notification.findByIdAndDelete(notificationId);
+            return res.json({ success: true, message: 'Xóa tin nhắn thành công' });
+        } catch (error) {
+            console.error('Error deleting notification:', error);
+            return res.status(500).json({ success: false, message: 'Failed to delete notification', error });
+        }
+    }
 }
 
 module.exports = new NotificationController();

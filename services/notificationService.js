@@ -26,6 +26,20 @@ const addNotification = (sender_id, receiver_id, title, body, imageUrl, sentTime
     }
 }
 
+const countNotifications = async (receiver_id) => {
+    return await Notification.countDocuments({ receiver_id });
+};
+
+const deleteOldNotifications = async (receiver_id, limit) => {
+    const oldNotifications = await Notification.find({ receiver_id })
+        .sort({ createdAt: 1 }) // Sắp xếp theo thời gian tạo tăng dần
+        .limit(limit);
+    const oldNotificationIds = oldNotifications.map(notification => notification._id);
+    await Notification.deleteMany({ _id: { $in: oldNotificationIds } });
+};
+
 module.exports = {
-    addNotification
-}
+    addNotification,
+    countNotifications,
+    deleteOldNotifications,
+};

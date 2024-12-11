@@ -13,4 +13,7 @@ router.put('/read-notification', NotificationController.readNotificationById);
 // đọc tất cả thông báo
 router.put('/read-all-notification', NotificationController.readAllNotification);
 
+// xóa thông báo theo id
+router.delete('/delete-notification', NotificationController.deleteNotificationById);
+
 module.exports = router;

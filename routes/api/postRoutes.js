@@ -19,4 +19,7 @@ router.get('/get-posts-by-friends', new PostController().getPostByFriends);
 router.get('/visible-posts', new PostController().getVisiblePosts);
 router.put('/update-block-post/:id', new PostController().updateBlockPost);
 
+//kiểm tra post
+router.post('/check-post', new PostController().checkPost);
+
 module.exports = router;

@@ -35,6 +35,12 @@ const sendNotification = async (title, body, userList, sender_id, type, post_id)
         // Gọi hàm addNotification để lưu thông báo vào cơ sở dữ liệu cho từng userId
         for (const userId of userIds) {
             await NotificationService.addNotification(sender_id, userId, title, body, imageUrl, new Date(), icon, sound, type, post_id);
+
+            // Kiểm tra số lượng thông báo của người nhận
+            const notificationCount = await NotificationService.countNotifications(userId);
+            if (notificationCount > 50) {
+                await NotificationService.deleteOldNotifications(userId, notificationCount - 50);
+            }
         }
 
         if (result.failureCount > 0) {
@@ -47,7 +53,6 @@ const sendNotification = async (title, body, userList, sender_id, type, post_id)
 
         return {
             notification: 'This is a notification',
-
         };
     } catch (error) {
         console.error('Error sending message:', error);
@@ -73,12 +78,7 @@ const sendOne = async (title, body, receiver_id, sender_id, type, post_id) => {
 
         const result = await admin.messaging().send({
             data: {
-                type: String(type), // Giá trị chuỗi
-                // senderId: String(userId), // Ép `userId` sang chuỗi
-                // actions: JSON.stringify([
-                //     { action: 'accept', label: 'Chấp nhận' },
-                //     { action: 'decline', label: 'Hủy' },
-                // ]), // Mảng được chuyển thành chuỗi JSON
+                type: String(type),
             },
             notification: {
                 title,
@@ -99,6 +99,12 @@ const sendOne = async (title, body, receiver_id, sender_id, type, post_id) => {
 
         // Gọi hàm addNotification để lưu thông báo vào cơ sở dữ liệu
         await NotificationService.addNotification(sender_id, receiver_id, title, body, imageUrl, new Date(), icon, sound, type, post_id);
+
+        // Kiểm tra số lượng thông báo của người nhận
+        const notificationCount = await NotificationService.countNotifications(receiver_id);
+        if (notificationCount > 50) {
+            await NotificationService.deleteOldNotifications(receiver_id, notificationCount - 50);
+        }
 
         return {
             notification: 'This is a notification'
