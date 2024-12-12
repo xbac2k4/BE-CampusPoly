@@ -11,7 +11,7 @@ const dotenv = require('dotenv');
 const { use } = require("../routes/api");
 const userPreferencesModel = require("../models/userPreferencesModel");
 const friendModel = require("../models/friendModel");
-const { sendOne } = require("../notification/Notification");
+const { sendOne, sendNotification } = require("../notification/Notification");
 dotenv.config();
 const displayedPostIds = new Set(); // Set để lưu trữ ID bài viết đã hiển thị
 const removeVietnameseTones = (str) => {
@@ -500,9 +500,9 @@ class PostService {
     getPostByFriends = async (user_id) => {
         try {
             const dataFriend = await friendModel.find({
-                user_id: user_id
+                user_id: user_id 
             })
-                .populate({
+                .populate({ 
                     path: 'status_id',
                     match: { status_name: 'Chấp nhận' }, // Chỉ lấy các bản ghi có status_name là "Chấp nhận"
                     select: 'status_name'
@@ -523,7 +523,7 @@ class PostService {
 
 
             // Tìm bài viết của bạn bè
-            const posts = await Post.find({ user_id: { $in: friendIds } })
+            const posts = await Post.find({ user_id: { $in: friendIds } , is_blocked: false  })
                 .sort({ createdAt: -1 }) // Sắp xếp theo `createdAt` giảm dần
                 .populate({
                     path: 'user_id',
@@ -654,11 +654,9 @@ class PostService {
             // Lấy thông tin người dùng và populate trường role để lấy tên role
             const user = await User.findById(user_id).populate('role');
             console.log(user.role); // Kiểm tra dữ liệu đã được populate chưa
-
             // Kiểm tra xem người dùng có phải là Admin không
             const adminRole = user.role.find(role => role.role_name === "Admin");
-            console.log(adminRole); // In thông tin của adminRole để kiểm tra
-
+            // console.log(adminRole); // In thông tin của adminRole để kiểm tra
             // Nếu người dùng có vai trò Admin, set is_pinned = true
             if (adminRole) {
                 is_pinned = true;
@@ -676,10 +674,22 @@ class PostService {
                 is_blocked: is_blocked,
                 is_pinned: is_pinned
             });
-
             // Lưu bài viết vào cơ sở dữ liệu
             const result = await newPost.save();
-            console.log(result);
+            if (adminRole) {
+                const allUsser = await User.find();
+                // console.log(allUsser);
+                await sendNotification(
+                    'CampusPoly vừa đăng một bài viết!',
+                    'CampusPoly vừa đăng một bài viết mới, hãy xem ngay!',
+                    allUsser,
+                    '670ca3898cfc1be4b41b183b',
+                    'New post by Admin',
+                    result._id
+                )
+                console.log('Thông báo cho tất cả người dùng');
+            }
+            // console.log(result);
 
             return HttpResponse.success(result, HttpResponse.getErrorMessages('success'));
         } catch (error) {
@@ -694,26 +704,21 @@ class PostService {
             if (!post) {
                 return HttpResponse.fail(HttpResponse.getErrorMessages('dataNotFound'));
             }
-
             // Kiểm tra quyền người dùng (chỉ người sở hữu bài viết mới có thể sửa)
             if (post.user_id.toString() !== user_id) {
                 return HttpResponse.fail(HttpResponse.getErrorMessages('unauthorized'));
             }
-
             // Cập nhật thông tin bài viết
             post.user_id = user_id ?? post.user_id;
             post.group_id = group_id ?? post.group_id;
             post.title = title ?? post.title;
             post.content = content ?? post.content;
             post.hashtag = hashtag ?? post.hashtag;
-
             // Kiểm tra và cập nhật ảnh: nếu không có ảnh mới, set thành mảng rỗng
             post.image = imageArray.length > 0 ? imageArray : [];
-
             // Lưu bài viết đã cập nhật
             const result = await post.save();
             return HttpResponse.success(result, HttpResponse.getErrorMessages('success'));
-
         } catch (error) {
             console.log(error);
             return HttpResponse.error(error);
@@ -755,7 +760,7 @@ class PostService {
             throw error; // Ném lỗi nếu có sự cố xảy ra
         }
     }
-    
+
     deletePostByUser = async (id, user_id) => {
         try {
             // Tìm bài viết theo ID
@@ -914,7 +919,6 @@ class PostService {
             if (post.is_blocked === true) {
                 // Tìm các báo cáo liên quan đến bài viết
                 const reportedPosts = await ReportedPost.find({ post_id: id });
-
                 // Cập nhật trạng thái báo cáo của tất cả các báo cáo liên quan
                 if (reportedPosts.length > 0) {
                     for (const reportedPost of reportedPosts) {

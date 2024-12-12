@@ -3,7 +3,12 @@
     color: gray !important;
 }
 
-.wrapper-post,
+.wrapper-post {
+    padding-right: 20px; /* Thêm padding phải cho wrapper-post */
+    background-color: #E4EBF6;
+    border-radius: 2vh;
+    overflow: hidden;
+}
 .wrapper-comment {
     background-color: #E4EBF6;
     border-radius: 2vh;
@@ -16,6 +21,7 @@
     height: 100vh; /* Đặt chiều cao cố định */
     overflow-y: scroll; /* Cho phép cuộn theo chiều dọc */
     padding-bottom: 10vh;
+    padding-right: 15px; 
 }
 #wrapper-image-post {
     overflow-x: auto; /* Cho phép cuộn theo chiều ngang */
@@ -112,4 +118,24 @@
 #block-post-btn i.fa-unlock:hover {
     background-color: #0b772a;
 }
-
+#post-title {
+    white-space: normal;  /* Cho phép văn bản xuống dòng */
+    overflow-wrap: break-word;  /* Đảm bảo văn bản sẽ xuống dòng khi cần */
+    word-wrap: break-word;  /* Đảm bảo văn bản sẽ xuống dòng khi cần */
+    max-width: 55%; 
+    line-height: 1;
+    padding-bottom: 10px;
+}
+#post-content{
+    white-space: normal;  /* Cho phép văn bản xuống dòng */
+    overflow-wrap: break-word;  /* Đảm bảo văn bản sẽ xuống dòng khi cần */
+    word-wrap: break-word;  /* Đảm bảo văn bản sẽ xuống dòng khi cần */
+    max-width: 52%; 
+    line-height: 1;
+    padding-bottom: 10px;
+    font-size: 18px;  
+}
+#content-main{
+    max-width: 100%; 
+    padding-right: 80%;
+}
