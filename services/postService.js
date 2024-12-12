@@ -500,9 +500,9 @@ class PostService {
     getPostByFriends = async (user_id) => {
         try {
             const dataFriend = await friendModel.find({
-                user_id: user_id 
+                user_id: user_id
             })
-                .populate({ 
+                .populate({
                     path: 'status_id',
                     match: { status_name: 'Chấp nhận' }, // Chỉ lấy các bản ghi có status_name là "Chấp nhận"
                     select: 'status_name'
@@ -523,7 +523,7 @@ class PostService {
 
 
             // Tìm bài viết của bạn bè
-            const posts = await Post.find({ user_id: { $in: friendIds } , is_blocked: false  })
+            const posts = await Post.find({ user_id: { $in: friendIds }, is_blocked: false })
                 .sort({ createdAt: -1 }) // Sắp xếp theo `createdAt` giảm dần
                 .populate({
                     path: 'user_id',
@@ -684,7 +684,7 @@ class PostService {
                     'CampusPoly vừa đăng một bài viết mới, hãy xem ngay!',
                     allUsser,
                     '670ca3898cfc1be4b41b183b',
-                    'New post by Admin',
+                    'create_post',
                     result._id
                 )
                 console.log('Thông báo cho tất cả người dùng');
@@ -913,8 +913,30 @@ class PostService {
             }
             // Cập nhật thông tin bài viết
             post.is_blocked = is_blocked ?? post.is_blocked;
+            if (is_blocked === true) {
+                sendOne(
+                    'Bài viết của bạn đã bị chặn',
+                    'Bài viết của bạn đã bị chặn vì vi phạm quy định của chúng tôi',
+                    post.user_id,
+                    '670ca3898cfc1be4b41b183b',
+                    'admin_block',
+                    id
+                )
+            }
+            else if (is_blocked === false) {
+                sendOne(
+                    'Bài viết của bạn đã được mở chặn',
+                    'Bài viết của bạn đã được mở chặn',
+                    post.user_id,
+                    '670ca3898cfc1be4b41b183b',
+                    'admin_block',
+                    id
+                )
+            }
             // Lưu bài viết đã cập nhật
             const result = await post.save();
+
+
             // Kiểm tra nếu bài viết bị chặn
             if (post.is_blocked === true) {
                 // Tìm các báo cáo liên quan đến bài viết

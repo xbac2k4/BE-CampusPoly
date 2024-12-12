@@ -8,10 +8,11 @@ const dotenv = require('dotenv');
 const transporter = require("../config/common/mail");
 const nodemailer = require("nodemailer");
 const Friend = require("../models/friendModel");
-const { sendNotification } = require("../notification/Notification");
+const { sendOne } = require("../notification/Notification");
 const mongoose = require('mongoose');
 dotenv.config();
 const SECRETKEY = process.env.SECRETKEY
+const EMAIL = process.env.EMAIL
 
 const removeVietnameseTones = (str) => {
     return str
@@ -390,6 +391,16 @@ class UserService {
                 newUpdate.block_count = block_count ?? newUpdate.block_count;
 
                 result = await newUpdate.save();
+                if (newUpdate.user_status_id == '67089ccb862f7badead53eba') {
+                    sendOne(
+                        'Chúng tôi đã chặn tài khoản của bạn',
+                        `Bạn đã vi phạm quy định của chúng tôi. Vui lòng liên hệ với chúng tôi qua email ${EMAIL} để biết thêm chi tiết. `,
+                        id,
+                        '670ca3898cfc1be4b41b183b',
+                        'admin_block_user',
+                        ''
+                    )
+                }
             }
             if (result) {
                 return HttpResponse.success(result, HttpResponse.getErrorMessages('success'));
