@@ -78,7 +78,7 @@ class SearchplusService {
             normalizedSearchTerm = removeVietnameseTones(normalizedSearchTerm);
             console.log("Normalized Search Term after removing '#':", normalizedSearchTerm); // Log sau khi chuẩn hóa lại
             // Tải tất cả bài viết từ database
-            const posts = await Post.find()
+            const posts = await Post.find({ is_blocked: false })
                 .populate({
                     path: 'user_id',
                     select: 'full_name avatar role', // Chọn các trường của `user`

@@ -559,10 +559,10 @@ class PostService {
             return HttpResponse.error(error);
         }
     }
-    getPostByUserID = async (user_id) => {
+    getPostByUserID = async (user_id) => { 
         try {
             const data = await Post.find({
-                user_id
+                user_id, is_blocked: false 
             }).populate({
                 path: 'user_id',
                 select: 'full_name avatar role', // Chọn các trường của `user`
