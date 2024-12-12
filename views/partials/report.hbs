@@ -19,8 +19,26 @@
 
 <body>
     <main class="w-100 pl-4">
-        <div class="header d-flex justify-content-end align-items-center pb-3">
-            <!-- Optional Search Bar -->
+        <div class="header d-flex justify-content-start align-items-center pb-3">
+             <div class="dropdown">
+                <li class="nav-item" style="list-style: none;">
+                    <a data-mdb-dropdown-init class="nav-link dropdown-toggle d-flex align-items-center" href="#"
+                        id="navbarDropdownMenuLink" role="button" data-mdb-toggle="dropdown" aria-expanded="false">
+                        Lọc
+                    </a>
+                    <ul class="dropdown-menu .bg-primary" aria-labelledby="navbarDropdownMenuLink">
+                        <li>
+                            <a class="dropdown-item" href="#" id="recent-filter">Gần đây</a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="#" id="isblock-filter" data-status="675437f55efa7f0643e94b29">Các bài viết đã vi phạm</a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="#" id="isunblock-filter" data-status="67571c815a8315a938d40c97">Các bài viết chưa vi phạm</a>
+                        </li>
+                    </ul>
+                </li>
+            </div>
         </div>
 
         <div class="table-container p-0">

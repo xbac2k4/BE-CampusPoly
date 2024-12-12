@@ -147,12 +147,19 @@ class ReportedPostService {
     };
 
     // Lấy báo cáo bài viết theo phân trang
-    getReportsByPage = async (page, limit) => {
+    getReportsByPage = async (page, limit, status) => {
         try {
             const skip = (parseInt(page) - 1) * parseInt(limit);
 
+            // Xây dựng query động
+            const query = {};
+
+            
+            if (status) query.report_status_id = status; // Lọc theo trạng thái
+            console.log(query);
+
             // Lấy các báo cáo bài viết với phân trang
-            const reports = await ReportedPost.find()
+            const reports = await ReportedPost.find(query)
                 .skip(skip) // Phân trang
                 .limit(parseInt(limit)) // Giới hạn số báo cáo trên mỗi trang
                 .populate({
@@ -167,7 +174,7 @@ class ReportedPostService {
                 .lean(); // Chuyển đổi kết quả mongoose thành đối tượng thuần
 
             // Tính tổng số báo cáo để tính tổng số trang
-            const totalReports = await ReportedPost.countDocuments();
+            const totalReports = await ReportedPost.countDocuments(query);
             const totalPages = Math.ceil(totalReports / parseInt(limit));
 
             // Nếu không có dữ liệu báo cáo

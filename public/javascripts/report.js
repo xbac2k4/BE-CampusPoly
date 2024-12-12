@@ -7,22 +7,17 @@ const hintText = document.querySelector('.hint-text');
 const itemsPerPage = 10; // Số lượng mục mỗi trang
 let currentPage = 1;
 let totalPages;
+let selectedStatus = ''; // Trạng thái được chọn
 
 // Fetch API and render data
-const fetchDataForPage = async (page) => {
+const fetchDataForPage = async (page, statusFilter = selectedStatus) => {
     try {
-        const response = await fetch(`${DOMAIN}reportedposts/get-report-by-page?page=${page}&limit=${itemsPerPage}`);
+        const response = await fetch(`${DOMAIN}reportedposts/get-report-by-page?page=${page}&limit=${itemsPerPage}&status=${statusFilter}`);
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
         const data = await response.json();
-        console.log("Data from API:", data); // Log dữ liệu từ API
-
-        // Kiểm tra nếu dữ liệu trả về có đúng cấu trúc
-        if (!data || !data.data || !Array.isArray(data.data.data.reports)) {
-            throw new Error('Dữ liệu không đúng định dạng hoặc không có báo cáo');
-        }
-
+        // console.log("Data from API:", data); // Log dữ liệu từ API
         // Cập nhật dữ liệu
         totalPages = data.data.data.totalPages; // totalPages từ data.data
         const reports = data.data.data.reports; // Lấy danh sách báo cáo
@@ -36,14 +31,13 @@ const fetchDataForPage = async (page) => {
         renderPagination(); // Gọi hàm renderPagination để cập nhật phân trang
 
         // Cập nhật thông tin mục hiển thị
-        const userAll = await fetch(`${DOMAIN}reportedposts/all-reports`);
-        const dataAll = await userAll.json();
-        const totalItems = dataAll.data.data.reports.length         
+        const userAllResponse = await fetch(`${DOMAIN}reportedposts/all-reports`);
+        const dataAll = await userAllResponse.json();
+        const totalItems = dataAll.data.data.reports.length;
         const startItem = (currentPage - 1) * itemsPerPage + 1; // Mục bắt đầu
         const endItem = Math.min(startItem + reports.length - 1, totalItems); // Mục kết thúc
         const hintText = document.querySelector('.hint-text');
         hintText.innerHTML = `Hiển thị <b>${startItem}</b> đến <b>${endItem}</b> trên tổng số <b>${totalItems}</b> báo cáo`;
-
 
     } catch (error) {
         console.error('Error fetching data:', error);
@@ -282,4 +276,32 @@ const formatDateTime = (dateTimeString) => {
 // Initial fetch on page load
 window.addEventListener("DOMContentLoaded", () => {
     fetchDataForPage(currentPage);
+});
+
+
+document.addEventListener("DOMContentLoaded", () => {
+    console.log("DOM fully loaded and parsed");
+    const recentFilter = document.getElementById("recent-filter");
+    const blockedFilter = document.getElementById("isblock-filter");
+    const unBlockedFilter = document.getElementById("isunblock-filter");
+
+    recentFilter.addEventListener("click", (event) => {
+        event.preventDefault(); // Ngăn chặn hành động mặc định của liên kết
+        window.location.reload(); // Tải lại trang
+    });
+
+    blockedFilter.addEventListener("click", (event) => {
+        event.preventDefault();
+        // Gửi thông tin lọc "Phổ biến"
+        selectedStatus = event.target.getAttribute('data-status');
+        console.log('Lọc đã chọn:', selectedStatus);
+        fetchDataForPage(currentPage);
+    });
+    unBlockedFilter.addEventListener("click", (event) => {
+        event.preventDefault();
+        // Gửi thông tin lọc "Phổ biến"
+        selectedStatus = event.target.getAttribute('data-status');
+        console.log('Lọc đã chọn:', selectedStatus);
+        fetchDataForPage(currentPage);
+    });
 });

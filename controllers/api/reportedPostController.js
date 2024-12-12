@@ -70,10 +70,10 @@ class ReportedPostController {
 
     // Lấy báo cáo theo phân trang
     getReportsByPage = async (req, res) => {
-        const { page, limit } = req.query;  // Lấy các tham số từ query string
+        const { page, limit, status } = req.query;  // Lấy các tham số từ query string
         try {
             // Gọi service để lấy báo cáo theo trang
-            const data = await new ReportedPostService().getReportsByPage(page, limit);
+            const data = await new ReportedPostService().getReportsByPage(page, limit, status);
             if (data) {
                 // Trả về kết quả nếu có dữ liệu
                 return res.json(HttpResponse.success(data));
