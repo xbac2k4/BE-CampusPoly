@@ -246,7 +246,7 @@ function confirmDeleteBtn(userData) {
             user_status_id: {
                 _id: '67089ccb862f7badead53eba',
             },
-            block_reason: 'admin', // Lý do bị chặn là do admin
+            block_reason: 'Bởi Admin', // Lý do bị chặn là do admin
             block_count: block_count, // Cập nhật block_count sau khi tăng
         }
     }

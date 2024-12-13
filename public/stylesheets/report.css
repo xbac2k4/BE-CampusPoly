@@ -139,3 +139,31 @@ table.table td i {
     margin-top: 6px;
     font-size: 95%;
 } 
+/* Dropdown chính */
+.header>.dropdown {
+    background-color: #e4ebf6;
+    border-radius: 2vh;
+    transition: 0.3s ease;
+}
+.header>.dropdown:hover {
+    background-color: #f2f5fa;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+.main-dropdown {
+    display: none;
+    /* Ẩn menu khi chưa hover */
+    position: absolute;
+    top: 100%;
+    /* Hiển thị menu ngay dưới mục cha */
+    left: 0;
+    min-width: 150px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+}

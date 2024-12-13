@@ -661,7 +661,7 @@ class UserService {
         }
     };
 
-    updateUserStatus = async (userId, reason = 'violation') => {
+    updateUserStatus = async (userId, reason = 'Vi phạm cộng đồng') => {
         try {
             // Tìm người dùng trước
             const user = await Users.findById(userId);
@@ -705,11 +705,11 @@ class UserService {
                 return false;
             }
             // console.log(`User details - is_blocked: ${user.user_status_id}, block_reason: ${user.block_reason}, blocked_at: ${user.blocked_at}`);
-            // Chỉ mở khóa nếu lý do bị chặn là 'violation'
+            // Chỉ mở khóa nếu lý do bị chặn là 'Vi phạm cộng đồng'
             if (
                 user.user_status_id &&
                 user.user_status_id.toString() === '67089ccb862f7badead53eba' &&
-                user.block_reason === 'violation'
+                user.block_reason === 'Vi phạm cộng đồng'
             ) {
                 const currentDate = new Date();
                 const blockDuration = currentDate - new Date(user.blocked_at); // Đảm bảo sử dụng new Date()

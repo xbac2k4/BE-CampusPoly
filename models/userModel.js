@@ -67,7 +67,7 @@ const userModel = new Schema({
     },     // Thời gian bị chặn
     block_reason: { 
         type: String, 
-        enum: ['admin', 'violation',''], 
+        enum: ['Bởi Admin', 'Vi phạm cộng đồng',''], 
         default: '' }, // Lý do bị chặn
     block_count: {
         type: Number,

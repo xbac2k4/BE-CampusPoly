@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel='stylesheet' href='/stylesheets/post_detail.css' />
-    <script src="javascripts/domain.js"></script>
+    <script src="/javascripts/domain.js"></script>
     <title>{{title}}</title>
 </head>
 
@@ -32,8 +32,6 @@
                         <span id="delete-post-btn" class="position-absolute"  title="Xóa bài viết">
                             <i class="bi bi-trash-fill"></i>
                         </span>
-
-
                     </div> 
                     <h2 id="post-title" class="m-0" style="" >Tiêu đề bài viết</h2>
                     <div id="post-content" class="content">
@@ -62,8 +60,9 @@
     <script>
         const postId = '{{postId}}';
         const userId = '{{userId}}'; // ID của người dùng, có thể lấy từ session hoặc một biến toàn cục
+        const DOMAIN = window.APP_CONFIG.API_URL;
 
-        fetch(`http://localhost:3000/api/v1/posts/get-post-by-id/{{postId}}`)
+        fetch(`${DOMAIN}posts/get-post-by-id/{{postId}}`)
             .then(response => response.json())
             .then(data => {
                 console.log(data);
@@ -90,7 +89,7 @@
                     const currentState = data.data.postData?.is_blocked; // Lấy trạng thái ban đầu từ dữ liệu API
                     const newState = !currentState; // Đảo trạng thái
                     // Gửi yêu cầu tới API để cập nhật trạng thái
-                    fetch(`http://localhost:3000/api/v1/posts/update-block-post/${postId}`, {
+                    fetch(`${DOMAIN}posts/update-block-post/${postId}`, {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
@@ -122,7 +121,7 @@
                 document.getElementById('delete-post-btn').addEventListener('click', () => {
                     if (confirm("Bạn có chắc chắn muốn xóa bài viết này?")) {
                         // Thực hiện gọi API xóa bài viết
-                        fetch(`http://localhost:3000/api/v1/posts/delete-post/${postId}?user_id=${data.data.postData.user_id._id}`, {
+                        fetch(`${DOMAIN}posts/delete-post/${postId}?user_id=${data.data.postData.user_id._id}`, {
                             method: 'DELETE', // Cách gọi API xóa, có thể thay đổi thành POST nếu API của bạn sử dụng POST
                         })
                             .then(response => response.json())
