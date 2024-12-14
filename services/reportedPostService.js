@@ -9,25 +9,22 @@ class ReportedPostService {
     // Tạo báo cáo bài viết
     createReport = async ({ reported_by_user_id, post_id, report_type_id }) => {
         try {
-            console.log("Creating report with data:", { reported_by_user_id, post_id, report_type_id });
-
+            // console.log("Creating report with data:", { reported_by_user_id, post_id, report_type_id });
             // Kiểm tra xem báo cáo đã tồn tại chưa
             const existingReport = await PostReporter.findOne({
                 reported_by_user_id,
                 report_post_id: post_id,
             });
-
             if (existingReport) {
                 console.log("Existing report found:", existingReport);
                 return HttpResponse.fail('Bạn đã báo cáo bài viết này, không thể báo cáo lại.');
             }
-
             if (!post_id) {
                 return HttpResponse.fail('Báo cáo bài viết không hợp lệ.');
             }
             const reportType = await ReportType.findById(report_type_id);
             const violationPoint = reportType.violation_point;
-            console.log("Violation point:", violationPoint);
+            // console.log("Violation point:", violationPoint);
 
             // Tạo bản ghi trong PostReporter
             const newReport = new PostReporter({
@@ -36,7 +33,7 @@ class ReportedPostService {
                 report_post_id: post_id,
             });
             await newReport.save();
-            console.log("New report created:", newReport);
+            // console.log("New report created:", newReport);
 
             // Kiểm tra hoặc tạo mới ReportedPost
             let reportedPost = await ReportedPost.findOne({ post_id });
@@ -47,12 +44,14 @@ class ReportedPostService {
                     post_reporter_id: [newReport._id], // Lưu mảng các ID người báo cáo
                     violation_point: violationPoint,
                     total_reports: 0,
+                    total_reporter: 1,
                 });
             } else {
                 // Nếu có ReportedPost, tăng số báo cáo và điểm vi phạm
                 reportedPost.post_reporter_id.push(newReport._id);
                 // Chỉ tăng violation_point khi vi phạm thực sự xảy ra
                 reportedPost.violation_point += violationPoint;
+                reportedPost.total_reporter++;
                 // Kiểm tra nếu violation_point >= 10 thì thay đổi trạng thái
                 if (reportedPost.violation_point >= 20) {
                     // ID của trạng thái mới
@@ -60,7 +59,7 @@ class ReportedPostService {
                     reportedPost.report_status_id = newStatusId;
                     // Gọi PostService để cập nhật trạng thái is_blocked
                     await new PostService().blockPost(post_id);
-                    console.log(`Post with ID ${post_id} is now blocked.`); 
+                    // console.log(`Post with ID ${post_id} is now blocked.`); 
                     reportedPost.total_reports++;
                     // if( reportedPost.total_reports >= 2){
                     //     const post = await Post.findById(post_id); // Lấy thông tin bài viết
@@ -75,13 +74,13 @@ class ReportedPostService {
 
             // Lưu lại cập nhật
             await reportedPost.save();
-            console.log("Updated reported post:", reportedPost);
+            // console.log("Updated reported post:", reportedPost);
             if( reportedPost.total_reports >= 2){
                 const post = await Post.findById(post_id); // Lấy thông tin bài viết
                 if (post) {
                     // Gọi hàm deletePost từ PostService để xóa bài viết
                     await new PostService().deletePost(post_id, post.user_id, 'Admin');
-                    console.log(`Post is now deleted due to multiple reports.`);
+                    // console.log(`Post is now deleted due to multiple reports.`);
                 }
             }
             return HttpResponse.success('Report submitted successfully.', {
@@ -147,21 +146,27 @@ class ReportedPostService {
     };
 
     // Lấy báo cáo bài viết theo phân trang
-    getReportsByPage = async (page, limit, status) => {
+    getReportsByPage = async (page, limit, status, totalreporter, totalReporter) => {
         try {
             const skip = (parseInt(page) - 1) * parseInt(limit);
-
             // Xây dựng query động
             const query = {};
-
-            
             if (status) query.report_status_id = status; // Lọc theo trạng thái
-            console.log(query);
-
+            // console.log(query);
+            // Tạo biến sort mặc định là không sắp xếp
+            let sort = {createdAt: -1};
+            // Nếu có tham số totalreporter, sắp xếp theo total_reporter giảm dần
+            if (totalreporter) {
+                sort = { total_reporter: -1 }; // Sắp xếp theo số người báo cáo giảm dần
+            } 
+            if (totalReporter) {
+                sort = { total_reporter: +1 };
+            } 
             // Lấy các báo cáo bài viết với phân trang
             const reports = await ReportedPost.find(query)
                 .skip(skip) // Phân trang
                 .limit(parseInt(limit)) // Giới hạn số báo cáo trên mỗi trang
+                .sort(sort) // Áp dụng sắp xếp nếu có
                 .populate({
                     path: "post_id",
                     select: "title content",

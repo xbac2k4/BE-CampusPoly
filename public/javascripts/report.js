@@ -8,11 +8,13 @@ const itemsPerPage = 10; // Số lượng mục mỗi trang
 let currentPage = 1;
 let totalPages;
 let selectedStatus = ''; // Trạng thái được chọn
+let Reporter = '';
+let Reporter2 = ''; // Số lượng người báo cáo
 
 // Fetch API and render data
-const fetchDataForPage = async (page, statusFilter = selectedStatus) => {
+const fetchDataForPage = async (page, statusFilter = selectedStatus, reporterFilter = Reporter,  reporterFilter2 = Reporter2 ) => {
     try {
-        const response = await fetch(`${DOMAIN}reportedposts/get-report-by-page?page=${page}&limit=${itemsPerPage}&status=${statusFilter}`);
+        const response = await fetch(`${DOMAIN}reportedposts/get-report-by-page?page=${page}&limit=${itemsPerPage}&status=${statusFilter}&totalreporter=${reporterFilter}&totalReporter=${reporterFilter2}`);
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
@@ -284,6 +286,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const recentFilter = document.getElementById("recent-filter");
     const blockedFilter = document.getElementById("isblock-filter");
     const unBlockedFilter = document.getElementById("isunblock-filter");
+    const reporterFilter = document.getElementById("reporter-filter");
+    const rePorterFilter = document.getElementById("rePorter-filter");
 
     recentFilter.addEventListener("click", (event) => {
         event.preventDefault(); // Ngăn chặn hành động mặc định của liên kết
@@ -294,14 +298,37 @@ document.addEventListener("DOMContentLoaded", () => {
         event.preventDefault();
         // Gửi thông tin lọc "Phổ biến"
         selectedStatus = event.target.getAttribute('data-status');
-        console.log('Lọc đã chọn:', selectedStatus);
+        Reporter = '';
+        Reporter2 = '';
+        // console.log('Lọc đã chọn:', selectedStatus);
         fetchDataForPage(currentPage);
     });
     unBlockedFilter.addEventListener("click", (event) => {
         event.preventDefault();
         // Gửi thông tin lọc "Phổ biến"
         selectedStatus = event.target.getAttribute('data-status');
-        console.log('Lọc đã chọn:', selectedStatus);
+        Reporter = '';
+        Reporter2 = '';
+        // console.log('Lọc đã chọn:', selectedStatus);
+        fetchDataForPage(currentPage);
+    });
+
+    reporterFilter.addEventListener("click", (event) => {
+        event.preventDefault();
+        // Lấy giá trị từ thuộc tính data-sort
+        Reporter = event.target.getAttribute('data-sort');
+        Reporter2 = '';
+        selectedStatus ='';
+        // console.log('Sắp xếp theo số lượng báo cáo:', Reporter);
+        fetchDataForPage(currentPage);
+    });
+    rePorterFilter.addEventListener("click", (event) => {
+        event.preventDefault();
+        // Lấy giá trị từ thuộc tính data-sort
+        Reporter2 = event.target.getAttribute('data-sort');
+        Reporter = '';
+        selectedStatus ='';
+        // console.log('Sắp xếp theo số lượng báo cáo:', Reporter);
         fetchDataForPage(currentPage);
     });
 });

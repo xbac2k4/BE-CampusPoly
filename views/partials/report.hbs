@@ -20,7 +20,7 @@
 <body>
     <main class="w-100 pl-4">
         <div class="header d-flex justify-content-start align-items-center pb-3">
-             <div class="dropdown">
+            <div class="dropdown">
                 <li class="nav-item" style="list-style: none;">
                     <a data-mdb-dropdown-init class="nav-link dropdown-toggle d-flex align-items-center" href="#"
                         id="navbarDropdownMenuLink" role="button" data-mdb-toggle="dropdown" aria-expanded="false">
@@ -28,13 +28,23 @@
                     </a>
                     <ul class="dropdown-menu main-dropdown" aria-labelledby="navbarDropdownMenuLink">
                         <li>
-                            <a class="dropdown-item" href="#" id="recent-filter">Gần đây</a>
+                            <a class="dropdown-item" href="#" id="recent-filter">Mới nhất</a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="#" id="isblock-filter" data-status="675437f55efa7f0643e94b29">Các bài viết đã vi phạm</a>
+                            <a class="dropdown-item" href="#" id="isblock-filter"
+                                data-status="675437f55efa7f0643e94b29">Các bài viết đã vi phạm</a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="#" id="isunblock-filter" data-status="67571c815a8315a938d40c97">Các bài viết chưa vi phạm</a>
+                            <a class="dropdown-item" href="#" id="isunblock-filter"
+                                data-status="67571c815a8315a938d40c97">Các bài viết chưa vi phạm</a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="#" id="reporter-filter" data-sort="-1">Xếp số người
+                                báo cáo giảm dần</a>
+                        </li>
+                         <li>
+                            <a class="dropdown-item" href="#" id="rePorter-filter" data-sort="+1">Xếp số người
+                                báo cáo tăng dần</a>
                         </li>
                     </ul>
                 </li>

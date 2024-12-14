@@ -24,6 +24,10 @@ const reportedPostModel = new Schema({
     total_reports: {  // Tổng số lượt báo cáo
         type: Number,
         default: 0
+    },
+    total_reporter: {  // Tổng số người báo cáo
+        type: Number,
+        default: 0
     }
 }, {
     timestamps: true // Kích hoạt tính năng tự động tạo createdAt và updatedAt
